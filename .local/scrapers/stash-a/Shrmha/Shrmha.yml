@@ -7,3 +7,9 @@ sceneByURL:
       - python
       - Shrmha.py
       - scene-by-url
+sceneByFragment:
+  action: script
+  script:
+    - python
+    - Shrmha.py
+    - scene-by-fragment

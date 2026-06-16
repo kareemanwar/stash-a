@@ -101,7 +101,7 @@ const messages = defineMessages({
   },
 });
 
-const allMenuItems: IMenuItem[] = [
+const mainMenuItems: IMenuItem[] = [
   {
     name: "scenes",
     message: messages.scenes,
@@ -164,6 +164,9 @@ const allMenuItems: IMenuItem[] = [
     hotkey: "g t",
     userCreatable: true,
   },
+];
+
+const developerMenuItems: IMenuItem[] = [
   {
     name: "test",
     message: messages.test,
@@ -173,7 +176,7 @@ const allMenuItems: IMenuItem[] = [
   },
 ];
 
-const newPathsList = allMenuItems
+const newPathsList = mainMenuItems
   .filter((item) => item.userCreatable)
   .map((item) => item.href);
 
@@ -199,11 +202,12 @@ export const MainNavbar: React.FC = () => {
 
   const [expanded, setExpanded] = useState(false);
 
-  // Show all menu items by default, unless config says otherwise
+  // Show all standard menu items by default, unless config says otherwise.
+  // Developer items are always appended so old saved menu configs don't hide them.
   const menuItems = useMemo(() => {
     let cfgMenuItems = configuration?.interface.menuItems;
     if (!cfgMenuItems) {
-      return allMenuItems;
+      return [...mainMenuItems, ...developerMenuItems];
     }
 
     // translate old movies menu item to groups
@@ -214,9 +218,11 @@ export const MainNavbar: React.FC = () => {
       return item;
     });
 
-    return allMenuItems.filter((menuItem) =>
+    const configuredMenuItems = mainMenuItems.filter((menuItem) =>
       cfgMenuItems!.includes(menuItem.name)
     );
+
+    return [...configuredMenuItems, ...developerMenuItems];
   }, [configuration]);
 
   // react-bootstrap typing bug

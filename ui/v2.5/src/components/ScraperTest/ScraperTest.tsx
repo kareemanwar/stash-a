@@ -1,5 +1,13 @@
 import React, { useMemo, useState } from "react";
-import { Button, Card, Col, Dropdown, Form, InputGroup, Row } from "react-bootstrap";
+import {
+  Button,
+  Card,
+  Col,
+  Dropdown,
+  Form,
+  InputGroup,
+  Row,
+} from "react-bootstrap";
 import { faPlayCircle } from "@fortawesome/free-solid-svg-icons";
 import { Icon } from "src/components/Shared/Icon";
 
@@ -55,7 +63,8 @@ export const ScraperTest: React.FC = () => {
           status: "ready",
           scraper_test: selectedOption,
           input,
-          note: "Scraper execution is not wired yet. This tab is UI infrastructure for future scraper development.",
+          note:
+            "Scraper execution is not wired yet. This tab is UI infrastructure for future scraper development.",
         },
         null,
         2

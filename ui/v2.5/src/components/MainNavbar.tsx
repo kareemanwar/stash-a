@@ -101,7 +101,7 @@ const messages = defineMessages({
   },
 });
 
-const mainMenuItems: IMenuItem[] = [
+const allMenuItems: IMenuItem[] = [
   {
     name: "scenes",
     message: messages.scenes,
@@ -166,17 +166,15 @@ const mainMenuItems: IMenuItem[] = [
   },
 ];
 
-const developerMenuItems: IMenuItem[] = [
-  {
-    name: "test",
-    message: messages.test,
-    href: "/scraper-test",
-    icon: faFlask,
-    hotkey: "g x",
-  },
-];
+const scraperTestMenuItem: IMenuItem = {
+  name: "test",
+  message: messages.test,
+  href: "/scraper-test",
+  icon: faFlask,
+  hotkey: "g x",
+};
 
-const newPathsList = mainMenuItems
+const newPathsList = allMenuItems
   .filter((item) => item.userCreatable)
   .map((item) => item.href);
 
@@ -202,12 +200,11 @@ export const MainNavbar: React.FC = () => {
 
   const [expanded, setExpanded] = useState(false);
 
-  // Show all standard menu items by default, unless config says otherwise.
-  // Developer items are always appended so old saved menu configs don't hide them.
+  // Show all menu items by default, unless config says otherwise
   const menuItems = useMemo(() => {
     let cfgMenuItems = configuration?.interface.menuItems;
     if (!cfgMenuItems) {
-      return [...mainMenuItems, ...developerMenuItems];
+      return allMenuItems;
     }
 
     // translate old movies menu item to groups
@@ -218,12 +215,15 @@ export const MainNavbar: React.FC = () => {
       return item;
     });
 
-    const configuredMenuItems = mainMenuItems.filter((menuItem) =>
+    return allMenuItems.filter((menuItem) =>
       cfgMenuItems!.includes(menuItem.name)
     );
-
-    return [...configuredMenuItems, ...developerMenuItems];
   }, [configuration]);
+
+  const visibleMenuItems = useMemo(
+    () => [...menuItems, scraperTestMenuItem],
+    [menuItems]
+  );
 
   // react-bootstrap typing bug
   const navbarRef = useRef<HTMLElement | null>(null);
@@ -274,7 +274,7 @@ export const MainNavbar: React.FC = () => {
     Mousetrap.bind("?", () => openManual());
     Mousetrap.bind("g z", () => goto("/settings"));
 
-    menuItems.forEach((item) => {
+    visibleMenuItems.forEach((item) => {
       Mousetrap.bind(item.hotkey, () => goto(item.href));
     });
 
@@ -285,7 +285,7 @@ export const MainNavbar: React.FC = () => {
     return () => {
       Mousetrap.unbind("?");
       Mousetrap.unbind("g z");
-      menuItems.forEach((item) => {
+      visibleMenuItems.forEach((item) => {
         Mousetrap.unbind(item.hotkey);
       });
 
@@ -377,7 +377,7 @@ export const MainNavbar: React.FC = () => {
     >
       <Navbar.Collapse className="bg-dark order-sm-1">
         <MainNavbarMenuItems>
-          {menuItems.map(({ href, icon, message }) => (
+          {visibleMenuItems.map(({ href, icon, message }) => (
             <Nav.Link
               eventKey={href}
               as="div"

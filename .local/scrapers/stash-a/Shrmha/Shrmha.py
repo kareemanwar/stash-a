@@ -76,6 +76,13 @@ def clean_text(value: str | None) -> str:
     return re.sub(r"\s+", " ", html.unescape(value)).strip()
 
 
+def write_json(value: Any) -> None:
+    # Stash reads scraper stdout as JSON. Use ASCII escaping so Windows consoles
+    # using cp1252 do not fail when scraped Arabic text is printed.
+    sys.stdout.write(json.dumps(value, ensure_ascii=True))
+    sys.stdout.write("\n")
+
+
 def fetch_html(url: str) -> str:
     request = Request(url, headers={"User-Agent": USER_AGENT})
     with urlopen(request, timeout=30) as response:
@@ -263,9 +270,6 @@ def scraper_args() -> tuple[str, dict[str, Any]]:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="operation", required=True)
     subparsers.add_parser("scene-by-url").add_argument("--url")
-    fragment_parser = subparsers.add_parser("scene-by-fragment")
-    fragment_parser.add_argument("--url")
-    fragment_parser.add_argument("--urls", nargs="+")
     args = vars(parser.parse_args())
 
     if not sys.stdin.isatty():
@@ -293,10 +297,10 @@ def get_url_arg(args: dict[str, Any]) -> str | None:
 
 def main() -> None:
     operation, args = scraper_args()
-    if operation in {"scene-by-url", "scene-by-fragment"}:
+    if operation == "scene-by-url":
         url = get_url_arg(args)
         if url:
-            print(json.dumps(scrape_scene_by_url(url), ensure_ascii=False))
+            write_json(scrape_scene_by_url(url))
             return
 
     print(json.dumps({"error": f"Unsupported operation or missing URL: {operation}"}), file=sys.stderr)

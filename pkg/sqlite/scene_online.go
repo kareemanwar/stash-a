@@ -3,6 +3,7 @@ package sqlite
 import "github.com/stashapp/stash/pkg/models"
 
 const sceneOnlineMediaTable = "scene_online_media"
+const sceneOnlineStreamsTable = "scene_online_streams"
 
 type SceneOnlineMediaStore struct {
 	repository

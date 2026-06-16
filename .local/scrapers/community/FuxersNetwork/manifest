@@ -1,0 +1,9 @@
+id: FuxersNetwork
+name: FuxersNetwork
+metadata: {}
+version: 563c7a85
+date: "2024-05-25 18:20:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FuxersNetwork.yml

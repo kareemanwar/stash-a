@@ -1,0 +1,9 @@
+id: WeAreHairy
+name: We Are Hairy
+metadata: {}
+version: 3c8d03ba
+date: "2025-02-28 07:41:19"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- WeAreHairy.yml

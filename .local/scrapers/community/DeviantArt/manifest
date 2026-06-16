@@ -1,0 +1,9 @@
+id: DeviantArt
+name: DeviantArt
+metadata: {}
+version: af4089ed
+date: "2025-06-12 23:21:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DeviantArt.yml

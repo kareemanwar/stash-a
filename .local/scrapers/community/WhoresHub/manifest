@@ -1,0 +1,9 @@
+id: WhoresHub
+name: WhoresHub
+metadata: {}
+version: 8404fca7
+date: "2024-08-26 21:15:12"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- WhoresHub.yml

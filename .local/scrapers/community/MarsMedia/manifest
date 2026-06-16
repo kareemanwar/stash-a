@@ -1,0 +1,9 @@
+id: MarsMedia
+name: MarsMedia
+metadata: {}
+version: 0dcef087
+date: "2024-02-07 08:54:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MarsMedia.yml

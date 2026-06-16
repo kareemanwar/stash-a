@@ -1,0 +1,10 @@
+id: Iwara
+name: Iwara
+metadata: {}
+version: c8daca8b
+date: "2025-07-09 00:51:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Iwara.yml
+- Iwara.py

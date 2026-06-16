@@ -1,0 +1,9 @@
+id: hstream
+name: hstream
+metadata: {}
+version: cd55cc12
+date: "2025-05-29 23:01:19"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- hstream.yml

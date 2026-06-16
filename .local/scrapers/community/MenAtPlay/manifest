@@ -1,0 +1,9 @@
+id: MenAtPlay
+name: MenAtPlay
+metadata: {}
+version: b5f06029
+date: "2023-07-03 22:44:07"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MenAtPlay.yml

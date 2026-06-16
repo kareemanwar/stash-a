@@ -1,0 +1,9 @@
+id: Heyzo
+name: Heyzo
+metadata: {}
+version: 5032fb5e
+date: "2024-01-16 11:21:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Heyzo.yml

@@ -1,0 +1,9 @@
+id: WowPorn
+name: WowPorn
+metadata: {}
+version: e4fd4516
+date: "2025-08-31 06:07:08"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- WowPorn.yml

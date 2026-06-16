@@ -1,0 +1,9 @@
+id: fc2
+name: FC2-JP
+metadata: {}
+version: 57bae249
+date: "2026-01-03 11:15:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- fc2.yml

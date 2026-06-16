@@ -1,0 +1,9 @@
+id: CollegeUniform
+name: College-Uniform
+metadata: {}
+version: 5d74a661
+date: "2025-01-11 17:33:42"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CollegeUniform.yml

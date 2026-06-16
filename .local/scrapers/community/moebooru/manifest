@@ -1,0 +1,9 @@
+id: moebooru
+name: moebooru
+metadata: {}
+version: ef31ed29
+date: "2025-04-20 02:51:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- moebooru.yml

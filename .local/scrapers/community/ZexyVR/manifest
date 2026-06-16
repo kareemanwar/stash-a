@@ -1,0 +1,9 @@
+id: ZexyVR
+name: ZexyVR
+metadata: {}
+version: db52bfe3
+date: "2022-01-15 18:29:07"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ZexyVR.yml

@@ -1,0 +1,9 @@
+id: PimpBunny
+name: PimpBunny
+metadata: {}
+version: c2a0b46c
+date: "2026-02-21 05:17:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PimpBunny.yml

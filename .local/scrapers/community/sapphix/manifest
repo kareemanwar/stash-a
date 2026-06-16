@@ -1,0 +1,9 @@
+id: sapphix
+name: sapphicnetwork
+metadata: {}
+version: 790d86a1
+date: "2021-03-11 11:24:53"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- sapphix.yml

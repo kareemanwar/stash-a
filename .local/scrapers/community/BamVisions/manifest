@@ -1,0 +1,9 @@
+id: BamVisions
+name: BamVisions
+metadata: {}
+version: 6adb6045
+date: "2021-06-27 20:04:21"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BamVisions.yml

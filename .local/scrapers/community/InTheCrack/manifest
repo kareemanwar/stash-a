@@ -1,0 +1,9 @@
+id: InTheCrack
+name: InTheCrack
+metadata: {}
+version: efe2b509
+date: "2025-08-05 00:08:28"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- InTheCrack.yml

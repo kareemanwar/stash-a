@@ -1,0 +1,9 @@
+id: SmutPuppet
+name: SmutPuppet
+metadata: {}
+version: 4f4c5680
+date: "2025-08-14 12:38:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SmutPuppet.yml

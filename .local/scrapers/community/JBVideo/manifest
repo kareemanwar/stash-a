@@ -1,0 +1,9 @@
+id: JBVideo
+name: JB Video
+metadata: {}
+version: a2a63ee7
+date: "2023-12-17 19:59:32"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JBVideo.yml

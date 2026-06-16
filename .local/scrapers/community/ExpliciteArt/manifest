@@ -1,0 +1,9 @@
+id: ExpliciteArt
+name: Expliciteart
+metadata: {}
+version: 3f164f1a
+date: "2025-05-27 18:25:56"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ExpliciteArt.yml

@@ -1,0 +1,9 @@
+id: JavLibrary_cn
+name: JavLibrary_CN
+metadata: {}
+version: f275e3e2
+date: "2025-10-28 06:53:37"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JavLibrary_cn.yml

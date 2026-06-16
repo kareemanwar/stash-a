@@ -1,0 +1,9 @@
+id: CamCaps
+name: CamCaps
+metadata: {}
+version: cbf83b2e
+date: "2025-03-19 00:19:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CamCaps.yml

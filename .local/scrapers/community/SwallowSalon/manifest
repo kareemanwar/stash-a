@@ -1,0 +1,9 @@
+id: SwallowSalon
+name: SwallowSalon
+metadata: {}
+version: cece0b19
+date: "2024-05-02 02:53:43"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SwallowSalon.yml

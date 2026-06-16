@@ -1,0 +1,9 @@
+id: DarkkoTV
+name: DarkkoTV
+metadata: {}
+version: 276728c2
+date: "2025-09-14 00:25:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DarkkoTV.yml

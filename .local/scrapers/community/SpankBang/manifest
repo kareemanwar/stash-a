@@ -1,0 +1,9 @@
+id: SpankBang
+name: SpankBang
+metadata: {}
+version: cc48f1ad
+date: "2024-06-28 17:53:20"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SpankBang.yml

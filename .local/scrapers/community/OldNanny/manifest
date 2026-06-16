@@ -1,0 +1,9 @@
+id: OldNanny
+name: OldNanny
+metadata: {}
+version: c91828a4
+date: "2023-07-27 18:47:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- OldNanny.yml

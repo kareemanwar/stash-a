@@ -1,0 +1,11 @@
+id: WowNetworkVenus
+name: WowNetworkVenus
+metadata: {}
+version: 60a134d7
+date: "2024-12-18 21:08:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- requirements.txt
+- WowNetworkVenus.py
+- WowNetworkVenus.yml

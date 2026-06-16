@@ -1,0 +1,9 @@
+id: HmvMania
+name: HMV Mania
+metadata: {}
+version: 385e001f
+date: "2022-12-20 21:08:35"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HmvMania.yml

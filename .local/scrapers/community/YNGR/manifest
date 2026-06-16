@@ -1,0 +1,9 @@
+id: YNGR
+name: Yngr
+metadata: {}
+version: 6c8a96cf
+date: "2021-09-12 19:17:14"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- YNGR.yml

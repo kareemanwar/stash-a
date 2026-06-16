@@ -1,0 +1,10 @@
+id: Pornhub
+name: Pornhub
+metadata: {}
+version: 6dcd8477
+date: "2026-05-26 08:57:31"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Pornhub.yml
+- PornhubStar.py

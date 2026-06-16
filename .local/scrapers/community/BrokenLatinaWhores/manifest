@@ -1,0 +1,10 @@
+id: BrokenLatinaWhores
+name: Broken Latina Whores
+metadata: {}
+version: a2405777
+date: "2025-09-17 14:58:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BrokenLatinaWhores.py
+- BrokenLatinaWhores.yml

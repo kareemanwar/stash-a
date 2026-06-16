@@ -1,0 +1,9 @@
+id: PuffyNetwork
+name: PuffyNetwork
+metadata: {}
+version: 0568af72
+date: "2026-04-28 05:59:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PuffyNetwork.yml

@@ -1,0 +1,9 @@
+id: TakeVan
+name: TakeVan
+metadata: {}
+version: 48a748d6
+date: "2022-09-05 21:39:14"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TakeVan.yml

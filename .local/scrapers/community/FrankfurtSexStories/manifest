@@ -1,0 +1,9 @@
+id: FrankfurtSexStories
+name: FrankfurtSexStories
+metadata: {}
+version: 2695c74e
+date: "2024-03-23 17:29:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FrankfurtSexStories.yml

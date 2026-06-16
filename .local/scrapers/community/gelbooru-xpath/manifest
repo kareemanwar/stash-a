@@ -1,0 +1,9 @@
+id: gelbooru-xpath
+name: gelbooru-xpath
+metadata: {}
+version: 9d254646
+date: "2025-10-17 12:32:34"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- gelbooru-xpath.yml

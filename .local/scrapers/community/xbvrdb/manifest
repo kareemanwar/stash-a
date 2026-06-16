@@ -1,0 +1,10 @@
+id: xbvrdb
+name: XBVR DB
+metadata: {}
+version: 2f1c5299
+date: "2025-04-25 00:51:08"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- xbvrdb.yml
+- xbvrdb.py

@@ -1,0 +1,9 @@
+id: MFC
+name: MyFreeCams
+metadata: {}
+version: dc1b9fae
+date: "2023-12-13 22:31:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MFC.yml

@@ -1,0 +1,9 @@
+id: LittleCapriceDreams
+name: LittleCapriceDreams
+metadata: {}
+version: 3d23cba5
+date: "2025-02-11 10:55:28"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- LittleCapriceDreams.yml

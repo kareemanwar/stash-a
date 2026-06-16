@@ -1,0 +1,9 @@
+id: BoyCrush
+name: BoyCrush Network
+metadata: {}
+version: 0c88cb8d
+date: "2023-10-03 01:03:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BoyCrush.yml

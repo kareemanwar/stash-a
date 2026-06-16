@@ -1,0 +1,9 @@
+id: Pornbcn
+name: PornBCN
+metadata: {}
+version: 773dc301
+date: "2024-04-30 13:04:09"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Pornbcn.yml

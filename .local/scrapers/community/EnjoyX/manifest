@@ -1,0 +1,9 @@
+id: EnjoyX
+name: EnjoyX
+metadata: {}
+version: 21a3bca9
+date: "2025-06-25 10:46:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- EnjoyX.yml

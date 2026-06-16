@@ -1,0 +1,9 @@
+id: ModelMediaUS
+name: ModelMediaUS
+metadata: {}
+version: 66feb5d2
+date: "2022-07-29 21:32:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ModelMediaUS.yml

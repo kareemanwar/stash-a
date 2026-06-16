@@ -1,0 +1,9 @@
+id: Karissa-Diamond
+name: Karissa Diamond
+metadata: {}
+version: f6f6a1d9
+date: "2020-10-24 20:42:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Karissa-Diamond.yml

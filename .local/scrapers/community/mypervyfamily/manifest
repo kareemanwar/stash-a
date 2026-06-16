@@ -1,0 +1,9 @@
+id: mypervyfamily
+name: MyPervyFamily
+metadata: {}
+version: cee409f1
+date: "2025-10-10 20:10:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- mypervyfamily.yml

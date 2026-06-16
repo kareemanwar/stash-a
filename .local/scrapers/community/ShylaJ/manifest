@@ -1,0 +1,9 @@
+id: ShylaJ
+name: ShylaJ
+metadata: {}
+version: 108502a9
+date: "2021-06-20 17:21:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ShylaJ.yml

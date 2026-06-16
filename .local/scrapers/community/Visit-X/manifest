@@ -1,0 +1,9 @@
+id: Visit-X
+name: Visit-X
+metadata: {}
+version: 8c0810dc
+date: "2023-05-07 19:48:07"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Visit-X.yml

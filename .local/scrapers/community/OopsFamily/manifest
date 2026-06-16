@@ -1,0 +1,9 @@
+id: OopsFamily
+name: Oops Family
+metadata: {}
+version: d493181f
+date: "2025-10-18 03:17:26"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- OopsFamily.yml

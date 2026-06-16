@@ -1,0 +1,10 @@
+id: pornolab
+name: PornoLab
+metadata: {}
+version: 18da3612
+date: "2025-05-30 15:02:55"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- pornolab.yml
+- pornolab.py

@@ -1,0 +1,9 @@
+id: LoneStarAngel
+name: LoneStarAngel
+metadata: {}
+version: 9823974d
+date: "2021-05-23 10:17:33"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- LoneStarAngel.yml

@@ -1,0 +1,9 @@
+id: VelvetVeronica
+name: VelvetVeronica
+metadata: {}
+version: b2a94e49
+date: "2021-06-13 07:03:48"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VelvetVeronica.yml

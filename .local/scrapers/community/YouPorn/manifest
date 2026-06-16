@@ -1,0 +1,9 @@
+id: YouPorn
+name: YouPorn
+metadata: {}
+version: 080a5926
+date: "2025-08-29 03:01:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- YouPorn.yml

@@ -1,0 +1,9 @@
+id: Affect3DStore
+name: Affect3DStore
+metadata: {}
+version: 85ced684
+date: "2026-04-22 12:08:51"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Affect3DStore.yml

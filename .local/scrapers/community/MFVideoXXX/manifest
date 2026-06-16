@@ -1,0 +1,9 @@
+id: MFVideoXXX
+name: MFVideoxx
+metadata: {}
+version: 503e1ef0
+date: "2024-12-11 20:43:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MFVideoXXX.yml

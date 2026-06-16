@@ -1,0 +1,9 @@
+id: CruelBrats
+name: CruelBrats
+metadata: {}
+version: a4b9fc8d
+date: "2024-12-18 00:56:21"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CruelBrats.yml

@@ -1,0 +1,10 @@
+id: FileMetadata
+name: File Metadata (ffprobe)
+metadata: {}
+version: e422a476
+date: "2026-05-17 16:46:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FileMetadata.py
+- FileMetadata.yml

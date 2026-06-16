@@ -1,0 +1,9 @@
+id: Perverformer
+name: Perverformer
+metadata: {}
+version: b51885eb
+date: "2026-04-11 17:49:12"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Perverformer.yml

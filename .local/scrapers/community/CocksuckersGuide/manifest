@@ -1,0 +1,9 @@
+id: CocksuckersGuide
+name: Cocksuckers Guide
+metadata: {}
+version: bf30f85c
+date: "2025-11-16 08:37:14"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CocksuckersGuide.yml

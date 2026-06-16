@@ -1,0 +1,9 @@
+id: MPLStudios
+name: MPL Studios
+metadata: {}
+version: f4a35dac
+date: "2024-05-14 16:40:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MPLStudios.yml

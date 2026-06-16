@@ -1,0 +1,9 @@
+id: TwoTGirls
+name: TwoTGirls
+metadata: {}
+version: b925b04c
+date: "2022-03-06 08:49:58"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TwoTGirls.yml

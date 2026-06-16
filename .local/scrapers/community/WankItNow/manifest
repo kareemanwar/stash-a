@@ -1,0 +1,9 @@
+id: WankItNow
+name: Wank It Now
+metadata: {}
+version: 52b64e43
+date: "2023-09-12 09:26:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- WankItNow.yml

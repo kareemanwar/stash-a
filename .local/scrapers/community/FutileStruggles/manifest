@@ -1,0 +1,9 @@
+id: FutileStruggles
+name: Futile Struggles
+metadata: {}
+version: 864ad7fa
+date: "2025-05-02 23:43:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FutileStruggles.yml

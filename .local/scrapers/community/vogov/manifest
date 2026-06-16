@@ -1,0 +1,9 @@
+id: vogov
+name: vogov
+metadata: {}
+version: 86a6af8b
+date: "2024-05-22 14:32:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- vogov.yml

@@ -1,0 +1,9 @@
+id: SubmissiveX
+name: SubmissiveX
+metadata: {}
+version: "92282590"
+date: "2021-05-28 20:29:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SubmissiveX.yml

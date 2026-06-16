@@ -1,0 +1,9 @@
+id: StraponDreamer
+name: StraponDreamer
+metadata: {}
+version: 7d4fdbe0
+date: "2021-11-10 17:41:36"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- StraponDreamer.yml

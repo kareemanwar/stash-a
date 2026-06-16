@@ -1,0 +1,9 @@
+id: GymRotic
+name: DollRotic
+metadata: {}
+version: 9b27ea88
+date: "2021-08-07 22:25:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GymRotic.yml

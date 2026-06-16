@@ -1,0 +1,9 @@
+id: APOVStory
+name: A POV Story
+metadata: {}
+version: 729a7601
+date: "2023-08-26 15:01:05"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- APOVStory.yml

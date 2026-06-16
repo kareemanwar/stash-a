@@ -1,0 +1,9 @@
+id: MMP_Network
+name: MMP Network
+metadata: {}
+version: c9adb908
+date: "2024-04-12 02:21:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MMP_Network.yml

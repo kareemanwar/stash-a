@@ -1,0 +1,9 @@
+id: DreddXXX
+name: Dredd XXX
+metadata: {}
+version: 4091408e
+date: "2025-06-24 19:54:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DreddXXX.yml

@@ -1,0 +1,11 @@
+id: FAKNetwork
+name: FAKNetwork
+metadata: {}
+version: 5b3016b9
+date: "2025-08-01 01:18:34"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- sites.py
+- overview.md
+- scrape.py

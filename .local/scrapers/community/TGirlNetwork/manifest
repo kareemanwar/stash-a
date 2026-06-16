@@ -1,0 +1,9 @@
+id: TGirlNetwork
+name: TGirl-Network
+metadata: {}
+version: 851cc46f
+date: "2025-04-22 13:12:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TGirlNetwork.yml

@@ -1,0 +1,9 @@
+id: ArchAngelVideo
+name: Arch Angel Video
+metadata: {}
+version: ca785c6d
+date: "2022-03-07 20:18:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ArchAngelVideo.yml

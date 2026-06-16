@@ -1,0 +1,10 @@
+id: vixenNetwork
+name: Vixen Media Group
+metadata: {}
+version: 32fe4a6d
+date: "2026-04-03 06:07:06"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- vixenNetwork.py
+- vixenNetwork.yml

@@ -1,0 +1,9 @@
+id: LetThemWatch
+name: LetThemWatch
+metadata: {}
+version: e7f484f1
+date: "2024-11-09 01:16:16"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- LetThemWatch.yml

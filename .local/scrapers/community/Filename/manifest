@@ -1,0 +1,10 @@
+id: Filename
+name: Filename
+metadata: {}
+version: 5536b887
+date: "2024-07-12 14:35:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Filename.yml
+- Filename.py

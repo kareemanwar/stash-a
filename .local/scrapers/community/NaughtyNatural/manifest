@@ -1,0 +1,9 @@
+id: NaughtyNatural
+name: Naughty Natural
+metadata: {}
+version: 22447f3a
+date: "2023-09-04 05:15:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- NaughtyNatural.yml

@@ -1,0 +1,9 @@
+id: VrxDB
+name: VrxDB
+metadata: {}
+version: 41476d88
+date: "2022-04-16 20:03:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VrxDB.yml

@@ -1,0 +1,9 @@
+id: HQPorner
+name: HQPorner
+metadata: {}
+version: 64185fc1
+date: "2024-03-15 10:49:58"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HQPorner.yml

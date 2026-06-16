@@ -1,0 +1,9 @@
+id: Vip4K
+name: Vip4K
+metadata: {}
+version: 26ae1dc7
+date: "2025-12-19 04:35:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Vip4K.yml

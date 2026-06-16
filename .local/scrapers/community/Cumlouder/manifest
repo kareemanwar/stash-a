@@ -1,0 +1,9 @@
+id: Cumlouder
+name: Cumlouder
+metadata: {}
+version: fee4bbe5
+date: "2025-07-27 23:13:06"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Cumlouder.yml

@@ -1,0 +1,10 @@
+id: NoodleDude
+name: NoodleDude
+metadata: {}
+version: c5ec7be4
+date: "2024-11-01 01:08:45"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- NoodleDude.py
+- NoodleDude.yml

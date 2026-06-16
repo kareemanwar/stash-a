@@ -1,0 +1,9 @@
+id: FuckPassVR
+name: FuckPassVR
+metadata: {}
+version: 769d1d74
+date: "2026-01-21 16:28:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FuckPassVR.yml

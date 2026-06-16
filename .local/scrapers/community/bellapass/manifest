@@ -1,0 +1,9 @@
+id: bellapass
+name: bellapass
+metadata: {}
+version: 77ef2d28
+date: "2021-03-15 15:46:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- bellapass.yml

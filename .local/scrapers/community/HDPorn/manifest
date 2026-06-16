@@ -1,0 +1,9 @@
+id: HDPorn
+name: HDPorn
+metadata: {}
+version: 8e6448e4
+date: "2024-03-23 21:13:08"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HDPorn.yml

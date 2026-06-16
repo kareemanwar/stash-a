@@ -1,0 +1,9 @@
+id: 1passforallsites
+name: 1 Pass For All Sites
+metadata: {}
+version: 81ddf2c2
+date: "2023-07-13 02:50:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- 1passforallsites.yml

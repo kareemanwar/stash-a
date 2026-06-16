@@ -1,0 +1,9 @@
+id: CamWhorestv
+name: CamWhores.tv
+metadata: {}
+version: 9e864c13
+date: "2024-11-27 05:40:51"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CamWhorestv.yml

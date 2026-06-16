@@ -1,0 +1,9 @@
+id: DartTechStudios
+name: DartTechStudios
+metadata: {}
+version: bea3619f
+date: "2023-10-09 11:57:48"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DartTechStudios.yml

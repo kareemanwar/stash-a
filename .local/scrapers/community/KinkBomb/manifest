@@ -1,0 +1,9 @@
+id: KinkBomb
+name: KinkBomb
+metadata: {}
+version: 611495f0
+date: "2021-11-19 20:48:42"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- KinkBomb.yml

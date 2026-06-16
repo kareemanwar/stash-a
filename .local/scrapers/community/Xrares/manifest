@@ -1,0 +1,9 @@
+id: Xrares
+name: Xrares
+metadata: {}
+version: 6dae5601
+date: "2023-07-02 01:22:32"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Xrares.yml

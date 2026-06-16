@@ -1,0 +1,9 @@
+id: ClubSeventeen
+name: ClubSeventeen
+metadata: {}
+version: 3e7d9e3c
+date: "2024-03-27 01:48:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ClubSeventeen.yml

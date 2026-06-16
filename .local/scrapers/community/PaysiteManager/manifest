@@ -1,0 +1,9 @@
+id: PaysiteManager
+name: PaysiteManager
+metadata: {}
+version: 1132c2c8
+date: "2025-06-05 03:50:41"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PaysiteManager.yml

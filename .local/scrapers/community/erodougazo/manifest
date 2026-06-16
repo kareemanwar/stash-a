@@ -1,0 +1,9 @@
+id: erodougazo
+name: erodougazo
+metadata: {}
+version: e6b57343
+date: "2025-05-14 19:21:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- erodougazo.yml

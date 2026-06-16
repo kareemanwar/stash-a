@@ -1,0 +1,9 @@
+id: Karups
+name: Karups
+metadata: {}
+version: "735510e6"
+date: "2025-11-28 12:45:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Karups.yml

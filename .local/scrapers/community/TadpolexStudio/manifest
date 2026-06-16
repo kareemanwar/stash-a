@@ -1,0 +1,9 @@
+id: TadpolexStudio
+name: TadpolexStudio
+metadata: {}
+version: ce646527
+date: "2026-04-05 16:16:32"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TadpolexStudio.yml

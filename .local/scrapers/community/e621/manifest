@@ -1,0 +1,9 @@
+id: e621
+name: e621
+metadata: {}
+version: 057025fc
+date: "2025-04-19 22:58:20"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- e621.yml

@@ -1,0 +1,9 @@
+id: taboopov
+name: taboopov
+metadata: {}
+version: 73463ed4
+date: "2020-10-30 17:12:16"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- taboopov.yml

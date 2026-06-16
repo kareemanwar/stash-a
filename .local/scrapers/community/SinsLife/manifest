@@ -1,0 +1,9 @@
+id: SinsLife
+name: Sins Life
+metadata: {}
+version: c568b197
+date: "2021-05-28 20:19:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SinsLife.yml

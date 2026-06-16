@@ -1,0 +1,11 @@
+id: AMAMultimedia
+name: AMA Multimedia
+metadata: {}
+version: a98026ef
+date: "2025-05-18 14:09:09"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AMAMultimedia.yml
+- overview.md
+- scrape.py

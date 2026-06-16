@@ -1,0 +1,10 @@
+id: Teamskeet
+name: Teamskeet
+metadata: {}
+version: c09b089d
+date: "2026-04-28 18:33:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TeamskeetAPI.py
+- Teamskeet.yml

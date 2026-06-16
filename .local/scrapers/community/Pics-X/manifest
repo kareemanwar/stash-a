@@ -1,0 +1,9 @@
+id: Pics-X
+name: Pics-X
+metadata: {}
+version: "44211614"
+date: "2025-08-25 08:02:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Pics-X.yml

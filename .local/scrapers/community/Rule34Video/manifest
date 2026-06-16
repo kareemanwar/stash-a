@@ -1,0 +1,9 @@
+id: Rule34Video
+name: Rule34Video
+metadata: {}
+version: 4245a20d
+date: "2026-05-21 11:51:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Rule34Video.yml

@@ -1,0 +1,9 @@
+id: TheBattleForEarth
+name: The Battle For Earth
+metadata: {}
+version: f0318f80
+date: "2024-08-17 10:37:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TheBattleForEarth.yml

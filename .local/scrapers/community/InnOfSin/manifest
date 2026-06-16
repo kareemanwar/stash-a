@@ -1,0 +1,9 @@
+id: InnOfSin
+name: Inn of Sin
+metadata: {}
+version: 4470bd64
+date: "2024-03-10 19:43:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- InnOfSin.yml

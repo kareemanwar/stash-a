@@ -1,0 +1,10 @@
+id: Ersties
+name: Ersties
+metadata: {}
+version: 23b0dc2a
+date: "2026-01-20 01:53:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Ersties.py
+- Ersties.yml

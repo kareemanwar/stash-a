@@ -1,0 +1,9 @@
+id: GirlsOutWest
+name: GirlsOutWest
+metadata: {}
+version: 5dba30a0
+date: "2025-06-22 16:41:04"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GirlsOutWest.yml

@@ -1,0 +1,10 @@
+id: scene-cover-in-dir
+name: Cover Image in Directory
+metadata: {}
+version: 94c3fa72
+date: "2025-04-25 00:59:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- scene-cover-in-dir.yml
+- scene-cover-in-dir.py

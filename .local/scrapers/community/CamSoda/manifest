@@ -1,0 +1,9 @@
+id: CamSoda
+name: CamSoda
+metadata: {}
+version: b4119582
+date: "2026-03-10 01:11:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CamSoda.yml

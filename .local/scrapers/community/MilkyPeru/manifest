@@ -1,0 +1,9 @@
+id: MilkyPeru
+name: Milky Peru
+metadata: {}
+version: cbc150ec
+date: "2025-10-18 08:30:35"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MilkyPeru.yml

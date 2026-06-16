@@ -1,0 +1,9 @@
+id: Damplips
+name: Damplipsamp
+metadata: {}
+version: 7d0d239b
+date: "2025-05-14 00:51:26"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Damplips.yml

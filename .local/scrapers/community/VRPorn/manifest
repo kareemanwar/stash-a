@@ -1,0 +1,9 @@
+id: VRPorn
+name: VRPorn
+metadata: {}
+version: c6ad03cc
+date: "2025-10-17 04:24:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VRPorn.yml

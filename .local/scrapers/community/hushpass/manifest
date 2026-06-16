@@ -1,0 +1,9 @@
+id: hushpass
+name: hushpass
+metadata: {}
+version: 530392fb
+date: "2021-03-15 13:48:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- hushpass.yml

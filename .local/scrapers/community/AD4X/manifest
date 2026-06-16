@@ -1,0 +1,9 @@
+id: AD4X
+name: AD4X
+metadata: {}
+version: 9d74b044
+date: "2025-09-26 20:36:26"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AD4X.yml

@@ -1,0 +1,12 @@
+id: Minnano-AV-JP
+name: Minnano-AV (JP)
+metadata: {}
+version: 71803b53
+date: "2025-06-09 02:07:05"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- requirements.txt
+- Minnano-AV.yml
+- Minnano-AV.py
+- Minnano-AV-JP.yml

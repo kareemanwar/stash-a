@@ -1,0 +1,10 @@
+id: stash-sqlite
+name: stash sqlite
+metadata: {}
+version: fbd81c51
+date: "2023-11-22 00:31:17"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- stash-sqlite.py
+- stash-sqlite.yml

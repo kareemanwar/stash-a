@@ -1,0 +1,9 @@
+id: TheBroNetwork
+name: The Bro Network
+metadata: {}
+version: c329f47f
+date: "2025-07-02 21:40:01"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TheBroNetwork.yml

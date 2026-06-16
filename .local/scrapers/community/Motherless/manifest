@@ -1,0 +1,9 @@
+id: Motherless
+name: Motherless
+metadata: {}
+version: 38661bae
+date: "2025-10-17 22:32:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Motherless.yml

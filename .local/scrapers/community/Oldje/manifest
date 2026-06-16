@@ -1,0 +1,9 @@
+id: Oldje
+name: Oldje
+metadata: {}
+version: c895e4a5
+date: "2024-07-22 01:43:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Oldje.yml

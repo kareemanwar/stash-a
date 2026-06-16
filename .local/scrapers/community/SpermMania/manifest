@@ -1,0 +1,9 @@
+id: SpermMania
+name: SpermMania
+metadata: {}
+version: 54f12ac2
+date: "2022-02-10 16:32:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SpermMania.yml

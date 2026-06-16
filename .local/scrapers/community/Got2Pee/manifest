@@ -1,0 +1,10 @@
+id: Got2Pee
+name: Got2Pee
+metadata: {}
+version: 09c1cfe7
+date: "2025-01-31 15:15:43"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Got2Pee.yml
+- got2pee_scraper.py

@@ -1,0 +1,9 @@
+id: Danni
+name: Danni
+metadata: {}
+version: eb78f636
+date: "2021-12-07 11:22:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Danni.yml

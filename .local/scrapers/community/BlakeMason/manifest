@@ -1,0 +1,9 @@
+id: BlakeMason
+name: Blake Mason
+metadata: {}
+version: 86b1ffc6
+date: "2023-10-04 03:43:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BlakeMason.yml

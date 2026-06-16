@@ -1,0 +1,9 @@
+id: angelasommers
+name: angelasommers
+metadata: {}
+version: 84844a4a
+date: "2021-03-15 13:57:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- angelasommers.yml

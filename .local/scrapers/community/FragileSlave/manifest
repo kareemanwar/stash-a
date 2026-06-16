@@ -1,0 +1,9 @@
+id: FragileSlave
+name: Fragile Slave
+metadata: {}
+version: 030bc336
+date: "2022-03-14 19:41:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FragileSlave.yml

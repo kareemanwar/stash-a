@@ -1,0 +1,9 @@
+id: privatecastings
+name: privatecastings
+metadata: {}
+version: a9438256
+date: "2021-03-01 21:48:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- privatecastings.yml

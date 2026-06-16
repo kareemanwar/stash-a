@@ -1,0 +1,10 @@
+id: SARJ-LLC
+name: SARJ LLC
+metadata: {}
+version: 6a51a33d
+date: "2026-04-23 15:50:51"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SARJ-LLC.py
+- SARJ-LLC.yml

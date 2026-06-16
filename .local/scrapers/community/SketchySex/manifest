@@ -1,0 +1,9 @@
+id: SketchySex
+name: Sketchy Sex
+metadata: {}
+version: 7494e86b
+date: "2025-07-23 00:22:01"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SketchySex.yml

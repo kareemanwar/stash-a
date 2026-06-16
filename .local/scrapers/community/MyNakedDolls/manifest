@@ -1,0 +1,9 @@
+id: MyNakedDolls
+name: MyNakedDolls
+metadata: {}
+version: 2100e3f8
+date: "2024-04-27 14:17:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MyNakedDolls.yml

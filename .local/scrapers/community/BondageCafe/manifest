@@ -1,0 +1,9 @@
+id: BondageCafe
+name: BondageCafe
+metadata: {}
+version: f81d62f4
+date: "2022-09-11 22:42:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BondageCafe.yml

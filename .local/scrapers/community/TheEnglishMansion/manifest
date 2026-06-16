@@ -1,0 +1,10 @@
+id: TheEnglishMansion
+name: TheEnglishMansion
+metadata: {}
+version: f209dda3
+date: "2026-04-14 00:59:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TheEnglishMansion.yml
+- TheEnglishMansion.py

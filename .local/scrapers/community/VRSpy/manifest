@@ -1,0 +1,9 @@
+id: VRSpy
+name: VRSpy
+metadata: {}
+version: 0921e9ac
+date: "2025-06-03 17:43:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VRSpy.yml

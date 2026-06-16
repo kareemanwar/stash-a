@@ -1,0 +1,9 @@
+id: hentai2read
+name: hentai2read
+metadata: {}
+version: 4110259f
+date: "2020-10-29 18:50:47"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- hentai2read.yml

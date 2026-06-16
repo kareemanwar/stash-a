@@ -1,0 +1,10 @@
+id: Erotik
+name: Erotik
+metadata: {}
+version: 9935a8ed
+date: "2026-02-28 04:22:05"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Erotik.yml
+- Erotik.py

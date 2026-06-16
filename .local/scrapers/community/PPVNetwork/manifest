@@ -1,0 +1,9 @@
+id: PPVNetwork
+name: PPVNetwork
+metadata: {}
+version: 4ca55ef0
+date: "2024-05-14 16:41:31"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PPVNetwork.yml

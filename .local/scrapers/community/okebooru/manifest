@@ -1,0 +1,9 @@
+id: okebooru
+name: okebooru
+metadata: {}
+version: 24db4f21
+date: "2025-04-20 04:39:49"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- okebooru.yml

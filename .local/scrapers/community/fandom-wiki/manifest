@@ -1,0 +1,9 @@
+id: fandom-wiki
+name: fandom-wiki
+metadata: {}
+version: 8ec04480
+date: "2025-11-01 18:47:48"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- fandom-wiki.yml

@@ -1,0 +1,9 @@
+id: pjgirls
+name: pjgirls
+metadata: {}
+version: "11742e97"
+date: "2021-03-04 11:00:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- pjgirls.yml

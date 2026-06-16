@@ -1,0 +1,9 @@
+id: ManyVidsClub
+name: ManyVids Club
+metadata: {}
+version: 1b4239bd
+date: "2024-12-27 11:23:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ManyVidsClub.yml

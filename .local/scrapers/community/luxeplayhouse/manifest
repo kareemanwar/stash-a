@@ -1,0 +1,9 @@
+id: luxeplayhouse
+name: luxeplayhouse
+metadata: {}
+version: 9e394df4
+date: "2025-08-17 20:31:08"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- luxeplayhouse.yml

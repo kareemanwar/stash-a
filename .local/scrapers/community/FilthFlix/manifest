@@ -1,0 +1,9 @@
+id: FilthFlix
+name: FilthFlix
+metadata: {}
+version: 6b4d8a02
+date: "2021-07-29 22:29:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FilthFlix.yml

@@ -1,0 +1,9 @@
+id: MaxHardcore
+name: Max-Hardcore
+metadata: {}
+version: 66a96c8d
+date: "2024-08-07 19:49:21"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MaxHardcore.yml

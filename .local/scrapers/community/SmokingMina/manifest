@@ -1,0 +1,9 @@
+id: SmokingMina
+name: SmokingMina
+metadata: {}
+version: "69669718"
+date: "2021-08-08 13:10:02"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SmokingMina.yml

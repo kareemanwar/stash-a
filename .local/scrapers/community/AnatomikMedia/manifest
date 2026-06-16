@@ -1,0 +1,9 @@
+id: AnatomikMedia
+name: Anatomik Media
+metadata: {}
+version: 087d0535
+date: "2024-04-25 00:23:47"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AnatomikMedia.yml

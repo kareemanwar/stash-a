@@ -1,0 +1,9 @@
+id: FFCSH
+name: FFCSH
+metadata: {}
+version: 4b24879a
+date: "2024-03-27 21:11:35"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FFCSH.yml

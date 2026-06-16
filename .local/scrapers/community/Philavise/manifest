@@ -1,0 +1,9 @@
+id: Philavise
+name: Philavise
+metadata: {}
+version: 8507819c
+date: "2021-04-10 10:44:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Philavise.yml

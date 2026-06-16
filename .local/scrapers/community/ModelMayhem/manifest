@@ -1,0 +1,9 @@
+id: ModelMayhem
+name: ModelMayhem
+metadata: {}
+version: 3ec8daff
+date: "2025-03-31 02:51:02"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ModelMayhem.yml

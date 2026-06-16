@@ -1,0 +1,9 @@
+id: AsianStreetMeat
+name: AsianStreetMeat
+metadata: {}
+version: 0edd16eb
+date: "2024-02-17 10:09:19"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AsianStreetMeat.yml

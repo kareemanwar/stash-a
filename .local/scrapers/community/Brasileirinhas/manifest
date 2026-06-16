@@ -1,0 +1,9 @@
+id: Brasileirinhas
+name: Brasileirinhas
+metadata: {}
+version: 683260ad
+date: "2024-08-19 00:46:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Brasileirinhas.yml

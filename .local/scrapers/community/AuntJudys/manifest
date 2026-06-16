@@ -1,0 +1,10 @@
+id: AuntJudys
+name: AuntJudys
+metadata: {}
+version: 57eff73d
+date: "2025-07-04 15:13:20"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AuntJudys.yml
+- AuntJudys.py

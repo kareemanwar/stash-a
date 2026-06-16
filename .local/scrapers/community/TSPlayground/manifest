@@ -1,0 +1,9 @@
+id: TSPlayground
+name: TS Playground
+metadata: {}
+version: bf9227bb
+date: "2023-01-18 15:34:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TSPlayground.yml

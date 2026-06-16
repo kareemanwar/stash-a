@@ -1,0 +1,9 @@
+id: UnderHentai
+name: UnderHentai
+metadata: {}
+version: 0b1ac157
+date: "2023-07-01 02:19:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- UnderHentai.yml

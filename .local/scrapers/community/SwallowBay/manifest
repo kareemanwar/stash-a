@@ -1,0 +1,9 @@
+id: SwallowBay
+name: SwallowBay
+metadata: {}
+version: 3bcfb078
+date: "2021-08-01 11:21:33"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SwallowBay.yml

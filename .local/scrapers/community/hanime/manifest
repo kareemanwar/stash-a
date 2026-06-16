@@ -1,0 +1,9 @@
+id: hanime
+name: hanime
+metadata: {}
+version: 8a5f5d49
+date: "2024-08-04 17:00:53"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- hanime.yml

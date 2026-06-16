@@ -1,0 +1,9 @@
+id: Assylum
+name: assylum
+metadata: {}
+version: 8f2f5493
+date: "2024-01-03 01:15:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Assylum.yml

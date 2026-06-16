@@ -1,0 +1,9 @@
+id: Lasublime
+name: lasublimexxx
+metadata: {}
+version: 7f1f7a75
+date: "2021-04-23 15:33:16"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Lasublime.yml

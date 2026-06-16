@@ -1,0 +1,9 @@
+id: Mundomais
+name: MundoMais
+metadata: {}
+version: 22d6ba66
+date: "2025-05-19 19:57:09"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Mundomais.yml

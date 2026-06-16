@@ -1,0 +1,11 @@
+id: MyMemberSite
+name: MyMemberSite
+metadata: {}
+version: 85188c38
+date: "2025-10-13 12:20:58"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MyMemberSite.py
+- generate_urls.py
+- MyMemberSite.yml

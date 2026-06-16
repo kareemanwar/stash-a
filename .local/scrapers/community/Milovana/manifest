@@ -1,0 +1,9 @@
+id: Milovana
+name: Milovana
+metadata: {}
+version: 377e8f7f
+date: "2025-11-12 22:59:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Milovana.yml

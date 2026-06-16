@@ -1,0 +1,9 @@
+id: FapHouse
+name: Faphouse
+metadata: {}
+version: 1fa28b1c
+date: "2024-06-28 15:54:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FapHouse.yml

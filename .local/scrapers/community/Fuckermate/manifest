@@ -1,0 +1,9 @@
+id: Fuckermate
+name: Fuckermate
+metadata: {}
+version: 805b561b
+date: "2022-01-11 20:10:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Fuckermate.yml

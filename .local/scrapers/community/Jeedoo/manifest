@@ -1,0 +1,9 @@
+id: Jeedoo
+name: Jeedoo
+metadata: {}
+version: 73c04512
+date: "2026-04-30 13:36:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Jeedoo.yml

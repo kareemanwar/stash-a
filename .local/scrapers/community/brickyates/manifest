@@ -1,0 +1,9 @@
+id: brickyates
+name: brickyates
+metadata: {}
+version: 65e17ede
+date: "2021-03-09 10:00:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- brickyates.yml

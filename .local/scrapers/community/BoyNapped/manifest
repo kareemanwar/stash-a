@@ -1,0 +1,9 @@
+id: BoyNapped
+name: BoyNapped
+metadata: {}
+version: fc826038
+date: "2025-11-11 12:23:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BoyNapped.yml

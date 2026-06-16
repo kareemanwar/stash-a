@@ -1,0 +1,9 @@
+id: WakeUpnFuck
+name: Wake Up n Fuck
+metadata: {}
+version: 19c6144f
+date: "2025-09-17 10:51:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- WakeUpnFuck.yml

@@ -1,0 +1,9 @@
+id: JakeCruiseMedia
+name: JakeCruiseMedia
+metadata: {}
+version: adb1406b
+date: "2024-09-28 14:17:19"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JakeCruiseMedia.yml

@@ -1,0 +1,9 @@
+id: Pornbox
+name: Pornbox
+metadata: {}
+version: 85baa2e2
+date: "2024-06-10 08:26:31"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Pornbox.yml

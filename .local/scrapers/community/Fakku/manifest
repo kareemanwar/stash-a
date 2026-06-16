@@ -1,0 +1,9 @@
+id: Fakku
+name: Fakku
+metadata: {}
+version: acdddd1d
+date: "2024-12-23 14:19:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Fakku.yml

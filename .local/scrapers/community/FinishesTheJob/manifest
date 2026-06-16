@@ -1,0 +1,9 @@
+id: FinishesTheJob
+name: FinishesTheJob
+metadata: {}
+version: e9b2db4d
+date: "2023-10-19 20:09:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FinishesTheJob.yml

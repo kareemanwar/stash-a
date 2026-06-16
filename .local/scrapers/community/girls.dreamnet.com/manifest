@@ -1,0 +1,9 @@
+id: girls.dreamnet.com
+name: Girls.Dreamnet.com
+metadata: {}
+version: 5ee93a34
+date: "2025-09-17 10:48:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- girls.dreamnet.com.yml

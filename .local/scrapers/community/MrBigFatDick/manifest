@@ -1,0 +1,9 @@
+id: MrBigFatDick
+name: MrBigFatDick
+metadata: {}
+version: ba7f535b
+date: "2022-11-05 08:51:11"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MrBigFatDick.yml

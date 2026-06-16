@@ -1,0 +1,9 @@
+id: PissPlay
+name: PissPlay
+metadata: {}
+version: 1de19a79
+date: "2022-02-16 12:46:17"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PissPlay.yml

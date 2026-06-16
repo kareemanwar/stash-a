@@ -1,0 +1,9 @@
+id: ehentai
+name: ehentai
+metadata: {}
+version: 74fec184
+date: "2025-06-11 23:17:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ehentai.yml

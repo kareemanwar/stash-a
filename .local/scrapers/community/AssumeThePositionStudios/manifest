@@ -1,0 +1,10 @@
+id: AssumeThePositionStudios
+name: AssumeThePosition
+metadata: {}
+version: 0f658ea1
+date: "2024-01-12 15:32:58"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AssumeThePositionStudios.yml
+- AssumeThePositionStudios.py

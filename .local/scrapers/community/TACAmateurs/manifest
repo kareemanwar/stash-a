@@ -1,0 +1,9 @@
+id: TACAmateurs
+name: TACAmateurs
+metadata: {}
+version: 86b536e6
+date: "2021-05-20 20:15:31"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TACAmateurs.yml

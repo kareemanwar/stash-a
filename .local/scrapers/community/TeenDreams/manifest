@@ -1,0 +1,9 @@
+id: TeenDreams
+name: Teen Dreams
+metadata: {}
+version: 6c16976e
+date: "2024-05-25 18:14:11"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TeenDreams.yml

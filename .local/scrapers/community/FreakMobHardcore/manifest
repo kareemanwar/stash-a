@@ -1,0 +1,9 @@
+id: FreakMobHardcore
+name: FreakMobHardcore
+metadata: {}
+version: 2b3dba0c
+date: "2025-08-21 02:13:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FreakMobHardcore.yml

@@ -1,0 +1,9 @@
+id: HentaiDude
+name: HentaiDude
+metadata: {}
+version: 0f67aba3
+date: "2024-09-05 19:52:47"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HentaiDude.yml

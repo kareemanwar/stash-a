@@ -1,0 +1,9 @@
+id: GIGA
+name: GIGA
+metadata: {}
+version: e402dc4e
+date: "2024-08-24 04:58:24"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GIGA.yml

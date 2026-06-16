@@ -1,0 +1,9 @@
+id: ModelMediaAsia
+name: ModelMediaAsia
+metadata: {}
+version: c33988a4
+date: "2025-12-16 09:10:19"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ModelMediaAsia.yml

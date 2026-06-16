@@ -1,0 +1,9 @@
+id: FistingInferno
+name: FistingInferno
+metadata: {}
+version: bd1381e9
+date: "2025-08-13 01:37:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FistingInferno.yml

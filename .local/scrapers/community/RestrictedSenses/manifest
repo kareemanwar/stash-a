@@ -1,0 +1,9 @@
+id: RestrictedSenses
+name: RestrictedSenses
+metadata: {}
+version: 046a1dc5
+date: "2022-03-13 13:34:55"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- RestrictedSenses.yml

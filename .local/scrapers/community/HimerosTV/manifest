@@ -1,0 +1,9 @@
+id: HimerosTV
+name: HimerosTV
+metadata: {}
+version: 4c9a36fa
+date: "2023-12-14 17:23:41"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HimerosTV.yml

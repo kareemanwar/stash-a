@@ -1,0 +1,9 @@
+id: TaraTainton
+name: TaraTainton.com
+metadata: {}
+version: 08e85309
+date: "2022-08-25 21:53:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TaraTainton.yml

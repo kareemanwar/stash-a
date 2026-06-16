@@ -1,0 +1,10 @@
+id: Redgifs
+name: Redgifs
+metadata: {}
+version: 3d0a26cf
+date: "2025-06-19 00:24:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Redgifs.py
+- Redgifs.yml

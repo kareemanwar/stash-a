@@ -1,0 +1,9 @@
+id: 10Musume-JP
+name: 10Musume-JP
+metadata: {}
+version: "66738272"
+date: "2026-02-28 16:05:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- 10Musume-JP.yml

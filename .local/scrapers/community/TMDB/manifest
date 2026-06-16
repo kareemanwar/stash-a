@@ -1,0 +1,9 @@
+id: TMDB
+name: TheMovieDB
+metadata: {}
+version: a77cc747
+date: "2025-05-30 15:20:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TMDB.yml

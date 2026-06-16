@@ -1,0 +1,9 @@
+id: Spizoo
+name: Spizoo
+metadata: {}
+version: 65d6f763
+date: "2024-12-12 01:42:43"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Spizoo.yml

@@ -1,0 +1,9 @@
+id: Slim4k
+name: Slim4k
+metadata: {}
+version: 7d87f6f1
+date: "2024-04-06 21:55:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Slim4k.yml

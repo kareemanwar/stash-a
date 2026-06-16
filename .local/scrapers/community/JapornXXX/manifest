@@ -1,0 +1,9 @@
+id: JapornXXX
+name: JapornXXX
+metadata: {}
+version: 754da38e
+date: "2022-05-22 14:22:20"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JapornXXX.yml

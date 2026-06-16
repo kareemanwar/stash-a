@@ -1,0 +1,10 @@
+id: fc2ppvdb
+name: fc2ppvdb
+metadata: {}
+version: c5ccf43c
+date: "2026-05-02 23:05:06"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- fc2ppvdb.yml
+- fc2ppvdb.py

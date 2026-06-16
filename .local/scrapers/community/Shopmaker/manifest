@@ -1,0 +1,9 @@
+id: Shopmaker
+name: Shopmaker
+metadata: {}
+version: ccb4ed8f
+date: "2024-04-27 14:12:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Shopmaker.yml

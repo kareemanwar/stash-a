@@ -1,0 +1,10 @@
+id: PetersKingdom
+name: PetersKingdom
+metadata: {}
+version: ed581e35
+date: "2025-05-17 22:43:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PetersKingdom.py
+- PetersKingdom.yml

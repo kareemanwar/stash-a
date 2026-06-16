@@ -1,0 +1,9 @@
+id: karatmedia
+name: karatmedia
+metadata: {}
+version: 0d476e56
+date: "2021-03-08 23:44:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- karatmedia.yml

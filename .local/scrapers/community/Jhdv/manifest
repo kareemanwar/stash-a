@@ -1,0 +1,9 @@
+id: Jhdv
+name: Jhdv
+metadata: {}
+version: d2096ce7
+date: "2021-05-28 20:47:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Jhdv.yml

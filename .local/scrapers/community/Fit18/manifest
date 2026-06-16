@@ -1,0 +1,10 @@
+id: Fit18
+name: Fit18
+metadata: {}
+version: 0228f448
+date: "2024-09-11 01:25:55"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Fit18.yml
+- Fit18.py

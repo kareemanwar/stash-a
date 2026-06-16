@@ -1,0 +1,9 @@
+id: PureMedia
+name: PureMedia
+metadata: {}
+version: 081f281f
+date: "2024-08-15 23:19:34"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PureMedia.yml

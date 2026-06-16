@@ -1,0 +1,10 @@
+id: GGFetishMedia
+name: GGFetishMedia
+metadata: {}
+version: 61886b31
+date: "2026-02-17 20:12:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GGFetishMedia.yml
+- GGFetishMedia.py

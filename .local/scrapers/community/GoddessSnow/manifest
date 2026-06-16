@@ -1,0 +1,9 @@
+id: GoddessSnow
+name: GoddessSnow.com
+metadata: {}
+version: 22cee2ef
+date: "2023-02-07 21:01:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GoddessSnow.yml

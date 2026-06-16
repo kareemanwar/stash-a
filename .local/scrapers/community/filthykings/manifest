@@ -1,0 +1,9 @@
+id: filthykings
+name: FilthyKings
+metadata: {}
+version: 97bec714
+date: "2023-11-22 00:53:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- filthykings.yml

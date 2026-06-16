@@ -1,0 +1,10 @@
+id: PlayboyTV
+name: PlayboyTV
+metadata: {}
+version: a39a2063
+date: "2026-03-07 01:05:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PlayboyTV.py
+- PlayboyTV.yml

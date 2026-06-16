@@ -1,0 +1,9 @@
+id: MetalBondage
+name: Metal Bondage
+metadata: {}
+version: 908435f7
+date: "2023-07-26 14:43:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MetalBondage.yml

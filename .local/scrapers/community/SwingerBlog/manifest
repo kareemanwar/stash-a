@@ -1,0 +1,9 @@
+id: SwingerBlog
+name: Swinger-Blog
+metadata: {}
+version: f6f513dc
+date: "2021-05-27 18:29:45"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SwingerBlog.yml

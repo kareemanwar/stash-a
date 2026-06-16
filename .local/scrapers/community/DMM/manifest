@@ -1,0 +1,9 @@
+id: DMM
+name: DMM
+metadata: {}
+version: a93929e5
+date: "2024-01-10 11:45:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DMM.yml

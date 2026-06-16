@@ -1,0 +1,9 @@
+id: MyDirtyHobby
+name: MyDirtyHobby
+metadata: {}
+version: fecf7863
+date: "2025-01-10 02:09:47"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MyDirtyHobby.yml

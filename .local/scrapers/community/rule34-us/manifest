@@ -1,0 +1,9 @@
+id: rule34-us
+name: rule34-us
+metadata: {}
+version: "19661554"
+date: "2025-04-20 01:51:14"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- rule34-us.yml

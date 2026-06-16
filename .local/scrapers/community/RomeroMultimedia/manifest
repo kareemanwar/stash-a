@@ -1,0 +1,9 @@
+id: RomeroMultimedia
+name: Romero Multimedia
+metadata: {}
+version: 1bb6e101
+date: "2026-06-01 15:46:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- RomeroMultimedia.yml

@@ -1,0 +1,10 @@
+id: Tube8Vip
+name: Tube8Vip
+metadata: {}
+version: b3a2261b
+date: "2026-05-20 23:45:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Tube8Vip.yml
+- Tube8Vip.py

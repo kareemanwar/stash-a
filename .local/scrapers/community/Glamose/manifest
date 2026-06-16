@@ -1,0 +1,9 @@
+id: Glamose
+name: Glamose
+metadata: {}
+version: 1c24e42f
+date: "2024-04-06 21:45:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Glamose.yml

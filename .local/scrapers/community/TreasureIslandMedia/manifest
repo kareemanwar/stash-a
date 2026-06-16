@@ -1,0 +1,9 @@
+id: TreasureIslandMedia
+name: Treasure Island Media
+metadata: {}
+version: e01ec918
+date: "2026-01-30 15:49:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TreasureIslandMedia.yml

@@ -1,0 +1,9 @@
+id: Madou
+name: Madou Media Unofficial
+metadata: {}
+version: 4847b824
+date: "2021-05-30 16:09:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Madou.yml

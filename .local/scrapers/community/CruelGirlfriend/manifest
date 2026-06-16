@@ -1,0 +1,9 @@
+id: CruelGirlfriend
+name: Cruel Girlfriend
+metadata: {}
+version: d373d1e4
+date: "2025-11-05 03:48:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CruelGirlfriend.yml

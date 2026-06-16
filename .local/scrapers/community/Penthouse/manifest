@@ -1,0 +1,9 @@
+id: Penthouse
+name: Penthouse Gold
+metadata: {}
+version: 8140e6ac
+date: "2024-04-27 14:17:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Penthouse.yml

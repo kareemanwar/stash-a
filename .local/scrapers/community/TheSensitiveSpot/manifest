@@ -1,0 +1,9 @@
+id: TheSensitiveSpot
+name: The Sensitive Spot
+metadata: {}
+version: bc3476b6
+date: "2025-08-15 14:04:17"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TheSensitiveSpot.yml

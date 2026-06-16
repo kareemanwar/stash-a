@@ -1,0 +1,10 @@
+id: Blowpass
+name: Blowpass
+metadata: {}
+version: ec6d4e5b
+date: "2025-05-23 14:20:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Blowpass.py
+- Blowpass.yml

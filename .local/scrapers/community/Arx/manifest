@@ -1,0 +1,9 @@
+id: Arx
+name: Arx
+metadata: {}
+version: 55e8dab3
+date: "2025-11-07 17:52:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Arx.yml

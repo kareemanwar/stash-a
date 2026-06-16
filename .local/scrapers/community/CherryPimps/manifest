@@ -1,0 +1,9 @@
+id: CherryPimps
+name: CherryPimps
+metadata: {}
+version: b92e17ca
+date: "2024-01-20 00:26:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CherryPimps.yml

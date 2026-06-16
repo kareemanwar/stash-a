@@ -1,0 +1,9 @@
+id: Andomark
+name: Andomark
+metadata: {}
+version: 8e5cacb2
+date: "2026-04-07 23:56:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Andomark.yml

@@ -1,0 +1,9 @@
+id: UltraFilms
+name: UltraFilms
+metadata: {}
+version: e7807bfb
+date: "2024-11-26 22:53:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- UltraFilms.yml

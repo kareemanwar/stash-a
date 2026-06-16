@@ -1,0 +1,9 @@
+id: AdultDvdMarketPlace
+name: AdultDvdMarketPlace
+metadata: {}
+version: 048f1510
+date: "2025-10-28 01:21:07"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AdultDvdMarketPlace.yml

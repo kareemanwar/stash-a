@@ -1,0 +1,9 @@
+id: ExtremeMoviePass
+name: ExtremeMoviePass
+metadata: {}
+version: e97d05f9
+date: "2025-05-01 13:42:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ExtremeMoviePass.yml

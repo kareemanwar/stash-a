@@ -1,0 +1,9 @@
+id: RichardNailder
+name: RichardNailder
+metadata: {}
+version: cc2e374b
+date: "2024-05-02 02:46:01"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- RichardNailder.yml

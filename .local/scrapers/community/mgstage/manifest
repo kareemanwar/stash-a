@@ -1,0 +1,9 @@
+id: mgstage
+name: mgstage
+metadata: {}
+version: 94f1f097
+date: "2020-12-07 09:35:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- mgstage.yml

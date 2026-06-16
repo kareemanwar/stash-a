@@ -1,0 +1,9 @@
+id: Sinematica
+name: SINematica
+metadata: {}
+version: 94ed8c07
+date: "2021-10-07 20:26:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Sinematica.yml

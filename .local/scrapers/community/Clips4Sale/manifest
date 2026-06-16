@@ -1,0 +1,10 @@
+id: Clips4Sale
+name: Clips4Sale
+metadata: {}
+version: df2ee76a
+date: "2026-02-21 07:03:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Clips4Sale.py
+- Clips4Sale.yml

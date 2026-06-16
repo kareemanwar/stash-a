@@ -1,0 +1,9 @@
+id: NewSensationsNetworkSites
+name: NewSensationsNetworkSites
+metadata: {}
+version: aea9d9e2
+date: "2025-05-02 23:08:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- NewSensationsNetworkSites.yml

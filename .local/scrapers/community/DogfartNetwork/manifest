@@ -1,0 +1,9 @@
+id: DogfartNetwork
+name: DogfartNetwork
+metadata: {}
+version: c49738c3
+date: "2024-08-26 23:02:58"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DogfartNetwork.yml

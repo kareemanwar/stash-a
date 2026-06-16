@@ -1,0 +1,9 @@
+id: PKFStudios
+name: PKF Studios
+metadata: {}
+version: 016bf3c9
+date: "2023-12-05 01:51:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PKFStudios.yml

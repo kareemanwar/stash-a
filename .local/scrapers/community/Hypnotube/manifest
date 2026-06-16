@@ -1,0 +1,9 @@
+id: Hypnotube
+name: Hypnotube
+metadata: {}
+version: bc1c45ea
+date: "2025-01-14 20:44:16"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Hypnotube.yml

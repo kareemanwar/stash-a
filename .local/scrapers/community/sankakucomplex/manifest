@@ -1,0 +1,9 @@
+id: sankakucomplex
+name: sankakucomplex
+metadata: {}
+version: c54f5c8e
+date: "2025-08-11 01:42:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- sankakucomplex.yml

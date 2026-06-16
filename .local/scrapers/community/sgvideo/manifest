@@ -1,0 +1,9 @@
+id: sgvideo
+name: SG Video
+metadata: {}
+version: 46ae5df5
+date: "2025-05-19 11:07:41"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- sgvideo.yml

@@ -1,0 +1,9 @@
+id: POVTrain
+name: POV Train
+metadata: {}
+version: a36daaff
+date: "2024-03-10 17:43:12"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- POVTrain.yml

@@ -1,0 +1,9 @@
+id: JavHub
+name: JavHub
+metadata: {}
+version: 472fa90f
+date: "2022-02-28 16:50:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JavHub.yml

@@ -1,0 +1,9 @@
+id: BrandNewAmateurs
+name: Brand New Amateurs
+metadata: {}
+version: 71c3d297
+date: "2026-03-31 00:31:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BrandNewAmateurs.yml

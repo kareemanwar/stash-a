@@ -1,0 +1,9 @@
+id: GroobyClub
+name: GroobyClub
+metadata: {}
+version: ecdb398a
+date: "2025-04-17 14:16:43"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GroobyClub.yml

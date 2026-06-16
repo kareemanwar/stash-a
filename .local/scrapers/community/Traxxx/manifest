@@ -1,0 +1,11 @@
+id: Traxxx
+name: Traxxx
+metadata: {}
+version: cae0c747
+date: "2024-09-17 18:41:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Traxxx.yml
+- traxxx_interface.py
+- Traxxx.py

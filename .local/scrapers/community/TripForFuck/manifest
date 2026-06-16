@@ -1,0 +1,9 @@
+id: TripForFuck
+name: TripForFuck
+metadata: {}
+version: 26c11e75
+date: "2022-01-22 00:36:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TripForFuck.yml

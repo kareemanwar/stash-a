@@ -1,0 +1,9 @@
+id: XXXBios
+name: XXXBios
+metadata: {}
+version: 4d3b3b50
+date: "2026-03-10 02:18:21"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- XXXBios.yml

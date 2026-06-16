@@ -1,0 +1,9 @@
+id: bruceandmorgan
+name: Bruce and Morgan
+metadata: {}
+version: 79042c6b
+date: "2020-10-29 22:01:24"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- bruceandmorgan.yml

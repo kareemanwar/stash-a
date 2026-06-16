@@ -1,0 +1,9 @@
+id: EricJohnsSexAdventures
+name: EricJohnsSexAdventures
+metadata: {}
+version: 66d47602
+date: "2021-07-18 15:48:20"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- EricJohnsSexAdventures.yml

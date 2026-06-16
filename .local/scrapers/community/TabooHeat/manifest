@@ -1,0 +1,9 @@
+id: TabooHeat
+name: TabooHeat
+metadata: {}
+version: 6ce6806a
+date: "2025-05-11 16:51:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TabooHeat.yml

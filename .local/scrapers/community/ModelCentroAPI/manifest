@@ -1,0 +1,10 @@
+id: ModelCentroAPI
+name: ModelCentroAPI
+metadata: {}
+version: 7ab2709d
+date: "2025-10-07 11:57:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ModelCentroAPI.yml
+- ModelCentroAPI.py

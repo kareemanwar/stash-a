@@ -1,0 +1,10 @@
+id: VirtualRealPorn
+name: VirtualRealPorn (Network)
+metadata: {}
+version: 1262883d
+date: "2025-12-16 12:56:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VirtualRealPorn.py
+- VirtualRealPorn.yml

@@ -1,0 +1,9 @@
+id: PlumperPass
+name: PlumperPass
+metadata: {}
+version: 6865aec5
+date: "2022-05-20 20:55:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PlumperPass.yml

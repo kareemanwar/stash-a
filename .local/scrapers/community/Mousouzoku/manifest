@@ -1,0 +1,9 @@
+id: Mousouzoku
+name: Mousouzoku
+metadata: {}
+version: 50da6bc6
+date: "2024-04-08 15:32:12"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Mousouzoku.yml

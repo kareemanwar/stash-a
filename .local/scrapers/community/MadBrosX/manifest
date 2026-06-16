@@ -1,0 +1,9 @@
+id: MadBrosX
+name: MadBrosX
+metadata: {}
+version: f29d108b
+date: "2025-10-19 07:07:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MadBrosX.yml

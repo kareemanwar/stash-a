@@ -1,0 +1,9 @@
+id: Vivid
+name: Vivid
+metadata: {}
+version: 05b6d35d
+date: "2024-04-23 00:07:01"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Vivid.yml

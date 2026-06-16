@@ -1,0 +1,9 @@
+id: AdultFilmDatabase
+name: AdultFilmDatabase
+metadata: {}
+version: 5f03143a
+date: "2026-04-21 03:09:17"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AdultFilmDatabase.yml

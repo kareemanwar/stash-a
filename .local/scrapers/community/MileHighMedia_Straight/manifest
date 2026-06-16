@@ -1,0 +1,10 @@
+id: MileHighMedia_Straight
+name: Mile High Media (Straight)
+metadata: {}
+version: 2e0632f4
+date: "2026-05-05 21:07:34"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MileHighMedia_Straight.yml
+- MileHighMedia_Straight.py

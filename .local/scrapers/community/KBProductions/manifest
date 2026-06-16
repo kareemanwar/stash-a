@@ -1,0 +1,10 @@
+id: KBProductions
+name: KB Productions
+metadata: {}
+version: 9dcb8ae5
+date: "2026-03-16 12:35:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- KBProductions.py
+- KBProductions.yml

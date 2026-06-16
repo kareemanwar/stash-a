@@ -1,0 +1,10 @@
+id: BlackMaleMe
+name: BlackMaleMe
+metadata: {}
+version: 86aa9e39
+date: "2024-04-29 00:48:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BlackMaleMe.py
+- BlackMaleMe.yml

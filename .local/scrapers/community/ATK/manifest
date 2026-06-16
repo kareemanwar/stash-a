@@ -1,0 +1,9 @@
+id: ATK
+name: ATK
+metadata: {}
+version: fd1d440c
+date: "2025-08-08 20:03:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ATK.yml

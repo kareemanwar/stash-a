@@ -1,0 +1,9 @@
+id: BradMontana
+name: BradMontana
+metadata: {}
+version: a0080cec
+date: "2024-10-25 00:24:41"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BradMontana.yml

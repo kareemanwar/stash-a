@@ -1,0 +1,9 @@
+id: SweetyX
+name: SweetyX
+metadata: {}
+version: 6a3c46ea
+date: "2021-01-03 18:32:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SweetyX.yml

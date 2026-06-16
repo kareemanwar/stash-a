@@ -1,0 +1,9 @@
+id: MensRush
+name: MensRush
+metadata: {}
+version: 633398fb
+date: "2025-11-22 06:24:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MensRush.yml

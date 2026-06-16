@@ -1,0 +1,9 @@
+id: bibian-av
+name: Bibian-AV
+metadata: {}
+version: e4a3db9e
+date: "2024-06-06 09:21:06"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- bibian-av.yml

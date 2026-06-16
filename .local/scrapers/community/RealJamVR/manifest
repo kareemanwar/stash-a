@@ -1,0 +1,10 @@
+id: RealJamVR
+name: RealJamVR
+metadata: {}
+version: 8f5e8c1f
+date: "2025-09-26 03:48:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- RealJamVR.py
+- RealJamVR.yml

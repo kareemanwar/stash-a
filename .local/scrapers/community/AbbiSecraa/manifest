@@ -1,0 +1,9 @@
+id: AbbiSecraa
+name: AbbiSecraa
+metadata: {}
+version: b90aaeea
+date: "2024-06-23 12:26:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AbbiSecraa.yml

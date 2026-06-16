@@ -1,0 +1,9 @@
+id: derpibooru
+name: derpibooru
+metadata: {}
+version: 556dfe6b
+date: "2025-04-20 03:30:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- derpibooru.yml

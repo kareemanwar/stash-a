@@ -1,0 +1,9 @@
+id: Paco
+name: Paco (EN)
+metadata: {}
+version: 36e3419d
+date: "2024-03-26 22:08:42"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Paco.yml

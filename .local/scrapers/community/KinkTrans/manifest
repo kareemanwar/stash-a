@@ -1,0 +1,9 @@
+id: KinkTrans
+name: Kink Trans
+metadata: {}
+version: 05fa9201
+date: "2026-04-15 03:25:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- KinkTrans.yml

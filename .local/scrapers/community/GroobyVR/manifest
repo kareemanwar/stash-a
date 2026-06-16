@@ -1,0 +1,9 @@
+id: GroobyVR
+name: GroobyVR
+metadata: {}
+version: ff8c9fed
+date: "2025-08-07 17:42:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GroobyVR.yml

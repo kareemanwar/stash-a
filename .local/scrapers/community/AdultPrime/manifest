@@ -1,0 +1,9 @@
+id: AdultPrime
+name: AdultPrime
+metadata: {}
+version: 891887f1
+date: "2026-04-03 21:53:20"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AdultPrime.yml

@@ -1,0 +1,9 @@
+id: VegasDreamsLLC
+name: VegasDreamsLLC
+metadata: {}
+version: 7889cbd4
+date: "2022-08-09 12:35:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VegasDreamsLLC.yml

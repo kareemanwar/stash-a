@@ -1,0 +1,9 @@
+id: CruisingPorn
+name: CruisingPorn
+metadata: {}
+version: 7802f135
+date: "2024-04-11 21:40:15"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CruisingPorn.yml

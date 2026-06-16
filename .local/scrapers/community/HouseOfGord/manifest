@@ -1,0 +1,9 @@
+id: HouseOfGord
+name: HouseOfGord
+metadata: {}
+version: 35ab7c69
+date: "2026-03-15 05:41:16"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HouseOfGord.yml

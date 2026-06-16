@@ -1,0 +1,9 @@
+id: HobbyPorn
+name: HobbyPorn
+metadata: {}
+version: f14189e9
+date: "2025-03-24 20:50:48"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HobbyPorn.yml

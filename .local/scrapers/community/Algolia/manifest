@@ -1,0 +1,9 @@
+id: Algolia
+name: Algolia
+metadata: {}
+version: b19da1c0
+date: "2025-03-09 07:24:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Algolia.py

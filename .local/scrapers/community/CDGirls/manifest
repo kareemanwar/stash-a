@@ -1,0 +1,9 @@
+id: CDGirls
+name: CDGirls
+metadata: {}
+version: afc09dbe
+date: "2024-05-09 08:04:20"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CDGirls.yml

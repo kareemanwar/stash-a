@@ -1,0 +1,9 @@
+id: xSinsVR
+name: xSinsVR
+metadata: {}
+version: 7653d40a
+date: "2024-02-16 19:34:56"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- xSinsVR.yml

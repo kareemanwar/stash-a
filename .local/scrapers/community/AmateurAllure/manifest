@@ -1,0 +1,9 @@
+id: AmateurAllure
+name: AmateurAllure
+metadata: {}
+version: d3127aea
+date: "2025-12-22 16:20:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AmateurAllure.yml

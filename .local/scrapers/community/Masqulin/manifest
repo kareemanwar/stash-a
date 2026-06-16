@@ -1,0 +1,9 @@
+id: Masqulin
+name: Masqulin
+metadata: {}
+version: 952435cf
+date: "2023-01-15 17:51:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Masqulin.yml

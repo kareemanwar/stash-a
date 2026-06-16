@@ -1,0 +1,10 @@
+id: MissaX
+name: MissaX
+metadata: {}
+version: caf5a3b0
+date: "2024-02-19 20:27:17"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MissaX.py
+- MissaX.yml

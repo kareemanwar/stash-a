@@ -1,0 +1,9 @@
+id: MatureNL
+name: Mature.nl
+metadata: {}
+version: 4f1f4ba7
+date: "2025-01-19 12:38:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MatureNL.yml

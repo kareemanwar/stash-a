@@ -1,0 +1,9 @@
+id: DDFNetwork
+name: DDFNetwork
+metadata: {}
+version: e08e9967
+date: "2021-05-17 20:15:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DDFNetwork.yml

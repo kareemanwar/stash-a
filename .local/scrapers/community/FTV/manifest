@@ -1,0 +1,9 @@
+id: FTV
+name: FTV
+metadata: {}
+version: e31349c3
+date: "2024-03-28 12:17:04"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FTV.yml

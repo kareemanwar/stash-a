@@ -1,0 +1,10 @@
+id: IAFD
+name: IAFD
+metadata: {}
+version: 72c77d99
+date: "2025-11-27 06:32:56"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- IAFD.yml
+- IAFD.py

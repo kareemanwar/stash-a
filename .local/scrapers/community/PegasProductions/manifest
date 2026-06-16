@@ -1,0 +1,9 @@
+id: PegasProductions
+name: PegasProductions
+metadata: {}
+version: 60415a7f
+date: "2024-03-29 13:57:45"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PegasProductions.yml

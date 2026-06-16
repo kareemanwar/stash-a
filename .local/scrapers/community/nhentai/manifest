@@ -1,0 +1,9 @@
+id: nhentai
+name: nhentai
+metadata: {}
+version: 049b8db7
+date: "2026-05-02 06:34:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- nhentai.yml

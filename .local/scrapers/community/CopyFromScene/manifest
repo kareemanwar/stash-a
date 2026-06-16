@@ -1,0 +1,10 @@
+id: CopyFromScene
+name: Copy from Scene
+metadata: {}
+version: 19e080d5
+date: "2024-01-02 16:41:06"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CopyFromScene.py
+- CopyFromScene.yml

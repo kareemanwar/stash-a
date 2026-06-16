@@ -1,0 +1,9 @@
+id: Catalina Cruz
+name: CatalinaCruz
+metadata: {}
+version: ec330179
+date: "2021-04-13 17:47:42"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Catalina Cruz.yml

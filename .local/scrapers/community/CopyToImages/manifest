@@ -1,0 +1,10 @@
+id: CopyToImages
+name: Copy to Images
+metadata: {}
+version: 34fada11
+date: "2024-07-05 18:17:34"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CopyToImages.py
+- CopyToImages.yml

@@ -1,0 +1,9 @@
+id: Newgrounds
+name: Newgrounds
+metadata: {}
+version: 8ce96f06
+date: "2024-03-20 17:52:31"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Newgrounds.yml

@@ -1,0 +1,10 @@
+id: PlayboyPlus
+name: PlayboyPlus
+metadata: {}
+version: e76806a5
+date: "2026-02-25 04:28:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PlayboyPlus.py
+- PlayboyPlus.yml

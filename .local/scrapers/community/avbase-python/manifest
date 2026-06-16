@@ -1,0 +1,10 @@
+id: avbase-python
+name: avbase-python
+metadata: {}
+version: 0aa9faa0
+date: "2026-04-04 20:33:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- avbase-python.yml
+- avbase-python.py

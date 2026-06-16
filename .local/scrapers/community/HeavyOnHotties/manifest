@@ -1,0 +1,9 @@
+id: HeavyOnHotties
+name: HeavyOnHotties
+metadata: {}
+version: 883131ac
+date: "2024-04-21 21:57:28"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- HeavyOnHotties.yml

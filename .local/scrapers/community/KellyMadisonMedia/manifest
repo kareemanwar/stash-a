@@ -1,0 +1,9 @@
+id: KellyMadisonMedia
+name: Kelly Madison Media
+metadata: {}
+version: 0c3ab7a9
+date: "2026-05-08 05:20:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- KellyMadisonMedia.yml

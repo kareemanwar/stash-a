@@ -1,0 +1,9 @@
+id: Vipissy
+name: vipissy
+metadata: {}
+version: 39fd18b5
+date: "2021-09-26 10:05:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Vipissy.yml

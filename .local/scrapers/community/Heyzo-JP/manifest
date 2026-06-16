@@ -1,0 +1,9 @@
+id: Heyzo-JP
+name: Heyzo-JP
+metadata: {}
+version: 19ccc627
+date: "2025-07-16 11:08:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Heyzo-JP.yml

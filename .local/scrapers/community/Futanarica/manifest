@@ -1,0 +1,9 @@
+id: Futanarica
+name: Futanarica
+metadata: {}
+version: 75773bff
+date: "2023-07-19 22:20:32"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Futanarica.yml

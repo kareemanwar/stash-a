@@ -1,0 +1,9 @@
+id: SexTB
+name: SexTB
+metadata: {}
+version: 988ba27d
+date: "2025-06-11 23:23:42"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SexTB.yml

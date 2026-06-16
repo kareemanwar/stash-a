@@ -1,0 +1,10 @@
+id: AnimeCharactersDatabase
+name: AnimeCharactersDatabase
+metadata: {}
+version: ac47bbdd
+date: "2026-03-26 21:04:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AnimeCharactersDatabase.py
+- AnimeCharactersDatabase.yml

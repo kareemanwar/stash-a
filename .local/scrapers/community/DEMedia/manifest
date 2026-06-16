@@ -1,0 +1,9 @@
+id: DEMedia
+name: DEMedia
+metadata: {}
+version: d86d2d5f
+date: "2024-03-29 13:16:37"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DEMedia.yml

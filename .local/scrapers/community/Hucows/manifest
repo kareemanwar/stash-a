@@ -1,0 +1,9 @@
+id: Hucows
+name: HuCows
+metadata: {}
+version: a4b85bfc
+date: "2025-07-07 10:12:24"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Hucows.yml

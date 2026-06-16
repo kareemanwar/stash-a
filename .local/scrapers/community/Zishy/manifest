@@ -1,0 +1,9 @@
+id: Zishy
+name: Zishy
+metadata: {}
+version: e766de15
+date: "2024-10-11 23:49:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Zishy.yml

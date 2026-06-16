@@ -1,0 +1,9 @@
+id: MeanWorld
+name: MeanWorld
+metadata: {}
+version: 30dcddd4
+date: "2025-11-28 05:16:47"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MeanWorld.yml

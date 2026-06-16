@@ -1,0 +1,9 @@
+id: PervCity
+name: PervCity
+metadata: {}
+version: 2b1815fe
+date: "2024-09-12 00:44:04"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PervCity.yml

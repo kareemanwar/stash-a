@@ -1,0 +1,9 @@
+id: MyCherryCrush
+name: MyCherryCrush
+metadata: {}
+version: 3f254b51
+date: "2022-03-02 15:50:45"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MyCherryCrush.yml

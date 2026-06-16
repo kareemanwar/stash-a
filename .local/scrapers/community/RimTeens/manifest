@@ -1,0 +1,9 @@
+id: RimTeens
+name: RimTeens
+metadata: {}
+version: ecc202a5
+date: "2025-05-24 19:35:09"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- RimTeens.yml

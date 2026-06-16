@@ -1,0 +1,9 @@
+id: Heydouga-JP
+name: Heydouga-JP
+metadata: {}
+version: c32352e8
+date: "2024-06-27 22:31:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Heydouga-JP.yml

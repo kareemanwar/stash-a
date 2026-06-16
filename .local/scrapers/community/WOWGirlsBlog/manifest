@@ -1,0 +1,9 @@
+id: WOWGirlsBlog
+name: WOW Girls Blog
+metadata: {}
+version: 7f622d2a
+date: "2022-09-21 20:46:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- WOWGirlsBlog.yml

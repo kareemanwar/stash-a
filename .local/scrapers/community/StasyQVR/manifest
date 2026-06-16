@@ -1,0 +1,9 @@
+id: StasyQVR
+name: StasyQVR
+metadata: {}
+version: dfa66dac
+date: "2024-12-17 10:45:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- StasyQVR.yml

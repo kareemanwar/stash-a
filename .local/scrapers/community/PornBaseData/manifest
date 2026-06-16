@@ -1,0 +1,9 @@
+id: PornBaseData
+name: PornBaseData
+metadata: {}
+version: 88055c09
+date: "2025-08-11 00:01:01"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PornBaseData.yml

@@ -1,0 +1,9 @@
+id: ThirdRockEnt
+name: ThirdRockEnt
+metadata: {}
+version: 83bea20d
+date: "2025-05-15 23:20:37"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ThirdRockEnt.yml

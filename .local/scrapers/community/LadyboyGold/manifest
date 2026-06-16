@@ -1,0 +1,10 @@
+id: LadyboyGold
+name: LadyboyGold (Network)
+metadata: {}
+version: fa010ef2
+date: "2025-12-09 18:08:24"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- island_dollars.py
+- LadyboyGold.yml

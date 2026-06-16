@@ -1,0 +1,9 @@
+id: insexOL
+name: insexOL
+metadata: {}
+version: c8a90bf6
+date: "2021-01-24 10:06:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- insexOL.yml

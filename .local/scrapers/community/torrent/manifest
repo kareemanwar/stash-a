@@ -1,0 +1,10 @@
+id: torrent
+name: Torrent
+metadata: {}
+version: c48d09bf
+date: "2025-04-15 20:54:04"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- torrent.yml
+- torrent.py

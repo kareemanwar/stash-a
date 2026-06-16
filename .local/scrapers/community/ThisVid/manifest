@@ -1,0 +1,9 @@
+id: ThisVid
+name: ThisVid
+metadata: {}
+version: d71775f0
+date: "2023-02-27 04:00:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ThisVid.yml

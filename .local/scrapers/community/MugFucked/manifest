@@ -1,0 +1,9 @@
+id: MugFucked
+name: Mug Fucked
+metadata: {}
+version: 41da3b75
+date: "2022-11-16 15:05:09"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MugFucked.yml

@@ -1,0 +1,10 @@
+id: scrapeCoverFromFile
+name: Cover From File
+metadata: {}
+version: 42aae135
+date: "2024-12-31 21:00:12"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- scrapeCoverFromFile.yml
+- scrapeCoverFromFile.py

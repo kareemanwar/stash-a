@@ -1,0 +1,9 @@
+id: shimmie2-xpath
+name: shimmie2-xpath
+metadata: {}
+version: b3ab98f5
+date: "2025-04-20 04:25:26"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- shimmie2-xpath.yml

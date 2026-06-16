@@ -1,0 +1,9 @@
+id: Mypervmom
+name: mypervmom.com
+metadata: {}
+version: d3b75937
+date: "2022-11-16 15:04:34"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Mypervmom.yml

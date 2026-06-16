@@ -1,0 +1,10 @@
+id: performer-image-by-scene
+name: Performer Image by scene cover
+metadata: {}
+version: 3479c8b5
+date: "2023-11-22 01:14:42"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- performer-image-by-scene.yml
+- performer-image-by-scene.py

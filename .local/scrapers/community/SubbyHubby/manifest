@@ -1,0 +1,9 @@
+id: SubbyHubby
+name: SubbyHubby
+metadata: {}
+version: d0e31b81
+date: "2024-08-17 10:38:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SubbyHubby.yml

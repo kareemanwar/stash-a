@@ -1,0 +1,9 @@
+id: NastyDaddy
+name: NastyDaddy
+metadata: {}
+version: 2da0fe30
+date: "2025-05-16 19:32:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- NastyDaddy.yml

@@ -1,0 +1,9 @@
+id: PaperStreetMedia
+name: PaperStreetMedia
+metadata: {}
+version: 9124b9bb
+date: "2025-05-03 17:46:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PaperStreetMedia.yml

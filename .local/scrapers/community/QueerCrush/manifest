@@ -1,0 +1,9 @@
+id: QueerCrush
+name: QueerCrush
+metadata: {}
+version: cebf05cb
+date: "2025-07-08 19:15:11"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- QueerCrush.yml

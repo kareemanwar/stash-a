@@ -1,0 +1,9 @@
+id: FrancescoMalcom
+name: Francesco Malcom
+metadata: {}
+version: eb7006c3
+date: "2025-09-26 21:20:19"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FrancescoMalcom.yml

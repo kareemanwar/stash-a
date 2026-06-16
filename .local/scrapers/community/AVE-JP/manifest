@@ -1,0 +1,9 @@
+id: AVE-JP
+name: AVEntertainments-JP
+metadata: {}
+version: c32352e8
+date: "2024-06-27 22:31:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AVE-JP.yml

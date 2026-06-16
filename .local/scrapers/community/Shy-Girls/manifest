@@ -1,0 +1,9 @@
+id: Shy-Girls
+name: Shy Girls
+metadata: {}
+version: 39d78ccc
+date: "2024-04-23 00:00:36"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Shy-Girls.yml

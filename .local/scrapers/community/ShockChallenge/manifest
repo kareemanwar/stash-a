@@ -1,0 +1,9 @@
+id: ShockChallenge
+name: ShockChallenge
+metadata: {}
+version: 3c5c0d06
+date: "2026-04-12 00:28:43"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ShockChallenge.yml

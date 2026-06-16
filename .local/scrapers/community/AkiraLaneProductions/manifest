@@ -1,0 +1,9 @@
+id: AkiraLaneProductions
+name: AkiraLaneProductions
+metadata: {}
+version: 1b2c30e8
+date: "2024-04-02 02:47:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AkiraLaneProductions.yml

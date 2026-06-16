@@ -1,0 +1,9 @@
+id: DigitalDesire
+name: DigitalDesire.com
+metadata: {}
+version: d769d3d3
+date: "2021-07-08 20:56:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DigitalDesire.yml

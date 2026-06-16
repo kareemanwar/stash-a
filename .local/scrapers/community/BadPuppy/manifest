@@ -1,0 +1,9 @@
+id: BadPuppy
+name: BadPuppy
+metadata: {}
+version: 2d8593f8
+date: "2024-03-24 23:21:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BadPuppy.yml

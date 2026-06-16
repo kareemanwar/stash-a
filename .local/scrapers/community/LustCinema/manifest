@@ -1,0 +1,9 @@
+id: LustCinema
+name: LustCinema
+metadata: {}
+version: eadd57ab
+date: "2022-06-30 21:39:52"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- LustCinema.yml

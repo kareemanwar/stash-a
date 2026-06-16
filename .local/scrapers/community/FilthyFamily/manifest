@@ -1,0 +1,9 @@
+id: FilthyFamily
+name: FilthyFamily
+metadata: {}
+version: "488427e2"
+date: "2023-02-27 21:13:08"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FilthyFamily.yml

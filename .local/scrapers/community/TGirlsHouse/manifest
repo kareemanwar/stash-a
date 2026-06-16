@@ -1,0 +1,9 @@
+id: TGirlsHouse
+name: TGirls House
+metadata: {}
+version: aaaa8f72
+date: "2026-05-21 16:18:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TGirlsHouse.yml

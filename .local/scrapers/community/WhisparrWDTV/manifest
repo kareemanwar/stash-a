@@ -1,0 +1,10 @@
+id: WhisparrWDTV
+name: Whisparr WDTV XML
+metadata: {}
+version: 03687fb0
+date: "2024-02-17 09:58:02"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- WhisparrWDTV.yml
+- WhisparrWDTV.py

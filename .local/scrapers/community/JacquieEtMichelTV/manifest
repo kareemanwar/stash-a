@@ -1,0 +1,10 @@
+id: JacquieEtMichelTV
+name: JacquieEtMicaelTV
+metadata: {}
+version: 93c8736f
+date: "2025-03-09 06:03:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JacquieEtMichelTV.yml
+- JacquieEtMichelTV.py

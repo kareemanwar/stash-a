@@ -1,0 +1,9 @@
+id: GroobyNetwork-Brazilian
+name: GroobyNetwork-Brazilian
+metadata: {}
+version: bc975f8f
+date: "2023-07-27 17:22:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GroobyNetwork-Brazilian.yml

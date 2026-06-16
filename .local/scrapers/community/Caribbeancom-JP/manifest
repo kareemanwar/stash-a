@@ -1,0 +1,9 @@
+id: Caribbeancom-JP
+name: Caribbeancom-JP
+metadata: {}
+version: 765b3c30
+date: "2025-07-16 11:17:41"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Caribbeancom-JP.yml

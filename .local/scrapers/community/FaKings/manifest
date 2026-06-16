@@ -1,0 +1,10 @@
+id: FaKings
+name: FaKings
+metadata: {}
+version: d84bc2a7
+date: "2025-07-06 00:25:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FaKings.yml
+- FaKings.py

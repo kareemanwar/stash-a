@@ -1,0 +1,9 @@
+id: FrolicMe
+name: FrolicMe
+metadata: {}
+version: aaf45508
+date: "2024-01-20 02:20:31"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FrolicMe.yml

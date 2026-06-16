@@ -1,0 +1,10 @@
+id: Pornopedia
+name: Pornopedia
+metadata: {}
+version: 9d39812e
+date: "2025-12-03 19:14:09"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Pornopedia.py
+- Pornopedia.yml

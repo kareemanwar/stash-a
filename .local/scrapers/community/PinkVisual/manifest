@@ -1,0 +1,9 @@
+id: PinkVisual
+name: pinkvisual
+metadata: {}
+version: 838d7043
+date: "2022-03-14 19:47:07"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PinkVisual.yml

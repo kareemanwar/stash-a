@@ -1,0 +1,10 @@
+id: MilfVR
+name: MilfVR
+metadata: {}
+version: 1691787d
+date: "2025-09-26 01:41:56"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MilfVR.yml
+- MilfVR.py

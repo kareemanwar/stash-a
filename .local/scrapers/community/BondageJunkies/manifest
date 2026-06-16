@@ -1,0 +1,9 @@
+id: BondageJunkies
+name: BondageJunkies
+metadata: {}
+version: 31228dee
+date: "2026-02-07 20:47:06"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BondageJunkies.yml

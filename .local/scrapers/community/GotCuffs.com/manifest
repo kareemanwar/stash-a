@@ -1,0 +1,9 @@
+id: GotCuffs.com
+name: Got Cuffs
+metadata: {}
+version: 987c9bad
+date: "2025-07-12 00:51:33"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GotCuffs.com.yml

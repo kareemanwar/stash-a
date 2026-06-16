@@ -1,0 +1,11 @@
+id: nfo
+name: NFO Metadata Reader
+metadata: {}
+version: 466718dc
+date: "2025-09-26 23:46:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- nfo.py
+- nfo.yml
+- README.md

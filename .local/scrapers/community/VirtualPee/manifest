@@ -1,0 +1,9 @@
+id: VirtualPee
+name: virtualpee
+metadata: {}
+version: 292b9ac7
+date: "2022-02-21 13:33:24"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VirtualPee.yml

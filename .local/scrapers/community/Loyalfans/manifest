@@ -1,0 +1,11 @@
+id: Loyalfans
+name: Loyalfans
+metadata: {}
+version: db262387
+date: "2025-01-13 16:56:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- requirements.txt
+- Loyalfans.py
+- Loyalfans.yml

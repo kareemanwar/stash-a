@@ -1,0 +1,9 @@
+id: BBWHighway
+name: BBW Highway
+metadata: {}
+version: 063fb807
+date: "2024-04-11 21:37:04"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BBWHighway.yml

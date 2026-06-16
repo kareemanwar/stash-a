@@ -1,0 +1,9 @@
+id: Hustler
+name: Hustler
+metadata: {}
+version: e51d853f
+date: "2023-06-30 11:50:48"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Hustler.yml

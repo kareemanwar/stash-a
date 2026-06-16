@@ -1,0 +1,9 @@
+id: graphis
+name: graphis
+metadata: {}
+version: ef3eb389
+date: "2026-04-22 21:04:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- graphis.yml

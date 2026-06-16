@@ -1,0 +1,9 @@
+id: PinupDollars
+name: Pinupdollars
+metadata: {}
+version: 971cfe8d
+date: "2024-03-01 17:44:53"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PinupDollars.yml

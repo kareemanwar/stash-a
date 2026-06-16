@@ -1,0 +1,9 @@
+id: JacquieEtMichelStars
+name: JacquieEtMichelStars
+metadata: {}
+version: ce12b540
+date: "2024-05-16 16:52:16"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JacquieEtMichelStars.yml

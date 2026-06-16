@@ -1,0 +1,9 @@
+id: DreamTranny
+name: DreamTranny
+metadata: {}
+version: d74e509e
+date: "2025-08-01 16:01:12"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DreamTranny.yml

@@ -1,0 +1,9 @@
+id: Watch4Beauty
+name: Watch4Beauty
+metadata: {}
+version: 38c97417
+date: "2024-07-06 13:59:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Watch4Beauty.yml

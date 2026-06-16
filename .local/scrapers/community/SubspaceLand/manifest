@@ -1,0 +1,9 @@
+id: SubspaceLand
+name: Subspaceland
+metadata: {}
+version: c57195de
+date: "2021-07-12 22:22:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SubspaceLand.yml

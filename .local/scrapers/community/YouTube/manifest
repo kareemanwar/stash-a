@@ -1,0 +1,11 @@
+id: YouTube
+name: YouTube API
+metadata: {}
+version: 6cea1bc0
+date: "2024-08-26 23:40:53"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- requirements.txt
+- YouTube.py
+- YouTube.yml

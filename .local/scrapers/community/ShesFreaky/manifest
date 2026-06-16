@@ -1,0 +1,9 @@
+id: ShesFreaky
+name: ShesFreaky
+metadata: {}
+version: 78f37905
+date: "2024-08-31 00:07:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ShesFreaky.yml

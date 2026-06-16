@@ -1,0 +1,10 @@
+id: NaughtyAmerica
+name: Naughty America
+metadata: {}
+version: 3f426c08
+date: "2026-04-01 07:05:37"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- NaughtyAmerica.yml
+- NaughtyAmerica.py

@@ -1,0 +1,9 @@
+id: TugPass
+name: Tug Pass
+metadata: {}
+version: d13789da
+date: "2025-09-05 16:41:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TugPass.yml

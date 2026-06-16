@@ -1,0 +1,9 @@
+id: GloryHoleSwallow
+name: GloryHoleSwallow
+metadata: {}
+version: 4386b995
+date: "2025-06-17 05:55:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- GloryHoleSwallow.yml

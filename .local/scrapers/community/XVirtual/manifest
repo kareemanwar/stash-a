@@ -1,0 +1,9 @@
+id: XVirtual
+name: xVirtual
+metadata: {}
+version: 9c86552b
+date: "2022-11-16 14:30:01"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- XVirtual.yml

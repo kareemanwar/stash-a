@@ -1,0 +1,9 @@
+id: AngeloGodshack
+name: AngeloGodshack
+metadata: {}
+version: f04c3048
+date: "2025-03-31 04:20:36"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AngeloGodshack.yml

@@ -1,0 +1,9 @@
+id: CzechAV
+name: CzechAV
+metadata: {}
+version: 2a93f029
+date: "2026-03-18 16:26:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CzechAV.yml

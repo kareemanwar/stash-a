@@ -1,0 +1,9 @@
+id: PurePass
+name: Pure Pass
+metadata: {}
+version: b39a4922
+date: "2025-07-01 10:45:24"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PurePass.yml

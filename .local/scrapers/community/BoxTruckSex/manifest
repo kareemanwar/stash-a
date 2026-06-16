@@ -1,0 +1,9 @@
+id: BoxTruckSex
+name: BoxTruckSex
+metadata: {}
+version: f470642e
+date: "2020-10-14 19:08:11"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BoxTruckSex.yml

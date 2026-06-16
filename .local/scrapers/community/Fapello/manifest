@@ -1,0 +1,9 @@
+id: Fapello
+name: Fapello
+metadata: {}
+version: 76becd58
+date: "2025-02-26 22:40:38"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Fapello.yml

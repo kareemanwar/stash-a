@@ -1,0 +1,9 @@
+id: Anime-DB
+name: Anime-DB
+metadata: {}
+version: 2c5a687d
+date: "2023-02-25 23:42:56"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Anime-DB.yml

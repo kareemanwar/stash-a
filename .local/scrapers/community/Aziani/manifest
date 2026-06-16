@@ -1,0 +1,9 @@
+id: Aziani
+name: Aziani
+metadata: {}
+version: ebb398a9
+date: "2025-06-08 12:49:06"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Aziani.yml

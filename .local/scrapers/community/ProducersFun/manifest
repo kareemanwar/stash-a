@@ -1,0 +1,9 @@
+id: ProducersFun
+name: Producers Fun
+metadata: {}
+version: f0652216
+date: "2025-04-28 00:38:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ProducersFun.yml

@@ -1,0 +1,9 @@
+id: DLsite
+name: DLsite
+metadata: {}
+version: 0a9ad0ca
+date: "2022-06-20 23:26:48"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DLsite.yml

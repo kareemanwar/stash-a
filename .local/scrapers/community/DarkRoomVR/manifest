@@ -1,0 +1,9 @@
+id: DarkRoomVR
+name: DarkRoomVR
+metadata: {}
+version: 6e4179b7
+date: "2024-09-10 20:21:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- DarkRoomVR.yml

@@ -1,0 +1,11 @@
+id: ShokoAPI
+name: ShokoAPI
+metadata: {}
+version: f92ab54b
+date: "2025-01-25 22:48:57"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ShokoAPI.yml
+- ShokoAPI.py
+- config.py

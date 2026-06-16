@@ -1,0 +1,9 @@
+id: Oreno3d
+name: Oreno3d
+metadata: {}
+version: 5ee93a34
+date: "2025-09-17 10:48:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Oreno3d.yml

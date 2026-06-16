@@ -1,0 +1,9 @@
+id: BornToBeBound
+name: BornToBeBound
+metadata: {}
+version: 782f97a6
+date: "2025-05-05 17:31:14"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BornToBeBound.yml

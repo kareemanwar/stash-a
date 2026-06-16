@@ -1,0 +1,9 @@
+id: ElseCinema
+name: ElseCinema
+metadata: {}
+version: b86f973e
+date: "2025-06-01 19:29:50"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ElseCinema.yml

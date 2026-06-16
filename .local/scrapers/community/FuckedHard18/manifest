@@ -1,0 +1,9 @@
+id: FuckedHard18
+name: FuckedHard18
+metadata: {}
+version: ccd04945
+date: "2021-12-06 11:22:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FuckedHard18.yml

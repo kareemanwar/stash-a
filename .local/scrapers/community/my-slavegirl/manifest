@@ -1,0 +1,9 @@
+id: my-slavegirl
+name: My Slavegirl
+metadata: {}
+version: "77845626"
+date: "2021-07-14 20:55:29"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- my-slavegirl.yml

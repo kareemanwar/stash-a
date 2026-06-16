@@ -1,0 +1,9 @@
+id: 10Musume
+name: 10Musume
+metadata: {}
+version: d99c8c26
+date: "2021-11-14 11:30:04"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- 10Musume.yml

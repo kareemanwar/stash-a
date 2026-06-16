@@ -1,0 +1,9 @@
+id: Femanic
+name: Femanic
+metadata: {}
+version: 5ad18be5
+date: "2021-05-22 20:00:02"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Femanic.yml

@@ -1,0 +1,9 @@
+id: Putalocura
+name: Puta Locura
+metadata: {}
+version: 6b31be9e
+date: "2025-05-23 12:01:23"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Putalocura.yml

@@ -1,0 +1,9 @@
+id: PrimalFetishNetwork
+name: PrimalFetishNetwork
+metadata: {}
+version: b6caeaa8
+date: "2025-07-25 23:02:40"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- PrimalFetishNetwork.yml

@@ -1,0 +1,9 @@
+id: JavDatabase
+name: JAVDatabase
+metadata: {}
+version: 492ccb19
+date: "2025-12-03 05:09:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- JavDatabase.yml

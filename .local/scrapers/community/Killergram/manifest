@@ -1,0 +1,9 @@
+id: Killergram
+name: Killergram
+metadata: {}
+version: 72f93872
+date: "2025-11-20 23:12:24"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Killergram.yml

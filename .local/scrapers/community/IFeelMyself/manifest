@@ -1,0 +1,10 @@
+id: IFeelMyself
+name: IFeelMyself
+metadata: {}
+version: ca8d1517
+date: "2024-10-29 14:21:03"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- IFeelMyself.py
+- IFeelMyself.yml

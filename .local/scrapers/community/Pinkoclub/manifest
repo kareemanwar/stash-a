@@ -1,0 +1,9 @@
+id: Pinkoclub
+name: Pinkoclub
+metadata: {}
+version: bdfc3da9
+date: "2025-11-21 15:13:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Pinkoclub.yml

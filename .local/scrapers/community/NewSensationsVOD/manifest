@@ -1,0 +1,9 @@
+id: NewSensationsVOD
+name: NewSensationsVOD
+metadata: {}
+version: 85ea4d70
+date: "2025-12-06 21:55:25"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- NewSensationsVOD.yml

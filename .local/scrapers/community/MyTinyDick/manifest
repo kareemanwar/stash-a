@@ -1,0 +1,9 @@
+id: MyTinyDick
+name: MyTinyDick
+metadata: {}
+version: b37ae8c6
+date: "2025-06-01 21:46:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MyTinyDick.yml

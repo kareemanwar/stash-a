@@ -1,0 +1,9 @@
+id: VRAllure
+name: VR Allure
+metadata: {}
+version: 9b2f2e2d
+date: "2025-12-24 14:35:11"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- VRAllure.yml

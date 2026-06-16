@@ -1,0 +1,9 @@
+id: MoodX
+name: Mood X
+metadata: {}
+version: 42fc4122
+date: "2026-01-21 23:16:31"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MoodX.yml

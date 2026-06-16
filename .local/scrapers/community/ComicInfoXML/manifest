@@ -1,0 +1,10 @@
+id: ComicInfoXML
+name: ComicInfo XML
+metadata: {}
+version: 5426229a
+date: "2024-04-16 03:35:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ComicInfoXML.py
+- ComicInfoXML.yml

@@ -1,0 +1,9 @@
+id: ItsPOV
+name: It's POV
+metadata: {}
+version: cd135f52
+date: "2025-10-28 20:40:27"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- ItsPOV.yml

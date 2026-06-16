@@ -1,0 +1,9 @@
+id: TheFlourish
+name: The Flourish
+metadata: {}
+version: eddc79fa
+date: "2024-04-30 03:34:18"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- TheFlourish.yml

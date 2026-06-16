@@ -1,0 +1,9 @@
+id: OLBMedia
+name: OLBMedia
+metadata: {}
+version: a823d990
+date: "2024-04-19 11:01:44"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- OLBMedia.yml

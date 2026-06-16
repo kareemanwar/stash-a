@@ -1,0 +1,10 @@
+id: Tokyohot
+name: tokyohot
+metadata: {}
+version: c867e034
+date: "2024-08-19 00:19:36"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Tokyohot.py
+- Tokyohot.yml

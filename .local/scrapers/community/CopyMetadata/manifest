@@ -1,0 +1,10 @@
+id: CopyMetadata
+name: Copy Metadata
+metadata: {}
+version: f4144b99
+date: "2024-10-15 17:06:00"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CopyMetadata.py
+- CopyMetadata.yml

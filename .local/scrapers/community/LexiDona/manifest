@@ -1,0 +1,9 @@
+id: LexiDona
+name: LexiDona
+metadata: {}
+version: 6cae8f57
+date: "2021-04-14 18:17:13"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- LexiDona.yml

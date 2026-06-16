@@ -1,0 +1,9 @@
+id: SexMex
+name: SexMex
+metadata: {}
+version: 44893f87
+date: "2025-07-11 21:51:10"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- SexMex.yml

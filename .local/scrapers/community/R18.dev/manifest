@@ -1,0 +1,9 @@
+id: R18.dev
+name: R18.dev (JAV)
+metadata: {}
+version: 43e272c5
+date: "2026-02-21 06:30:46"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- R18.dev.yml

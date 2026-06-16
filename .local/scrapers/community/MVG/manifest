@@ -1,0 +1,9 @@
+id: MVG
+name: MVG
+metadata: {}
+version: 2ba60261
+date: "2024-04-27 14:08:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- MVG.yml

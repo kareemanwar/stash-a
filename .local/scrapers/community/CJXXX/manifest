@@ -1,0 +1,9 @@
+id: CJXXX
+name: CJXXX
+metadata: {}
+version: 4cb1d1e1
+date: "2024-04-08 00:08:17"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CJXXX.yml

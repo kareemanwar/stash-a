@@ -1,0 +1,9 @@
+id: LoveHerFilms
+name: LoveHerFilms
+metadata: {}
+version: 50c3f3f9
+date: "2026-04-05 19:07:39"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- LoveHerFilms.yml

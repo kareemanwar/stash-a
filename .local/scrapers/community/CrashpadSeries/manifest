@@ -1,0 +1,9 @@
+id: CrashpadSeries
+name: CrashpadSeries
+metadata: {}
+version: "49621745"
+date: "2022-03-06 08:48:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- CrashpadSeries.yml

@@ -1,0 +1,9 @@
+id: Voyeurweb
+name: HomeClips
+metadata: {}
+version: 22dfafc4
+date: "2025-02-21 00:44:17"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Voyeurweb.yml

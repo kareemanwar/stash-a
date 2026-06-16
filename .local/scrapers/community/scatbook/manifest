@@ -1,0 +1,9 @@
+id: scatbook
+name: scatbook
+metadata: {}
+version: e2f8429c
+date: "2025-10-28 01:37:54"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- scatbook.yml

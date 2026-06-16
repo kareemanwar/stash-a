@@ -1,0 +1,10 @@
+id: BellesaPlus
+name: BellesaPlus
+metadata: {}
+version: 842007f1
+date: "2025-04-03 01:09:48"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- BellesaPlus.py
+- BellesaPlus.yml

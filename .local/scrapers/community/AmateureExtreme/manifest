@@ -1,0 +1,9 @@
+id: AmateureExtreme
+name: AmateureXtreme
+metadata: {}
+version: e0aa84c1
+date: "2022-09-13 14:12:30"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- AmateureExtreme.yml

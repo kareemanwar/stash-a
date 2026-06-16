@@ -1,0 +1,9 @@
+id: FratX
+name: FratX
+metadata: {}
+version: 2f2ae3bf
+date: "2024-08-16 00:50:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- FratX.yml

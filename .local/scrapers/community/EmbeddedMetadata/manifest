@@ -1,0 +1,13 @@
+id: EmbeddedMetadata
+name: EmbeddedMetadata
+metadata: {}
+version: f66d1941
+date: "2026-01-02 22:04:22"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- EmbeddedMetadata.yml
+- .gitignore
+- requirements.txt
+- embedded-metadata.py
+- README.md

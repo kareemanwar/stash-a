@@ -1,0 +1,9 @@
+id: Eroteric
+name: Eroteric
+metadata: {}
+version: 9f32525a
+date: "2026-04-02 03:09:59"
+requires: []
+source_repository: https://stashapp.github.io/CommunityScrapers/stable/index.yml
+files:
+- Eroteric.yml

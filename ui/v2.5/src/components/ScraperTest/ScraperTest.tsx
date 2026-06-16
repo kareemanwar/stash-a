@@ -35,10 +35,13 @@ const LIST_SCRAPERS = gql`
 `;
 
 const SCRAPE_SCENE_WITH_SELECTED_SCRAPER = gql`
-  query ScraperTestScrapeScene($scraperID: ID!, $url: String!) {
+  query ScraperTestScrapeScene(
+    $scraperID: ID!
+    $sceneInput: ScrapedSceneInput!
+  ) {
     scrapeSingleScene(
       source: { scraper_id: $scraperID }
-      input: { scene_input: { urls: [$url] } }
+      input: { scene_input: $sceneInput }
     ) {
       title
       code
@@ -63,7 +66,6 @@ const SCRAPE_SCENE_WITH_SELECTED_SCRAPER = gql`
       groups {
         stored_id
         name
-        remote_site_id
       }
       tags {
         stored_id
@@ -235,7 +237,9 @@ export const ScraperTest: React.FC = () => {
         query: SCRAPE_SCENE_WITH_SELECTED_SCRAPER,
         variables: {
           scraperID: selectedScraper.id,
-          url: url.trim(),
+          sceneInput: {
+            urls: [url.trim()],
+          },
         },
         fetchPolicy: "network-only",
       });

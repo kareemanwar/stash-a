@@ -220,9 +220,13 @@ export const MainNavbar: React.FC = () => {
     );
   }, [configuration]);
 
+  const showScraperTestTab =
+    configuration?.ui?.kOptions?.showScraperTestTab ?? true;
+
   const visibleMenuItems = useMemo(
-    () => [...menuItems, scraperTestMenuItem],
-    [menuItems]
+    () =>
+      showScraperTestTab ? [...menuItems, scraperTestMenuItem] : menuItems,
+    [menuItems, showScraperTestTab]
   );
 
   // react-bootstrap typing bug

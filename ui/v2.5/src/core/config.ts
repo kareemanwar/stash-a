@@ -35,6 +35,10 @@ export type DefaultFilters = {
   [P in View]?: SavedFilterDataFragment;
 };
 
+export interface IKOptionsConfig {
+  showScraperTestTab?: boolean;
+}
+
 export type FrontPageContent = ISavedFilterRow | ICustomFilter;
 
 export const defaultMaxOptionsShown = 200;
@@ -56,6 +60,8 @@ export interface IUIConfig {
   abbreviateCounters?: boolean;
 
   ratingSystemOptions?: RatingSystemOptions;
+
+  kOptions?: IKOptionsConfig;
 
   // if true a background image will be display on header
   enableMovieBackgroundImage?: boolean;

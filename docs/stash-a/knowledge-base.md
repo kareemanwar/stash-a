@@ -109,6 +109,19 @@ Findings:
 - XPath scraper outputs map website fields into Stash-native scraped fields such as `Title`, `URL`, `Image`, `Date`, `Details`, `Tags`, and `Studio`.
 - Website extraction should live in scraper logic, not random app handlers.
 
+## Local scraper development folder
+
+Decision:
+
+- Track `.local/scrapers/**` in git for Stash-a scraper development.
+- Continue ignoring all other `.local` runtime state, including config files, databases, logs, generated cache, and downloaded media.
+
+Reasoning:
+
+- `make server-start` runs Stash from `.local`, so the default development scraper path resolves to `.local/scrapers` unless `scrapers_path` is overridden.
+- Keeping development scrapers in that folder lets Stash load them natively while allowing GitHub review and iterative edits.
+- Only scraper source files should be committed there, such as `.yml`, `.yaml`, `.py`, and shared helper modules needed by those scrapers.
+
 ## Scraper Test tab
 
 Goal:

@@ -26,6 +26,7 @@ import {
   faBars,
   faChartColumn,
   faFilm,
+  faFlask,
   faHeart,
   faImage,
   faImages,
@@ -81,6 +82,10 @@ const messages = defineMessages({
   galleries: {
     id: "galleries",
     defaultMessage: "Galleries",
+  },
+  test: {
+    id: "test",
+    defaultMessage: "Test",
   },
   sceneTagger: {
     id: "sceneTagger",
@@ -158,6 +163,13 @@ const allMenuItems: IMenuItem[] = [
     icon: faTag,
     hotkey: "g t",
     userCreatable: true,
+  },
+  {
+    name: "test",
+    message: messages.test,
+    href: "/scraper-test",
+    icon: faFlask,
+    hotkey: "g x",
   },
 ];
 

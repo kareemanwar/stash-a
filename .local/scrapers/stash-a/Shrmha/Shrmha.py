@@ -263,6 +263,9 @@ def scraper_args() -> tuple[str, dict[str, Any]]:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="operation", required=True)
     subparsers.add_parser("scene-by-url").add_argument("--url")
+    fragment_parser = subparsers.add_parser("scene-by-fragment")
+    fragment_parser.add_argument("--url")
+    fragment_parser.add_argument("--urls", nargs="+")
     args = vars(parser.parse_args())
 
     if not sys.stdin.isatty():
@@ -274,13 +277,29 @@ def scraper_args() -> tuple[str, dict[str, Any]]:
     return args.pop("operation"), args
 
 
+def get_url_arg(args: dict[str, Any]) -> str | None:
+    url = args.get("url")
+    if isinstance(url, str) and url:
+        return url
+
+    urls = args.get("urls")
+    if isinstance(urls, list) and urls:
+        first_url = urls[0]
+        if isinstance(first_url, str) and first_url:
+            return first_url
+
+    return None
+
+
 def main() -> None:
     operation, args = scraper_args()
-    if operation == "scene-by-url" and args.get("url"):
-        print(json.dumps(scrape_scene_by_url(args["url"]), ensure_ascii=False))
-        return
+    if operation in {"scene-by-url", "scene-by-fragment"}:
+        url = get_url_arg(args)
+        if url:
+            print(json.dumps(scrape_scene_by_url(url), ensure_ascii=False))
+            return
 
-    print(json.dumps({"error": f"Unsupported operation: {operation}"}), file=sys.stderr)
+    print(json.dumps({"error": f"Unsupported operation or missing URL: {operation}"}), file=sys.stderr)
     sys.exit(1)
 
 

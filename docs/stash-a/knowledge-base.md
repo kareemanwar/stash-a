@@ -59,21 +59,25 @@ Studied files:
 
 - `ui/v2.5/src/App.tsx`
 - `ui/v2.5/src/components/MainNavbar.tsx`
+- `graphql/schema/types/config.graphql`
 
 Findings:
 
 - Main UI pages are lazy-loaded in `App.tsx` and registered in the main React Router `Switch`.
 - Existing routes include `/scenes`, `/images`, `/galleries`, `/performers`, `/tags`, `/studios`, `/groups`, `/stats`, and `/settings`.
 - The top navbar is defined in `MainNavbar.tsx`.
-- Native top-level menu entries use the `allMenuItems` array.
-- Each `allMenuItems` entry has `name`, `message`, `href`, `icon`, `hotkey`, and optional `userCreatable`.
-- New top-level tabs should follow this pattern instead of building a custom nav.
+- Standard top-level menu entries use the menu item array pattern.
+- Each menu item has `name`, `message`, `href`, `icon`, `hotkey`, and optional `userCreatable`.
+- `configuration.interface.menuItems` can contain an ordered list of standard menu items that should be shown.
+- If a new dev-only item is added only to the normal filtered menu list, old saved configs will hide it.
+- Developer-only nav items should be appended after filtering the standard configured menu list unless they should become configurable settings.
 
 Implemented pattern:
 
 - The Scraper Test tab is registered as a lazy component in `App.tsx`.
 - Its route is `/scraper-test`.
-- Its navbar item is added through `MainNavbar.tsx` `allMenuItems` with label `Test`.
+- Its navbar item is appended as a developer menu item after the configured standard menu items.
+- This avoids changing saved user menu config and makes the dev tab visible on existing installs.
 
 ## Scraper architecture
 

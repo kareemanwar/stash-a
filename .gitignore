@@ -63,4 +63,11 @@ node_modules
 /phasher
 dist
 .DS_Store
+
+# Local dev runtime state. Keep configs, databases, logs, generated cache, and
+# other local state out of git, but track the local scraper development folder.
 /.local*
+!/.local/
+/.local/*
+!/.local/scrapers/
+!/.local/scrapers/**

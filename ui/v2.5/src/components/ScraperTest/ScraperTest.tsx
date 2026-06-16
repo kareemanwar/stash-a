@@ -1,6 +1,9 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { gql } from "@apollo/client";
-import { Alert, Button, Card, Col, Form, Row, Spinner } from "react-bootstrap";
+import { Alert, Badge, Button, Card, Col, Form, Row, Spinner } from "react-bootstrap";
+import * as GQL from "src/core/generated-graphql";
+import { SceneScrapeDialog } from "src/components/Scenes/SceneDetails/SceneScrapeDialog";
+import { SceneCard } from "src/components/Scenes/SceneCard";
 import { getClient } from "../../core/StashService";
 
 const contentTypes = [{ label: "Scene", value: "SCENE" }];
@@ -16,31 +19,6 @@ type Scraper = {
   id: string;
   name: string;
   scene?: ScraperSpec | null;
-};
-
-type ScrapedTag = {
-  name: string;
-  stored_id?: string | null;
-  remote_site_id?: string | null;
-};
-
-type ScrapedStudio = {
-  name: string;
-  stored_id?: string | null;
-  urls?: string[] | null;
-  remote_site_id?: string | null;
-};
-
-type ScrapedScene = {
-  title?: string | null;
-  details?: string | null;
-  urls?: string[] | null;
-  date?: string | null;
-  image?: string | null;
-  remote_site_id?: string | null;
-  duration?: number | null;
-  studio?: ScrapedStudio | null;
-  tags?: ScrapedTag[] | null;
 };
 
 const LIST_SCRAPERS = gql`
@@ -63,7 +41,9 @@ const SCRAPE_SCENE_WITH_SELECTED_SCRAPER = gql`
       input: { scene_input: { urls: [$url] } }
     ) {
       title
+      code
       details
+      director
       urls
       date
       image
@@ -73,6 +53,16 @@ const SCRAPE_SCENE_WITH_SELECTED_SCRAPER = gql`
         stored_id
         name
         urls
+        remote_site_id
+      }
+      performers {
+        stored_id
+        name
+        remote_site_id
+      }
+      groups {
+        stored_id
+        name
         remote_site_id
       }
       tags {
@@ -100,6 +90,53 @@ function scraperSupportsURL(scraper: Scraper) {
   return scraper.scene?.supported_scrapes?.includes("URL") ?? false;
 }
 
+function makeVirtualScene(scene: GQL.ScrapedScene): GQL.SlimSceneDataFragment {
+  return {
+    id: "scraper-test-virtual-scene",
+    title: scene.title ?? "",
+    code: scene.code ?? "",
+    details: scene.details ?? "",
+    director: scene.director ?? "",
+    urls: scene.urls ?? [],
+    date: scene.date ?? "",
+    rating100: null,
+    organized: false,
+    o_counter: null,
+    interactive_speed: null,
+    resume_time: null,
+    paths: {
+      screenshot: scene.image ?? "",
+      preview: "",
+      stream: "",
+      webp: "",
+      vtt: "",
+      sprite: "",
+      funscript: "",
+      interactive_heatmap: "",
+    },
+    files: [],
+    studio: scene.studio
+      ? ({
+          id: scene.studio.stored_id ?? "scraper-test-virtual-studio",
+          name: scene.studio.name,
+          image_path: "",
+        } as GQL.StudioDataFragment)
+      : null,
+    tags: (scene.tags ?? []).map((tag, index) =>
+      ({
+        id: tag.stored_id ?? `scraper-test-virtual-tag-${index}`,
+        name: tag.name,
+        aliases: [],
+        image_path: null,
+      } as GQL.TagDataFragment)
+    ),
+    performers: [],
+    groups: [],
+    galleries: [],
+    scene_markers: [],
+  } as unknown as GQL.SlimSceneDataFragment;
+}
+
 export const ScraperTest: React.FC = () => {
   const [url, setURL] = useState("");
   const [contentType, setContentType] = useState(contentTypes[0].value);
@@ -108,8 +145,9 @@ export const ScraperTest: React.FC = () => {
   const [loadingScrapers, setLoadingScrapers] = useState(false);
   const [testing, setTesting] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<ScrapedScene | null>(null);
+  const [result, setResult] = useState<GQL.ScrapedScene | null>(null);
   const [rawResult, setRawResult] = useState<unknown>(null);
+  const [showScrapeDialog, setShowScrapeDialog] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -167,6 +205,11 @@ export const ScraperTest: React.FC = () => {
     [scrapers, selectedScraperID]
   );
 
+  const virtualScene = useMemo(
+    () => (result ? makeVirtualScene(result) : undefined),
+    [result]
+  );
+
   const canTest =
     contentType === "SCENE" &&
     !!url.trim() &&
@@ -183,10 +226,11 @@ export const ScraperTest: React.FC = () => {
     setError(null);
     setResult(null);
     setRawResult(null);
+    setShowScrapeDialog(false);
 
     try {
       const response = await getClient().query<{
-        scrapeSingleScene: ScrapedScene[];
+        scrapeSingleScene: GQL.ScrapedScene[];
       }>({
         query: SCRAPE_SCENE_WITH_SELECTED_SCRAPER,
         variables: {
@@ -199,6 +243,7 @@ export const ScraperTest: React.FC = () => {
       const scene = response.data.scrapeSingleScene?.[0] ?? null;
       setResult(scene);
       setRawResult(response.data);
+      setShowScrapeDialog(!!scene);
 
       if (!scene) {
         setError("Selected scraper returned no scene result.");
@@ -210,8 +255,35 @@ export const ScraperTest: React.FC = () => {
     }
   }
 
+  function handleScrapeDialogClose(appliedScene?: GQL.ScrapedScene) {
+    if (appliedScene && result) {
+      setResult({ ...result, ...appliedScene });
+    }
+
+    setShowScrapeDialog(false);
+  }
+
   return (
     <div className="mt-4">
+      {showScrapeDialog && result && (
+        <SceneScrapeDialog
+          scene={{
+            title: "",
+            urls: [],
+            performer_ids: [],
+            tag_ids: [],
+            groups: [],
+          }}
+          sceneStudio={null}
+          scenePerformers={[]}
+          sceneTags={[]}
+          sceneGroups={[]}
+          scraped={result}
+          endpoint={selectedScraper?.name}
+          onClose={handleScrapeDialogClose}
+        />
+      )}
+
       <Row>
         <Col lg={5} xl={4}>
           <Card>
@@ -236,6 +308,7 @@ export const ScraperTest: React.FC = () => {
                       setContentType(event.currentTarget.value);
                       setResult(null);
                       setRawResult(null);
+                      setShowScrapeDialog(false);
                     }}
                   >
                     {contentTypes.map((type) => (
@@ -256,6 +329,7 @@ export const ScraperTest: React.FC = () => {
                       setSelectedScraperID(event.currentTarget.value);
                       setResult(null);
                       setRawResult(null);
+                      setShowScrapeDialog(false);
                     }}
                   >
                     {scrapers.length === 0 && <option>No scrapers loaded</option>}
@@ -298,6 +372,17 @@ export const ScraperTest: React.FC = () => {
                   )}
                 </Button>
 
+                {result && (
+                  <Button
+                    type="button"
+                    variant="secondary"
+                    className="ml-2"
+                    onClick={() => setShowScrapeDialog(true)}
+                  >
+                    Review native scrape result
+                  </Button>
+                )}
+
                 {selectedScraper && !scraperSupportsFragment(selectedScraper) && (
                   <Form.Text muted className="d-block mt-2">
                     Selected scraper does not support scene fragment scraping. URL
@@ -318,65 +403,66 @@ export const ScraperTest: React.FC = () => {
 
         <Col lg={7} xl={8}>
           <Card className="mb-3">
-            <Card.Header>
-              <h5 className="mb-0">Virtual Scene Preview</h5>
+            <Card.Header className="d-flex align-items-center justify-content-between">
+              <h5 className="mb-0">Virtual Scene</h5>
+              {result && <Badge variant="secondary">Not saved</Badge>}
             </Card.Header>
             <Card.Body>
               {!result && (
                 <p className="text-muted mb-0">
-                  Run a scraper to preview the scraped scene metadata here.
+                  Run a scraper to preview the scraped scene as a temporary Stash
+                  scene entity here.
                 </p>
               )}
 
-              {result && (
-                <Row>
-                  <Col md={4}>
-                    {result.image ? (
-                      <img
-                        className="img-fluid rounded"
-                        src={result.image}
-                        alt={result.title ?? "Scraped scene thumbnail"}
-                      />
-                    ) : (
-                      <div className="text-muted">No thumbnail returned.</div>
-                    )}
-                  </Col>
-                  <Col md={8}>
-                    <dl className="row mb-0">
-                      <dt className="col-sm-3">Title</dt>
-                      <dd className="col-sm-9">{result.title || "—"}</dd>
+              {result && virtualScene && (
+                <>
+                  <Alert variant="info">
+                    This is a virtual scene assembled from the scraper result. It is
+                    not saved to the database.
+                  </Alert>
 
-                      <dt className="col-sm-3">Date</dt>
-                      <dd className="col-sm-9">{result.date || "—"}</dd>
+                  <Row>
+                    <Col md={5} xl={4}>
+                      <SceneCard scene={virtualScene} width={320} />
+                    </Col>
+                    <Col md={7} xl={8}>
+                      <dl className="row mb-0">
+                        <dt className="col-sm-3">Title</dt>
+                        <dd className="col-sm-9">{result.title || "—"}</dd>
 
-                      <dt className="col-sm-3">Studio</dt>
-                      <dd className="col-sm-9">{result.studio?.name || "—"}</dd>
+                        <dt className="col-sm-3">Date</dt>
+                        <dd className="col-sm-9">{result.date || "—"}</dd>
 
-                      <dt className="col-sm-3">Duration</dt>
-                      <dd className="col-sm-9">
-                        {result.duration ? `${result.duration}s` : "—"}
-                      </dd>
+                        <dt className="col-sm-3">Studio</dt>
+                        <dd className="col-sm-9">{result.studio?.name || "—"}</dd>
 
-                      <dt className="col-sm-3">Remote ID</dt>
-                      <dd className="col-sm-9">{result.remote_site_id || "—"}</dd>
+                        <dt className="col-sm-3">Duration</dt>
+                        <dd className="col-sm-9">
+                          {result.duration ? `${result.duration}s` : "—"}
+                        </dd>
 
-                      <dt className="col-sm-3">URLs</dt>
-                      <dd className="col-sm-9">
-                        {result.urls?.length ? result.urls.join(", ") : "—"}
-                      </dd>
+                        <dt className="col-sm-3">Remote ID</dt>
+                        <dd className="col-sm-9">{result.remote_site_id || "—"}</dd>
 
-                      <dt className="col-sm-3">Tags</dt>
-                      <dd className="col-sm-9">
-                        {result.tags?.length
-                          ? result.tags.map((tag) => tag.name).join(", ")
-                          : "—"}
-                      </dd>
+                        <dt className="col-sm-3">URLs</dt>
+                        <dd className="col-sm-9">
+                          {result.urls?.length ? result.urls.join(", ") : "—"}
+                        </dd>
 
-                      <dt className="col-sm-3">Details</dt>
-                      <dd className="col-sm-9">{result.details || "—"}</dd>
-                    </dl>
-                  </Col>
-                </Row>
+                        <dt className="col-sm-3">Tags</dt>
+                        <dd className="col-sm-9">
+                          {result.tags?.length
+                            ? result.tags.map((tag) => tag.name).join(", ")
+                            : "—"}
+                        </dd>
+
+                        <dt className="col-sm-3">Details</dt>
+                        <dd className="col-sm-9">{result.details || "—"}</dd>
+                      </dl>
+                    </Col>
+                  </Row>
+                </>
               )}
             </Card.Body>
           </Card>

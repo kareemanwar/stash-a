@@ -152,3 +152,14 @@ Implementation rules:
 - Reuse `MainNavbar.tsx` menu item pattern.
 - Reuse React Bootstrap/Stash shared component style.
 - Keep the first version intentionally small so future scraper work can iterate on it.
+
+## Stash-a scrapers
+
+### Shrmha
+
+- Local development path: `.local/scrapers/stash-a/Shrmha/`.
+- First implementation is `sceneByURL` only.
+- The scraper returns native `ScrapedScene` fields only: title, urls, date, image, details, studio, tags, and remote_site_id when available.
+- Shrmha is mapped as a native scraped studio, not as a custom `source_type` field.
+- Do not return performers from Shrmha scene pages until a page source has explicit performer data.
+- Duration and direct video URL are not available in the supplied Shrmha page source and should be left unset until studied through embed hosts or another reliable source.

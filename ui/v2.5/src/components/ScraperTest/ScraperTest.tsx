@@ -34,15 +34,9 @@ const LIST_SCRAPERS = gql`
   }
 `;
 
-const SCRAPE_SCENE_WITH_SELECTED_SCRAPER = gql`
-  query ScraperTestScrapeScene(
-    $scraperID: ID!
-    $sceneInput: ScrapedSceneInput!
-  ) {
-    scrapeSingleScene(
-      source: { scraper_id: $scraperID }
-      input: { scene_input: $sceneInput }
-    ) {
+const SCRAPE_SCENE_URL = gql`
+  query ScraperTestScrapeSceneURL($url: String!) {
+    scrapeSceneURL(url: $url) {
       title
       code
       details
@@ -84,12 +78,21 @@ function formatJSON(value: unknown) {
   return JSON.stringify(value, null, 2);
 }
 
-function scraperSupportsFragment(scraper: Scraper) {
-  return scraper.scene?.supported_scrapes?.includes("FRAGMENT") ?? false;
-}
-
 function scraperSupportsURL(scraper: Scraper) {
   return scraper.scene?.supported_scrapes?.includes("URL") ?? false;
+}
+
+function scraperURLPatterns(scraper: Scraper) {
+  return scraper.scene?.urls?.filter(Boolean) ?? [];
+}
+
+function urlLooksSupportedByScraper(scraper: Scraper, url: string) {
+  const patterns = scraperURLPatterns(scraper);
+  if (patterns.length === 0) {
+    return true;
+  }
+
+  return patterns.some((pattern) => url.includes(pattern));
 }
 
 function makeVirtualScene(scene: GQL.ScrapedScene): GQL.SlimSceneDataFragment {
@@ -179,8 +182,8 @@ export const ScraperTest: React.FC = () => {
             return currentID;
           }
 
-          const fragmentScraper = nextScrapers.find(scraperSupportsFragment);
-          return fragmentScraper?.id ?? nextScrapers[0]?.id ?? "";
+          const urlScraper = nextScrapers.find(scraperSupportsURL);
+          return urlScraper?.id ?? nextScrapers[0]?.id ?? "";
         });
       } catch (err) {
         if (!cancelled) {
@@ -212,11 +215,16 @@ export const ScraperTest: React.FC = () => {
     [result]
   );
 
+  const urlSupportedBySelectedScraper = selectedScraper
+    ? urlLooksSupportedByScraper(selectedScraper, url.trim())
+    : false;
+
   const canTest =
     contentType === "SCENE" &&
     !!url.trim() &&
     !!selectedScraper &&
-    scraperSupportsFragment(selectedScraper) &&
+    scraperSupportsURL(selectedScraper) &&
+    urlSupportedBySelectedScraper &&
     !testing;
 
   async function testScraper() {
@@ -232,25 +240,22 @@ export const ScraperTest: React.FC = () => {
 
     try {
       const response = await getClient().query<{
-        scrapeSingleScene: GQL.ScrapedScene[];
+        scrapeSceneURL: GQL.ScrapedScene | null;
       }>({
-        query: SCRAPE_SCENE_WITH_SELECTED_SCRAPER,
+        query: SCRAPE_SCENE_URL,
         variables: {
-          scraperID: selectedScraper.id,
-          sceneInput: {
-            urls: [url.trim()],
-          },
+          url: url.trim(),
         },
         fetchPolicy: "network-only",
       });
 
-      const scene = response.data.scrapeSingleScene?.[0] ?? null;
+      const scene = response.data.scrapeSceneURL ?? null;
       setResult(scene);
       setRawResult(response.data);
       setShowScrapeDialog(!!scene);
 
       if (!scene) {
-        setError("Selected scraper returned no scene result.");
+        setError("No scene result was returned for this URL.");
       }
     } catch (err) {
       setError(err instanceof Error ? err.message : `${err}`);
@@ -296,8 +301,7 @@ export const ScraperTest: React.FC = () => {
             </Card.Header>
             <Card.Body>
               <p className="text-muted">
-                Test a selected native scene scraper against a URL without saving a
-                scene.
+                Test a native scene URL scraper against a URL without saving a scene.
               </p>
 
               {error && <Alert variant="danger">{error}</Alert>}
@@ -355,7 +359,12 @@ export const ScraperTest: React.FC = () => {
                   <Form.Control
                     type="text"
                     value={url}
-                    onChange={(event) => setURL(event.currentTarget.value)}
+                    onChange={(event) => {
+                      setURL(event.currentTarget.value);
+                      setResult(null);
+                      setRawResult(null);
+                      setShowScrapeDialog(false);
+                    }}
                     placeholder="Paste a scene URL to test"
                   />
                 </Form.Group>
@@ -372,7 +381,7 @@ export const ScraperTest: React.FC = () => {
                       Testing
                     </>
                   ) : (
-                    "Test selected scraper"
+                    "Test URL scrape"
                   )}
                 </Button>
 
@@ -387,19 +396,21 @@ export const ScraperTest: React.FC = () => {
                   </Button>
                 )}
 
-                {selectedScraper && !scraperSupportsFragment(selectedScraper) && (
+                {selectedScraper && !scraperSupportsURL(selectedScraper) && (
                   <Form.Text muted className="d-block mt-2">
-                    Selected scraper does not support scene fragment scraping. URL
-                    preview uses the selected scraper through Stash's native fragment
-                    scrape path.
+                    Selected scraper does not support scene URL scraping.
                   </Form.Text>
                 )}
 
-                {selectedScraper && scraperSupportsURL(selectedScraper) && (
-                  <Form.Text muted className="d-block mt-2">
-                    This scraper also supports native URL scraping.
-                  </Form.Text>
-                )}
+                {selectedScraper &&
+                  scraperSupportsURL(selectedScraper) &&
+                  !urlSupportedBySelectedScraper &&
+                  !!url.trim() && (
+                    <Form.Text muted className="d-block mt-2">
+                      URL does not match this scraper's URL patterns:{" "}
+                      {scraperURLPatterns(selectedScraper).join(", ")}
+                    </Form.Text>
+                  )}
               </Form>
             </Card.Body>
           </Card>

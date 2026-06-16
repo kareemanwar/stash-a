@@ -69,6 +69,12 @@ Findings:
 - Each `allMenuItems` entry has `name`, `message`, `href`, `icon`, `hotkey`, and optional `userCreatable`.
 - New top-level tabs should follow this pattern instead of building a custom nav.
 
+Implemented pattern:
+
+- The Scraper Test tab is registered as a lazy component in `App.tsx`.
+- Its route is `/scraper-test`.
+- Its navbar item is added through `MainNavbar.tsx` `allMenuItems` with label `Test`.
+
 ## Scraper architecture
 
 Studied files:
@@ -99,7 +105,7 @@ Findings:
 - XPath scraper outputs map website fields into Stash-native scraped fields such as `Title`, `URL`, `Image`, `Date`, `Details`, `Tags`, and `Studio`.
 - Website extraction should live in scraper logic, not random app handlers.
 
-## Current implementation target: Scraper Test tab
+## Scraper Test tab
 
 Goal:
 
@@ -116,6 +122,12 @@ Initial scope:
 - Output panel for placeholder/raw output.
 - No scraper implementation yet.
 - No backend, REST endpoint, database write, or side storage.
+
+Implemented files:
+
+- `ui/v2.5/src/components/ScraperTest/ScraperTest.tsx`
+- `ui/v2.5/src/App.tsx`
+- `ui/v2.5/src/components/MainNavbar.tsx`
 
 Implementation rules:
 

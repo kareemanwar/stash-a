@@ -26,6 +26,7 @@ import {
   faBars,
   faChartColumn,
   faFilm,
+  faFlask,
   faHeart,
   faImage,
   faImages,
@@ -81,6 +82,10 @@ const messages = defineMessages({
   galleries: {
     id: "galleries",
     defaultMessage: "Galleries",
+  },
+  test: {
+    id: "test",
+    defaultMessage: "Test",
   },
   sceneTagger: {
     id: "sceneTagger",
@@ -161,6 +166,14 @@ const allMenuItems: IMenuItem[] = [
   },
 ];
 
+const scraperTestMenuItem: IMenuItem = {
+  name: "test",
+  message: messages.test,
+  href: "/scraper-test",
+  icon: faFlask,
+  hotkey: "g x",
+};
+
 const newPathsList = allMenuItems
   .filter((item) => item.userCreatable)
   .map((item) => item.href);
@@ -206,6 +219,15 @@ export const MainNavbar: React.FC = () => {
       cfgMenuItems!.includes(menuItem.name)
     );
   }, [configuration]);
+
+  const showScraperTestTab =
+    configuration?.ui?.kOptions?.showScraperTestTab ?? true;
+
+  const visibleMenuItems = useMemo(
+    () =>
+      showScraperTestTab ? [...menuItems, scraperTestMenuItem] : menuItems,
+    [menuItems, showScraperTestTab]
+  );
 
   // react-bootstrap typing bug
   const navbarRef = useRef<HTMLElement | null>(null);
@@ -256,7 +278,7 @@ export const MainNavbar: React.FC = () => {
     Mousetrap.bind("?", () => openManual());
     Mousetrap.bind("g z", () => goto("/settings"));
 
-    menuItems.forEach((item) => {
+    visibleMenuItems.forEach((item) => {
       Mousetrap.bind(item.hotkey, () => goto(item.href));
     });
 
@@ -267,7 +289,7 @@ export const MainNavbar: React.FC = () => {
     return () => {
       Mousetrap.unbind("?");
       Mousetrap.unbind("g z");
-      menuItems.forEach((item) => {
+      visibleMenuItems.forEach((item) => {
         Mousetrap.unbind(item.hotkey);
       });
 
@@ -359,7 +381,7 @@ export const MainNavbar: React.FC = () => {
     >
       <Navbar.Collapse className="bg-dark order-sm-1">
         <MainNavbarMenuItems>
-          {menuItems.map(({ href, icon, message }) => (
+          {visibleMenuItems.map(({ href, icon, message }) => (
             <Nav.Link
               eventKey={href}
               as="div"

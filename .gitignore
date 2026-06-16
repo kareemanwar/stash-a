@@ -27,6 +27,7 @@ ui/login/locales/*
 ####
 # Visual Studio
 ####
+
 /.vs
 
 # User-specific stuff
@@ -63,4 +64,12 @@ node_modules
 /phasher
 dist
 .DS_Store
+
+# Local dev runtime state. Track only Stash-a scraper sources used by this fork.
 /.local*
+!/.local/
+/.local/*
+!/.local/scrapers/
+/.local/scrapers/*
+!/.local/scrapers/stash-a/
+!/.local/scrapers/stash-a/**

@@ -1,0 +1,9 @@
+name: Shrmha
+sceneByURL:
+  - action: script
+    url:
+      - shrmha.com
+    script:
+      - python
+      - Shrmha.py
+      - scene-by-url

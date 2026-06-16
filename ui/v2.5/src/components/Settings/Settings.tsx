@@ -8,6 +8,7 @@ import { useTitleProps } from "src/hooks/title";
 import { SettingsAboutPanel } from "./SettingsAboutPanel";
 import { SettingsConfigurationPanel } from "./SettingsSystemPanel";
 import { SettingsInterfacePanel } from "./SettingsInterfacePanel/SettingsInterfacePanel";
+import { SettingsKOptionsPanel } from "./SettingsKOptionsPanel";
 import { SettingsLogsPanel } from "./SettingsLogsPanel";
 import { SettingsTasksPanel } from "./Tasks/SettingsTasksPanel";
 import { SettingsPluginsPanel } from "./SettingsPluginsPanel";
@@ -25,6 +26,7 @@ const validTabs = [
   "tasks",
   "library",
   "interface",
+  "k-options",
   "security",
   "metadata-providers",
   "services",
@@ -74,6 +76,11 @@ const SettingTabs: React.FC<{ tab: TabKey }> = ({ tab }) => {
                 <Nav.Link eventKey="interface">
                   <FormattedMessage id="config.categories.interface" />
                 </Nav.Link>
+              </LinkContainer>
+            </Nav.Item>
+            <Nav.Item>
+              <LinkContainer to="/settings?tab=k-options">
+                <Nav.Link eventKey="k-options">K-Options</Nav.Link>
               </LinkContainer>
             </Nav.Item>
             <Nav.Item>
@@ -167,6 +174,9 @@ const SettingTabs: React.FC<{ tab: TabKey }> = ({ tab }) => {
             </Tab.Pane>
             <Tab.Pane eventKey="interface">
               <SettingsInterfacePanel />
+            </Tab.Pane>
+            <Tab.Pane eventKey="k-options">
+              <SettingsKOptionsPanel />
             </Tab.Pane>
             <Tab.Pane eventKey="security">
               <SettingsSecurityPanel />

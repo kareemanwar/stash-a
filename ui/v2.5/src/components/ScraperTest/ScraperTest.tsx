@@ -1,76 +1,11 @@
-import React, { useMemo, useState } from "react";
-import {
-  Button,
-  Card,
-  Col,
-  Dropdown,
-  Form,
-  InputGroup,
-  Row,
-} from "react-bootstrap";
-import { faPlayCircle } from "@fortawesome/free-solid-svg-icons";
-import { Icon } from "src/components/Shared/Icon";
+import React, { useState } from "react";
+import { Button, Card, Col, Form, Row } from "react-bootstrap";
 
-type ScraperTestOption = {
-  id: string;
-  label: string;
-  description: string;
-};
-
-const scraperTestOptions: ScraperTestOption[] = [
-  {
-    id: "arabgy-scene-url",
-    label: "Arabgy scene URL",
-    description: "Planned test profile for Arabgy scene URL output.",
-  },
-  {
-    id: "generic-scene-url",
-    label: "Generic scene URL",
-    description: "Generic scene URL test profile for future scraper work.",
-  },
-  {
-    id: "performer-url",
-    label: "Performer URL",
-    description: "Placeholder for performer URL scraper tests.",
-  },
-  {
-    id: "image-gallery-url",
-    label: "Image/Gallery URL",
-    description: "Placeholder for image and gallery URL scraper tests.",
-  },
-];
+const contentTypes = ["Scene", "Performer", "Image", "Gallery"];
 
 export const ScraperTest: React.FC = () => {
-  const [input, setInput] = useState("");
-  const [selectedOptionID, setSelectedOptionID] = useState(
-    scraperTestOptions[0].id
-  );
-  const [output, setOutput] = useState("");
-
-  const selectedOption = useMemo(() => {
-    return (
-      scraperTestOptions.find((option) => option.id === selectedOptionID) ??
-      scraperTestOptions[0]
-    );
-  }, [selectedOptionID]);
-
-  function onRunTest(event: React.FormEvent<HTMLFormElement>) {
-    event.preventDefault();
-
-    setOutput(
-      JSON.stringify(
-        {
-          status: "ready",
-          scraper_test: selectedOption,
-          input,
-          note:
-            "Scraper execution is not wired yet. This tab is UI infrastructure for future scraper development.",
-        },
-        null,
-        2
-      )
-    );
-  }
+  const [url, setURL] = useState("");
+  const [contentType, setContentType] = useState(contentTypes[0]);
 
   return (
     <div className="mt-4">
@@ -82,44 +17,44 @@ export const ScraperTest: React.FC = () => {
             </Card.Header>
             <Card.Body>
               <p className="text-muted">
-                Developer workspace for testing scraper output. This first version
-                only provides the native UI shell: input, scraper selector, run
-                button, and output panel.
+                Developer workspace for wiring and testing native scraper output.
+                No provider-specific scraper is hardcoded here.
               </p>
 
-              <Form onSubmit={onRunTest}>
-                <Form.Group controlId="scraper-test-input">
-                  <Form.Label>Input URL or test text</Form.Label>
-                  <InputGroup>
-                    <Form.Control
-                      type="text"
-                      value={input}
-                      onChange={(event) => setInput(event.currentTarget.value)}
-                      placeholder="Paste a URL or test input"
-                    />
-                    <Dropdown as={InputGroup.Append}>
-                      <Dropdown.Toggle variant="secondary">
-                        {selectedOption.label}
-                      </Dropdown.Toggle>
-                      <Dropdown.Menu>
-                        {scraperTestOptions.map((option) => (
-                          <Dropdown.Item
-                            key={option.id}
-                            active={option.id === selectedOptionID}
-                            onClick={() => setSelectedOptionID(option.id)}
-                          >
-                            {option.label}
-                          </Dropdown.Item>
-                        ))}
-                      </Dropdown.Menu>
-                    </Dropdown>
-                  </InputGroup>
-                  <Form.Text muted>{selectedOption.description}</Form.Text>
+              <Form>
+                <Form.Group controlId="scraper-test-url">
+                  <Form.Label>URL</Form.Label>
+                  <Form.Control
+                    type="text"
+                    value={url}
+                    onChange={(event) => setURL(event.currentTarget.value)}
+                    placeholder="Paste a URL to test"
+                  />
                 </Form.Group>
 
-                <Button type="submit" variant="primary">
-                  <Icon icon={faPlayCircle} /> Run Test
+                <Form.Group controlId="scraper-test-content-type">
+                  <Form.Label>Content type</Form.Label>
+                  <Form.Control
+                    as="select"
+                    value={contentType}
+                    onChange={(event) =>
+                      setContentType(event.currentTarget.value)
+                    }
+                  >
+                    {contentTypes.map((type) => (
+                      <option key={type} value={type}>
+                        {type}
+                      </option>
+                    ))}
+                  </Form.Control>
+                </Form.Group>
+
+                <Button type="button" variant="primary" disabled>
+                  Test
                 </Button>
+                <Form.Text muted className="d-block mt-2">
+                  Scraper execution is not wired yet.
+                </Form.Text>
               </Form>
             </Card.Body>
           </Card>
@@ -135,8 +70,8 @@ export const ScraperTest: React.FC = () => {
                 as="textarea"
                 rows={18}
                 readOnly
-                value={output}
-                placeholder="Test output will appear here."
+                value=""
+                placeholder="Scraper output will appear here."
               />
             </Card.Body>
           </Card>

@@ -6,6 +6,7 @@ import (
 )
 
 var scrapedSceneOnlineMedia sync.Map
+var scrapedSceneOnlineMediaByKey sync.Map
 
 // SetScrapedSceneOnlineMedia attaches raw online media scrape data to a scraped scene.
 // This is used only as transient scrape transport so script scrapers can return
@@ -19,6 +20,10 @@ func SetScrapedSceneOnlineMedia(scene *ScrapedScene, raw json.RawMessage) {
 	copied := make(json.RawMessage, len(raw))
 	copy(copied, raw)
 	scrapedSceneOnlineMedia.Store(scene, copied)
+
+	for _, key := range scrapedSceneOnlineMediaKeys(scene) {
+		scrapedSceneOnlineMediaByKey.Store(key, copied)
+	}
 }
 
 // GetScrapedSceneOnlineMedia returns raw online media scrape data previously
@@ -28,13 +33,19 @@ func GetScrapedSceneOnlineMedia(scene *ScrapedScene) (json.RawMessage, bool) {
 		return nil, false
 	}
 
-	value, ok := scrapedSceneOnlineMedia.Load(scene)
-	if !ok {
-		return nil, false
+	if value, ok := scrapedSceneOnlineMedia.Load(scene); ok {
+		raw, ok := value.(json.RawMessage)
+		return raw, ok
 	}
 
-	raw, ok := value.(json.RawMessage)
-	return raw, ok
+	for _, key := range scrapedSceneOnlineMediaKeys(scene) {
+		if value, ok := scrapedSceneOnlineMediaByKey.Load(key); ok {
+			raw, ok := value.(json.RawMessage)
+			return raw, ok
+		}
+	}
+
+	return nil, false
 }
 
 // CopyScrapedSceneOnlineMedia copies transient online media data when scraped
@@ -102,6 +113,41 @@ func attachSingleScrapedSceneOnlineMedia(scene *ScrapedScene, data []byte) error
 
 	SetScrapedSceneOnlineMedia(scene, raw.OnlineMedia)
 	return nil
+}
+
+func scrapedSceneOnlineMediaKeys(scene *ScrapedScene) []string {
+	if scene == nil {
+		return nil
+	}
+
+	payload, err := json.Marshal(scene)
+	if err != nil {
+		return nil
+	}
+
+	var probe struct {
+		URL          *string  `json:"url"`
+		URLs         []string `json:"urls"`
+		RemoteSiteID *string  `json:"remote_site_id"`
+	}
+	if err := json.Unmarshal(payload, &probe); err != nil {
+		return nil
+	}
+
+	keys := make([]string, 0, len(probe.URLs)+2)
+	for _, url := range probe.URLs {
+		if url != "" {
+			keys = append(keys, "url:"+url)
+		}
+	}
+	if probe.URL != nil && *probe.URL != "" {
+		keys = append(keys, "url:"+*probe.URL)
+	}
+	if probe.RemoteSiteID != nil && *probe.RemoteSiteID != "" {
+		keys = append(keys, "remote_site_id:"+*probe.RemoteSiteID)
+	}
+
+	return keys
 }
 
 // UnmarshalJSON preserves the upstream ScrapedScene shape while accepting the

@@ -64,7 +64,11 @@ interface IProps {
   initialCoverImage?: string;
   isNew?: boolean;
   isVisible: boolean;
-  onSubmit: (input: GQL.SceneCreateInput, andNew?: boolean) => Promise<void>;
+  onSubmit: (
+    input: GQL.SceneCreateInput,
+    andNew?: boolean,
+    onlineSourceURL?: string
+  ) => Promise<void>;
   onDelete?: () => void;
 }
 
@@ -187,6 +191,8 @@ export const SceneEditPanel: React.FC<IProps> = ({
   type InputValues = yup.InferType<typeof schema>;
 
   const [customFieldsError, setCustomFieldsError] = useState<string>();
+  const [createOnlineScene, setCreateOnlineScene] = useState(false);
+  const [onlineSourceURL, setOnlineSourceURL] = useState("");
 
   function submit(values: InputValues) {
     const input = {
@@ -207,6 +213,13 @@ export const SceneEditPanel: React.FC<IProps> = ({
     scene.tags,
     (ids) => formik.setFieldValue("tag_ids", ids)
   );
+
+  const onlineSourceURLForSubmit =
+    isNew && createOnlineScene ? onlineSourceURL.trim() : undefined;
+  const saveDisabled =
+    !isEqual(formik.errors, {}) ||
+    customFieldsError !== undefined ||
+    (isNew && createOnlineScene && !onlineSourceURLForSubmit);
 
   const coverImagePreview = useMemo(() => {
     const sceneImage = scene.paths?.screenshot;
@@ -296,8 +309,11 @@ export const SceneEditPanel: React.FC<IProps> = ({
   async function onSave(input: InputValues, andNew?: boolean) {
     setIsLoading(true);
     try {
-      await onSubmit(input, andNew);
+      await onSubmit(input, andNew, onlineSourceURLForSubmit);
       formik.resetForm();
+      if (andNew && createOnlineScene) {
+        setOnlineSourceURL("");
+      }
     } catch (e) {
       Toast.error(e);
     }
@@ -748,10 +764,57 @@ export const SceneEditPanel: React.FC<IProps> = ({
     return renderInputField("details", "textarea", "details", props);
   }
 
+  function renderOnlineCreateFields() {
+    if (!isNew) {
+      return null;
+    }
+
+    return (
+      <>
+        <Form.Group as={Row} controlId="scene-create-online">
+          <Form.Label column sm={3}>
+            Online
+          </Form.Label>
+          <Col sm={9}>
+            <Form.Check
+              type="checkbox"
+              id="scene-create-online-checkbox"
+              label="Create online scene from source URL"
+              checked={createOnlineScene}
+              onChange={(event) => {
+                const checked = event.currentTarget.checked;
+                setCreateOnlineScene(checked);
+                if (checked && !onlineSourceURL && formik.values.urls[0]) {
+                  setOnlineSourceURL(formik.values.urls[0]);
+                }
+              }}
+            />
+          </Col>
+        </Form.Group>
+
+        {createOnlineScene && (
+          <Form.Group as={Row} controlId="scene-create-online-source-url">
+            <Form.Label column sm={3}>
+              Source URL
+            </Form.Label>
+            <Col sm={9}>
+              <Form.Control
+                type="text"
+                value={onlineSourceURL}
+                onChange={(event) => setOnlineSourceURL(event.currentTarget.value)}
+                placeholder="Paste a scene URL supported by a URL scraper"
+              />
+            </Col>
+          </Form.Group>
+        )}
+      </>
+    );
+  }
+
   return (
     <div id="scene-edit-details">
       <Prompt
-        when={formik.dirty}
+        when={formik.dirty || (isNew && createOnlineScene && !!onlineSourceURL)}
         message={intl.formatMessage({ id: "dialogs.unsaved_changes" })}
       />
 
@@ -779,9 +842,7 @@ export const SceneEditPanel: React.FC<IProps> = ({
                 id="scene-save-split-button"
                 className="edit-button"
                 variant="primary"
-                disabled={
-                  !isEqual(formik.errors, {}) || customFieldsError !== undefined
-                }
+                disabled={saveDisabled}
                 title={intl.formatMessage({ id: "actions.save" })}
                 onClick={() => formik.submitForm()}
               >
@@ -838,6 +899,7 @@ export const SceneEditPanel: React.FC<IProps> = ({
         <Row className="form-container px-3">
           <Col lg={7} xl={12}>
             {renderInputField("title")}
+            {renderOnlineCreateFields()}
             {renderInputField("code", "text", "scene_code")}
 
             {renderURLListField(

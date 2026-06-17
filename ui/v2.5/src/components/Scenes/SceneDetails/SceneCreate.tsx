@@ -326,7 +326,7 @@ const SceneCreate: React.FC = () => {
     return scrapedScene;
   }
 
-  async function createScene(input: GQL.SceneCreateInput, andNew?: boolean) {
+  async function createScene(input: GQL.SceneCreateInput) {
     const fileID = query.get("file_id") ?? undefined;
     const result = await mutateCreateScene({
       ...input,
@@ -338,6 +338,10 @@ const SceneCreate: React.FC = () => {
       throw new Error("Scene creation did not return a scene id.");
     }
 
+    return sceneID;
+  }
+
+  function onCreateSuccess(sceneID: string, andNew?: boolean) {
     if (!andNew) {
       history.push(`/scenes/${sceneID}`);
     }
@@ -348,8 +352,6 @@ const SceneCreate: React.FC = () => {
         { entity: intl.formatMessage({ id: "scene" }).toLocaleLowerCase() }
       )
     );
-
-    return sceneID;
   }
 
   async function onSave(
@@ -358,7 +360,8 @@ const SceneCreate: React.FC = () => {
     onlineSourceURL?: string
   ) {
     if (!onlineSourceURL) {
-      await createScene(input, andNew);
+      const sceneID = await createScene(input);
+      onCreateSuccess(sceneID, andNew);
       return;
     }
 
@@ -367,7 +370,7 @@ const SceneCreate: React.FC = () => {
       buildScrapedSceneInput(scrapedScene, onlineSourceURL),
       input
     );
-    const sceneID = await createScene(mergedInput, andNew);
+    const sceneID = await createScene(mergedInput);
 
     await getClient().mutate({
       mutation: SAVE_ONLINE_MEDIA,
@@ -380,6 +383,8 @@ const SceneCreate: React.FC = () => {
         ),
       },
     });
+
+    onCreateSuccess(sceneID, andNew);
   }
 
   return (

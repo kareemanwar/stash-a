@@ -122,15 +122,21 @@ def is_unavailable_player_document(document: str) -> bool:
     return any(marker in text for marker in UNAVAILABLE_PLAYER_MARKERS)
 
 
-def fetch_embed_player_document(embed_url: str, page_url: str) -> str | None:
+def fetch_embed_player_document(embed_url: str, page_url: str) -> tuple[str | None, bool]:
+    """Return the player document and whether the embed is confirmed dead.
+
+    A network or extraction failure is not the same as a dead server: keep those
+    embeds as browser fallbacks. Only hide embeds that explicitly say the file is
+    deleted/expired/unavailable.
+    """
     parsed = urlparse(embed_url)
     if not parsed.scheme or not parsed.netloc:
-        return None
+        return None, False
 
     origin = f"{parsed.scheme}://{parsed.netloc}"
     file_code = parsed.path.rstrip("/").split("/")[-1]
     if not file_code:
-        return None
+        return None, False
 
     opener = build_opener(HTTPCookieProcessor(CookieJar()))
 
@@ -149,10 +155,10 @@ def fetch_embed_player_document(embed_url: str, page_url: str) -> str | None:
                 errors="replace",
             )
     except Exception:
-        return None
+        return None, False
 
     if is_unavailable_player_document(embed_document):
-        return None
+        return None, True
 
     data = urlencode(
         {
@@ -181,12 +187,12 @@ def fetch_embed_player_document(embed_url: str, page_url: str) -> str | None:
             charset = response.headers.get_content_charset() or "utf-8"
             player_document = response.read().decode(charset, errors="replace")
     except Exception:
-        return None
+        return None, False
 
     if is_unavailable_player_document(player_document):
-        return None
+        return None, True
 
-    return player_document
+    return player_document, False
 
 
 def fetch_text(url: str, referer: str) -> str | None:
@@ -322,24 +328,26 @@ def enhance_online_media(media: dict[str, Any], page_url: str) -> dict[str, Any]
         if not isinstance(embed_url, str) or not embed_url:
             continue
 
-        player_document = fetch_embed_player_document(embed_url, page_url)
-        if not player_document:
+        player_document, confirmed_unavailable = fetch_embed_player_document(embed_url, page_url)
+        if confirmed_unavailable:
             unavailable_streams.append(stream)
+            continue
+
+        # If the server did not explicitly say the file is unavailable, keep it
+        # as an iframe fallback even when the direct extraction/probe fails.
+        available_embed_streams.append(stream)
+
+        if not player_document:
             continue
 
         direct_url, parsed_duration, quality_height = extract_player_metadata(player_document, embed_url)
         if parsed_duration and not duration_seconds:
             duration_seconds = parsed_duration
 
-        if not direct_url:
-            unavailable_streams.append(stream)
-            continue
-
-        if direct_url in seen_direct_urls:
+        if not direct_url or direct_url in seen_direct_urls:
             continue
         seen_direct_urls.add(direct_url)
 
-        available_embed_streams.append(stream)
         available_direct_streams.append(
             (
                 quality_height or 0,
@@ -356,11 +364,15 @@ def enhance_online_media(media: dict[str, Any], page_url: str) -> dict[str, Any]
 
     if available_direct_streams:
         available_direct_streams.sort(key=lambda item: (-item[0], item[1]))
-        streams = [stream for _, _, stream in available_direct_streams]
+        direct_streams = [stream for _, _, stream in available_direct_streams]
+        fallback_streams = available_embed_streams or [
+            stream for stream in streams if isinstance(stream, dict) and stream not in unavailable_streams
+        ]
+        streams = direct_streams + fallback_streams
         reset_stream_order(streams)
         media["streams"] = streams
-        media["direct_video_url"] = streams[0]["url"]
-        media["embed_url"] = available_embed_streams[0].get("url") if available_embed_streams else media.get("embed_url")
+        media["direct_video_url"] = direct_streams[0]["url"]
+        media["embed_url"] = fallback_streams[0].get("url") if fallback_streams else media.get("embed_url")
     else:
         fallback_streams = available_embed_streams or [
             stream for stream in streams if isinstance(stream, dict) and stream not in unavailable_streams

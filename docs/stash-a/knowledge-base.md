@@ -169,6 +169,8 @@ Implemented UI flow:
 - When the checkbox is enabled, saving runs the native URL scraper, creates a native Scene from scraped fields plus any user-entered overrides, saves online media/streams, then opens the scene.
 - `ScenePlayer` is patched only for fileless scenes with online media. Local-file scenes continue to use the native Stash player.
 - Online scene card UI should avoid covering native selection controls; badges belong in card details, while duration overlays should follow the local Scene card overlay pattern.
+- Online provider view counts belong in the card text/details area, not on thumbnail overlays.
+- Fileless online scene pages expose an `Online` tab next to the native scene tabs. The tab displays `scene_online_media`, `scene_online_streams`, provider view count, duration, URLs, timestamps, and raw metadata through GraphQL.
 
 ## Stash-a scrapers
 

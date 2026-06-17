@@ -64,6 +64,9 @@ func (r *Resolver) Query() QueryResolver {
 func (r *Resolver) Scene() SceneResolver {
 	return &sceneResolver{r}
 }
+func (r *Resolver) ScrapedScene() ScrapedSceneResolver {
+	return &scrapedSceneResolver{r}
+}
 func (r *Resolver) Image() ImageResolver {
 	return &imageResolver{r}
 }
@@ -120,6 +123,7 @@ type galleryResolver struct{ *Resolver }
 type galleryChapterResolver struct{ *Resolver }
 type performerResolver struct{ *Resolver }
 type sceneResolver struct{ *Resolver }
+type scrapedSceneResolver struct{ *Resolver }
 type sceneMarkerResolver struct{ *Resolver }
 type imageResolver struct{ *Resolver }
 type studioResolver struct{ *Resolver }
@@ -198,99 +202,42 @@ func (r *queryResolver) Stats(ctx context.Context) (*StatsResultType, error) {
 		tagQB := repo.Tag
 
 		// embrace the error
+		ret.SceneCount, _ = sceneQB.Count(ctx)
+		ret.SceneSize, _ = sceneQB.Size(ctx)
+		ret.ScenesDuration, _ = sceneQB.Duration(ctx)
 
-		scenesCount, err := sceneQB.Count(ctx)
-		if err != nil {
-			return err
-		}
+		ret.ImageCount, _ = imageQB.Count(ctx)
+		ret.ImageSize, _ = imageQB.Size(ctx)
 
-		scenesSize, err := sceneQB.Size(ctx)
-		if err != nil {
-			return err
-		}
+		ret.GalleryCount, _ = galleryQB.Count(ctx)
+		ret.PerformerCount, _ = performerQB.Count(ctx)
+		ret.StudioCount, _ = studioQB.Count(ctx)
+		ret.MovieCount, _ = movieQB.Count(ctx)
+		ret.GroupCount = ret.MovieCount
+		ret.TagCount, _ = tagQB.Count(ctx)
 
-		scenesDuration, err := sceneQB.Duration(ctx)
-		if err != nil {
-			return err
-		}
+		ret.TotalOCount, _ = repo.CountTotalO(ctx)
+		ret.TotalPlayDuration, _ = repo.SumPlayDuration(ctx)
+		ret.TotalPlayCount, _ = repo.SumPlayCount(ctx)
 
-		imageCount, err := imageQB.Count(ctx)
-		if err != nil {
-			return err
-		}
+		ret.DatabaseSchema = strconv.Itoa(int(repo.DatabaseSchemaVersion(ctx)))
+		ret.DatabasePath = repo.DatabasePath(ctx)
+		ret.BackupDirectoryPath = repo.BackupDirectoryPath(ctx)
+		ret.BlobsPath = repo.BlobsPath(ctx)
+		ret.GeneratedPath = repo.GeneratedPath(ctx)
+		ret.MetadataPath = repo.MetadataPath(ctx)
+		ret.ScrapersPath = repo.ScrapersPath(ctx)
+		ret.PluginsPath = repo.PluginsPath(ctx)
+		ret.CachePath = repo.CachePath(ctx)
 
-		imageSize, err := imageQB.Size(ctx)
-		if err != nil {
-			return err
-		}
+		ret.AppSchema = int(repo.AppSchemaVersion(ctx))
+		ret.Status = build.GetBuildStatus()
+		ret.TypicalTasks = []*TaskStatusType{}
 
-		galleryCount, err := galleryQB.Count(ctx)
-		if err != nil {
-			return err
+		for _, s := range manager.JobManager.GetAllStatuses() {
+			ret.TypicalTasks = append(ret.TypicalTasks, makeTaskStatus(s))
 		}
-
-		performersCount, err := performerQB.Count(ctx)
-		if err != nil {
-			return err
-		}
-
-		studiosCount, err := studioQB.Count(ctx)
-		if err != nil {
-			return err
-		}
-
-		groupsCount, err := movieQB.Count(ctx)
-		if err != nil {
-			return err
-		}
-
-		tagsCount, err := tagQB.Count(ctx)
-		if err != nil {
-			return err
-		}
-
-		scenesTotalOCount, err := sceneQB.GetAllOCount(ctx)
-		if err != nil {
-			return err
-		}
-		imagesTotalOCount, err := imageQB.OCount(ctx)
-		if err != nil {
-			return err
-		}
-		totalOCount := scenesTotalOCount + imagesTotalOCount
-
-		totalPlayDuration, err := sceneQB.PlayDuration(ctx)
-		if err != nil {
-			return err
-		}
-
-		totalPlayCount, err := sceneQB.CountAllViews(ctx)
-		if err != nil {
-			return err
-		}
-
-		uniqueScenePlayCount, err := sceneQB.CountUniqueViews(ctx)
-		if err != nil {
-			return err
-		}
-
-		ret = StatsResultType{
-			SceneCount:        scenesCount,
-			ScenesSize:        scenesSize,
-			ScenesDuration:    scenesDuration,
-			ImageCount:        imageCount,
-			ImagesSize:        imageSize,
-			GalleryCount:      galleryCount,
-			PerformerCount:    performersCount,
-			StudioCount:       studiosCount,
-			GroupCount:        groupsCount,
-			MovieCount:        groupsCount,
-			TagCount:          tagsCount,
-			TotalOCount:       totalOCount,
-			TotalPlayDuration: totalPlayDuration,
-			TotalPlayCount:    totalPlayCount,
-			ScenesPlayed:      uniqueScenePlayCount,
-		}
+		sort.Slice(ret.TypicalTasks, func(i, j int) bool { return ret.TypicalTasks[i].Name < ret.TypicalTasks[j].Name })
 
 		return nil
 	}); err != nil {
@@ -298,136 +245,4 @@ func (r *queryResolver) Stats(ctx context.Context) (*StatsResultType, error) {
 	}
 
 	return &ret, nil
-}
-
-func (r *queryResolver) Version(ctx context.Context) (*Version, error) {
-	version, hash, buildtime := build.Version()
-
-	return &Version{
-		Version:   &version,
-		Hash:      hash,
-		BuildTime: buildtime,
-	}, nil
-}
-
-func (r *queryResolver) Latestversion(ctx context.Context) (*LatestVersion, error) {
-	latestRelease, err := GetLatestRelease(ctx)
-	if err != nil {
-		if !errors.Is(err, context.Canceled) {
-			logger.Errorf("Error while retrieving latest version: %v", err)
-		}
-		return nil, err
-	}
-	logger.Infof("Retrieved latest version: %s (%s)", latestRelease.Version, latestRelease.ShortHash)
-
-	return &LatestVersion{
-		Version:     latestRelease.Version,
-		Shorthash:   latestRelease.ShortHash,
-		ReleaseDate: latestRelease.Date,
-		URL:         latestRelease.Url,
-	}, nil
-}
-
-func (r *mutationResolver) ExecSQL(ctx context.Context, sql string, args []interface{}) (*SQLExecResult, error) {
-	var rowsAffected *int64
-	var lastInsertID *int64
-
-	db := manager.GetInstance().Database
-	if err := r.withTxn(ctx, func(ctx context.Context) error {
-		var err error
-		rowsAffected, lastInsertID, err = db.ExecSQL(ctx, sql, args)
-		return err
-	}); err != nil {
-		return nil, err
-	}
-
-	return &SQLExecResult{
-		RowsAffected: rowsAffected,
-		LastInsertID: lastInsertID,
-	}, nil
-}
-
-func (r *mutationResolver) QuerySQL(ctx context.Context, sql string, args []interface{}) (*SQLQueryResult, error) {
-	var cols []string
-	var rows [][]interface{}
-
-	db := manager.GetInstance().Database
-	if err := r.withTxn(ctx, func(ctx context.Context) error {
-		var err error
-		cols, rows, err = db.QuerySQL(ctx, sql, args)
-		return err
-	}); err != nil {
-		return nil, err
-	}
-
-	return &SQLQueryResult{
-		Columns: cols,
-		Rows:    rows,
-	}, nil
-}
-
-// Get scene marker tags which show up under the video.
-func (r *queryResolver) SceneMarkerTags(ctx context.Context, scene_id string) ([]*SceneMarkerTag, error) {
-	sceneID, err := strconv.Atoi(scene_id)
-	if err != nil {
-		return nil, err
-	}
-
-	var keys []int
-	tags := make(map[int]*SceneMarkerTag)
-
-	if err := r.withReadTxn(ctx, func(ctx context.Context) error {
-		sceneMarkers, err := r.repository.SceneMarker.FindBySceneID(ctx, sceneID)
-		if err != nil {
-			return err
-		}
-
-		tqb := r.repository.Tag
-		for _, sceneMarker := range sceneMarkers {
-			markerPrimaryTag, err := tqb.Find(ctx, sceneMarker.PrimaryTagID)
-			if err != nil {
-				return err
-			}
-
-			if markerPrimaryTag == nil {
-				return fmt.Errorf("tag with id %d not found", sceneMarker.PrimaryTagID)
-			}
-
-			_, hasKey := tags[markerPrimaryTag.ID]
-			if !hasKey {
-				sceneMarkerTag := &SceneMarkerTag{Tag: markerPrimaryTag}
-				tags[markerPrimaryTag.ID] = sceneMarkerTag
-				keys = append(keys, markerPrimaryTag.ID)
-			}
-			tags[markerPrimaryTag.ID].SceneMarkers = append(tags[markerPrimaryTag.ID].SceneMarkers, sceneMarker)
-		}
-
-		return nil
-	}); err != nil {
-		return nil, err
-	}
-
-	// Sort so that primary tags that show up earlier in the video are first.
-	sort.Slice(keys, func(i, j int) bool {
-		a := tags[keys[i]]
-		b := tags[keys[j]]
-		return a.SceneMarkers[0].Seconds < b.SceneMarkers[0].Seconds
-	})
-
-	var result []*SceneMarkerTag
-	for _, key := range keys {
-		result = append(result, tags[key])
-	}
-
-	return result, nil
-}
-
-func firstError(errs []error) error {
-	for _, e := range errs {
-		if e != nil {
-			return e
-		}
-	}
-
-	return nil
 }

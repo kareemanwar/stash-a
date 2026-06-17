@@ -150,6 +150,7 @@ const allMenuItems: IMenuItem[] = [
     href: "/sources",
     icon: faVideo,
     hotkey: "g o",
+    userCreatable: true,
   },
   {
     name: "performers",

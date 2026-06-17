@@ -1,5 +1,6 @@
 import React, { useEffect, useMemo, useRef } from "react";
-import { Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
+import { gql, useQuery } from "@apollo/client";
+import { Badge, Button, ButtonGroup, OverlayTrigger, Tooltip } from "react-bootstrap";
 import { useHistory } from "react-router-dom";
 import cx from "classnames";
 import * as GQL from "src/core/generated-graphql";
@@ -114,6 +115,48 @@ interface ISceneCardProps {
   fromGroupId?: string;
 }
 
+const FIND_SCENE_ONLINE_CARD_BADGE = gql`
+  query FindSceneOnlineCardBadge($id: ID!) {
+    findScene(id: $id) {
+      id
+      online_media {
+        source_slug
+      }
+    }
+  }
+`;
+
+const OnlineSceneCardBadge: React.FC<{ disabled?: boolean; sceneID: string }> = ({
+  disabled,
+  sceneID,
+}) => {
+  const { data } = useQuery<
+    { findScene?: { online_media?: { source_slug: string } | null } | null },
+    { id: string }
+  >(FIND_SCENE_ONLINE_CARD_BADGE, {
+    variables: { id: sceneID },
+    skip: disabled,
+    fetchPolicy: "cache-first",
+  });
+
+  if (!data?.findScene?.online_media) return null;
+
+  return (
+    <Badge
+      variant="success"
+      style={{
+        left: "0.5rem",
+        pointerEvents: "none",
+        position: "absolute",
+        top: "0.5rem",
+        zIndex: 3,
+      }}
+    >
+      Online
+    </Badge>
+  );
+};
+
 const Description: React.FC<{
   sceneNumber?: number;
 }> = ({ sceneNumber }) => {
@@ -143,7 +186,6 @@ const SceneCardPopovers = PatchComponent(
       if (!props.fromGroupId) {
         return undefined;
       }
-
       const group = props.scene.groups.find(
         (g) => g.group.id === props.fromGroupId
       );
@@ -152,17 +194,11 @@ const SceneCardPopovers = PatchComponent(
 
     function maybeRenderTagPopoverButton() {
       if (props.scene.tags.length <= 0) return;
-
       const popoverContent = props.scene.tags.map((tag) => (
         <TagLink key={tag.id} tag={tag} />
       ));
-
       return (
-        <HoverPopover
-          className="tag-count"
-          placement="bottom"
-          content={popoverContent}
-        >
+        <HoverPopover className="tag-count" placement="bottom" content={popoverContent}>
           <Button className="minimal">
             <Icon icon={faTag} />
             <span>{props.scene.tags.length}</span>
@@ -173,28 +209,16 @@ const SceneCardPopovers = PatchComponent(
 
     function maybeRenderPerformerPopoverButton() {
       if (props.scene.performers.length <= 0) return;
-
-      return (
-        <PerformerPopoverButton
-          performers={props.scene.performers}
-          linkType="scene"
-        />
-      );
+      return <PerformerPopoverButton performers={props.scene.performers} linkType="scene" />;
     }
 
     function maybeRenderGroupPopoverButton() {
       if (props.scene.groups.length <= 0) return;
-
       const popoverContent = props.scene.groups.map((sceneGroup) => (
         <GroupTag key={sceneGroup.group.id} group={sceneGroup.group} />
       ));
-
       return (
-        <HoverPopover
-          placement="bottom"
-          content={popoverContent}
-          className="group-count tag-tooltip"
-        >
+        <HoverPopover placement="bottom" content={popoverContent} className="group-count tag-tooltip">
           <Button className="minimal">
             <Icon icon={faFilm} />
             <span>{props.scene.groups.length}</span>
@@ -205,18 +229,12 @@ const SceneCardPopovers = PatchComponent(
 
     function maybeRenderSceneMarkerPopoverButton() {
       if (props.scene.scene_markers.length <= 0) return;
-
       const popoverContent = props.scene.scene_markers.map((marker) => {
         const markerWithScene = { ...marker, scene: { id: props.scene.id } };
         return <SceneMarkerLink key={marker.id} marker={markerWithScene} />;
       });
-
       return (
-        <HoverPopover
-          className="marker-count"
-          placement="bottom"
-          content={popoverContent}
-        >
+        <HoverPopover className="marker-count" placement="bottom" content={popoverContent}>
           <Button className="minimal">
             <Icon icon={faMapMarkerAlt} />
             <span>{props.scene.scene_markers.length}</span>
@@ -233,17 +251,11 @@ const SceneCardPopovers = PatchComponent(
 
     function maybeRenderGallery() {
       if (props.scene.galleries.length <= 0) return;
-
       const popoverContent = props.scene.galleries.map((gallery) => (
         <GalleryLink key={gallery.id} gallery={gallery} />
       ));
-
       return (
-        <HoverPopover
-          className="gallery-count"
-          placement="bottom"
-          content={popoverContent}
-        >
+        <HoverPopover className="gallery-count" placement="bottom" content={popoverContent}>
           <Button className="minimal">
             <Icon icon={faImages} />
             <span>{props.scene.galleries.length}</span>
@@ -255,10 +267,7 @@ const SceneCardPopovers = PatchComponent(
     function maybeRenderOrganized() {
       if (props.scene.organized) {
         return (
-          <OverlayTrigger
-            overlay={<Tooltip id="organised-tooltip">{"Organized"}</Tooltip>}
-            placement="bottom"
-          >
+          <OverlayTrigger overlay={<Tooltip id="organised-tooltip">{"Organized"}</Tooltip>} placement="bottom">
             <div className="organized">
               <Button className="minimal">
                 <Icon icon={faBox} />
@@ -270,17 +279,11 @@ const SceneCardPopovers = PatchComponent(
     }
 
     function maybeRenderDupeCopies() {
-      const phash = file
-        ? file.fingerprints.find((fp) => fp.type === "phash")
-        : undefined;
-
+      const phash = file ? file.fingerprints.find((fp) => fp.type === "phash") : undefined;
       if (phash) {
         return (
           <div className="other-copies extra-scene-info">
-            <Button
-              href={NavUtils.makeScenesPHashMatchUrl(phash.value)}
-              className="minimal"
-            >
+            <Button href={NavUtils.makeScenesPHashMatchUrl(phash.value)} className="minimal">
               <Icon icon={faCopy} />
             </Button>
           </div>
@@ -329,14 +332,8 @@ const SceneCardDetails = PatchComponent(
     return (
       <div className="scene-card__details">
         <span className="scene-card__date">{props.scene.date}</span>
-        <span className="file-path extra-scene-info">
-          {objectPath(props.scene)}
-        </span>
-        <TruncatedText
-          className="scene-card__description"
-          text={props.scene.details}
-          lineCount={3}
-        />
+        <span className="file-path extra-scene-info">{objectPath(props.scene)}</span>
+        <TruncatedText className="scene-card__description" text={props.scene.details} lineCount={3} />
       </div>
     );
   }
@@ -346,11 +343,8 @@ const SceneCardOverlays = PatchComponent(
   "SceneCard.Overlays",
   (props: ISceneCardProps) => {
     const ret = useMemo(() => {
-      return (
-        <StudioOverlay studio={props.scene.studio} disabled={props.selecting} />
-      );
+      return <StudioOverlay studio={props.scene.studio} disabled={props.selecting} />;
     }, [props.scene.studio, props.selecting]);
-
     return ret;
   }
 );
@@ -370,16 +364,12 @@ export const SceneSpecsOverlay: React.FC<ISceneSpecsOverlay> = PatchComponent(
           <FileSize size={file.size} />
         </span>
         {file.width && file.height ? (
-          <span className="overlay-resolution">
-            {TextUtils.resolution(file.width, file.height)}
-          </span>
+          <span className="overlay-resolution">{TextUtils.resolution(file.width, file.height)}</span>
         ) : (
           ""
         )}
         {file.duration > 0 ? (
-          <span className="overlay-duration">
-            {TextUtils.secondsToTimestamp(file.duration)}
-          </span>
+          <span className="overlay-duration">{TextUtils.secondsToTimestamp(file.duration)}</span>
         ) : (
           ""
         )}
@@ -394,30 +384,20 @@ const SceneCardImage = PatchComponent(
     const history = useHistory();
     const { configuration } = useConfigurationContext();
     const cont = configuration?.interface.continuePlaylistDefault ?? false;
-
     const file = useMemo(
       () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
       [props.scene]
     );
 
     function maybeRenderInteractiveSpeedOverlay() {
-      return (
-        <div className="scene-interactive-speed-overlay">
-          {props.scene.interactive_speed ?? ""}
-        </div>
-      );
+      return <div className="scene-interactive-speed-overlay">{props.scene.interactive_speed ?? ""}</div>;
     }
 
     function onScrubberClick(timestamp: number) {
       if (props.selecting) return;
       const link = props.queue
-        ? props.queue.makeLink(props.scene.id, {
-            sceneIndex: props.index,
-            continue: cont,
-            start: timestamp,
-          })
+        ? props.queue.makeLink(props.scene.id, { sceneIndex: props.index, continue: cont, start: timestamp })
         : `/scenes/${props.scene.id}?t=${timestamp}`;
-
       history.push(link);
     }
 
@@ -441,6 +421,7 @@ const SceneCardImage = PatchComponent(
         />
         <RatingBanner rating={props.scene.rating100} />
         <SceneSpecsOverlay scene={props.scene} />
+        <OnlineSceneCardBadge disabled={props.scene.files.length > 0} sceneID={props.scene.id} />
         {maybeRenderInteractiveSpeedOverlay()}
       </>
     );
@@ -451,7 +432,6 @@ export const SceneCard = PatchComponent(
   "SceneCard",
   (props: ISceneCardProps) => {
     const { configuration } = useConfigurationContext();
-
     const file = useMemo(
       () => (props.scene.files.length > 0 ? props.scene.files[0] : undefined),
       [props.scene]
@@ -461,7 +441,6 @@ export const SceneCard = PatchComponent(
       if (!props.compact && props.zoomIndex !== undefined) {
         return `zoom-${props.zoomIndex}`;
       }
-
       return "";
     }
 
@@ -469,17 +448,12 @@ export const SceneCard = PatchComponent(
       if (!props.scene.files.length) {
         return "fileless";
       }
-
       return "";
     }
 
     const cont = configuration?.interface.continuePlaylistDefault ?? false;
-
     const sceneLink = props.queue
-      ? props.queue.makeLink(props.scene.id, {
-          sceneIndex: props.index,
-          continue: cont,
-        })
+      ? props.queue.makeLink(props.scene.id, { sceneIndex: props.index, continue: cont })
       : `/scenes/${props.scene.id}`;
 
     return (
@@ -493,9 +467,7 @@ export const SceneCard = PatchComponent(
         resumeTime={props.scene.resume_time ?? undefined}
         duration={file?.duration ?? undefined}
         interactiveHeatmap={
-          props.scene.interactive_speed
-            ? (props.scene.paths.interactive_heatmap ?? undefined)
-            : undefined
+          props.scene.interactive_speed ? (props.scene.paths.interactive_heatmap ?? undefined) : undefined
         }
         image={<SceneCardImage {...props} />}
         overlays={<SceneCardOverlays {...props} />}

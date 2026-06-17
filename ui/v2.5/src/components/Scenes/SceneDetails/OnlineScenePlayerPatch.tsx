@@ -12,6 +12,13 @@ interface IScenePlayerPatchProps {
   };
 }
 
+interface ISceneCardImagePatchProps {
+  scene: {
+    id: string;
+    files: unknown[];
+  };
+}
+
 interface IOnlineStream {
   id?: string;
   label?: string | null;
@@ -42,6 +49,15 @@ interface IOnlineMediaData {
   } | null;
 }
 
+interface IOnlineBadgeData {
+  findScene?: {
+    id: string;
+    online_media?: {
+      source_slug: string;
+    } | null;
+  } | null;
+}
+
 interface IOnlineMediaVariables {
   id: string;
 }
@@ -69,6 +85,17 @@ const FIND_SCENE_ONLINE_MEDIA = gql`
           position
           is_primary
         }
+      }
+    }
+  }
+`;
+
+const FIND_SCENE_ONLINE_BADGE = gql`
+  query FindSceneOnlineBadge($id: ID!) {
+    findScene(id: $id) {
+      id
+      online_media {
+        source_slug
       }
     }
   }
@@ -107,6 +134,35 @@ function buildPlaybackStreams(media: IOnlineMedia): IOnlineStream[] {
 
   return streams;
 }
+
+const OnlineSceneCardBadge: React.FC<{ sceneID: string }> = ({ sceneID }) => {
+  const { data } = useQuery<IOnlineBadgeData, IOnlineMediaVariables>(
+    FIND_SCENE_ONLINE_BADGE,
+    {
+      variables: { id: sceneID },
+      fetchPolicy: "cache-first",
+    }
+  );
+
+  if (!data?.findScene?.online_media) {
+    return null;
+  }
+
+  return (
+    <Badge
+      variant="success"
+      style={{
+        left: "0.5rem",
+        pointerEvents: "none",
+        position: "absolute",
+        top: "0.5rem",
+        zIndex: 3,
+      }}
+    >
+      Online
+    </Badge>
+  );
+};
 
 const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
   const { data, loading, error } = useQuery<IOnlineMediaData, IOnlineMediaVariables>(
@@ -150,52 +206,11 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
   const sourceURL = media.page_url || media.canonical_url || selectedStream?.url;
 
   return (
-    <div className="online-scene-player h-100 d-flex flex-column p-3">
-      <div className="d-flex align-items-center justify-content-between mb-2">
-        <div className="d-flex align-items-center">
-          <Badge variant="success" className="mr-2">
-            Online
-          </Badge>
-          <span className="text-muted small">
-            {media.source_name}
-            {media.external_view_count != null
-              ? ` · ${media.external_view_count} views`
-              : ""}
-          </span>
-        </div>
-        {!!sourceURL && (
-          <Button
-            size="sm"
-            variant="secondary"
-            href={sourceURL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open source
-          </Button>
-        )}
-      </div>
-
-      {streams.length > 1 && (
-        <Form.Group controlId="online-scene-server" className="mb-2">
-          <Form.Label className="small text-muted mb-1">Server</Form.Label>
-          <Form.Control
-            as="select"
-            size="sm"
-            value={selectedStream?.url ?? ""}
-            onChange={(e) => setSelectedURL(e.target.value)}
-          >
-            {streams.map((stream) => (
-              <option key={stream.url} value={stream.url}>
-                {stream.label || `Server ${stream.position + 1}`}
-                {stream.kind === "direct" ? " · direct" : ""}
-              </option>
-            ))}
-          </Form.Control>
-        </Form.Group>
-      )}
-
-      <div className="online-scene-player__frame flex-grow-1 bg-black">
+    <div className="online-scene-player h-100 d-flex flex-column">
+      <div
+        className="online-scene-player__frame flex-grow-1 bg-black"
+        style={{ minHeight: 0 }}
+      >
         {selectedStream && isDirectStream(selectedStream) ? (
           <video
             key={selectedStream.url}
@@ -219,8 +234,39 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
         )}
       </div>
 
-      {!!sourceURL && (
-        <div className="mt-2">
+      <div className="online-scene-player__controls d-flex align-items-center justify-content-between mt-2">
+        <div className="d-flex align-items-center flex-grow-1 mr-2">
+          {streams.length > 1 ? (
+            <>
+              <Form.Label className="small text-muted mb-0 mr-2" htmlFor="online-scene-server">
+                Server
+              </Form.Label>
+              <Form.Control
+                id="online-scene-server"
+                as="select"
+                size="sm"
+                value={selectedStream?.url ?? ""}
+                onChange={(e) => setSelectedURL(e.target.value)}
+              >
+                {streams.map((stream) => (
+                  <option key={stream.url} value={stream.url}>
+                    {stream.label || `Server ${stream.position + 1}`}
+                    {stream.kind === "direct" ? " · direct" : ""}
+                  </option>
+                ))}
+              </Form.Control>
+            </>
+          ) : (
+            <span className="small text-muted">
+              {media.source_name}
+              {media.external_view_count != null
+                ? ` · ${media.external_view_count} views`
+                : ""}
+            </span>
+          )}
+        </div>
+
+        {!!sourceURL && (
           <Button
             size="sm"
             variant="outline-secondary"
@@ -230,8 +276,8 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
           >
             Open source
           </Button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
@@ -244,6 +290,24 @@ instead(
     }
 
     return next(props);
+  }
+);
+
+instead(
+  "SceneCard.Image",
+  (props: ISceneCardImagePatchProps, next: React.FC<ISceneCardImagePatchProps>) => {
+    const ret = next(props);
+
+    if (props.scene.files.length > 0) {
+      return ret;
+    }
+
+    return (
+      <>
+        {ret}
+        <OnlineSceneCardBadge sceneID={props.scene.id} />
+      </>
+    );
   }
 );
 

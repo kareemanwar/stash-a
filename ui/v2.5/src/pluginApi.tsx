@@ -23,6 +23,7 @@ import { useSettings } from "./components/Settings/context";
 import { useInteractive } from "./hooks/Interactive/context";
 import InteractiveUtils from "./hooks/Interactive/utils";
 import { useLightbox, useGalleryLightbox } from "./hooks/Lightbox/hooks";
+import "./components/Scenes/SceneDetails/OnlineScenePlayerPatch";
 
 // due to code splitting, some components may not have been loaded when a plugin
 // page is loaded. This function will load all components passed to it.

@@ -158,7 +158,7 @@ func (r *Resolver) idOnly(ctx context.Context) bool {
 }
 
 func (r *scrapedSceneResolver) OnlineMedia(ctx context.Context, obj *models.ScrapedScene) (*ScrapedSceneOnlineMedia, error) {
-	return nil, nil
+	return scrapedSceneOnlineMediaForScene(obj)
 }
 
 func (r *queryResolver) MarkerWall(ctx context.Context, q *string) (ret []*models.SceneMarker, err error) {

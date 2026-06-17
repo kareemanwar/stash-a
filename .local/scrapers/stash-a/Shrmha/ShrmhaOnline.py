@@ -79,7 +79,7 @@ def extract_embed_streams(document: str, parser: Shrmha.PageParser, base_url: st
 
 
 def js_string(value: str) -> str:
-    return bytes(value, "utf-8").decode("unicode_escape").replace("\/", "/")
+    return bytes(value, "utf-8").decode("unicode_escape").replace("\\/", "/")
 
 
 def base_n(value: int, radix: int) -> str:
@@ -404,9 +404,12 @@ def enhance_online_media(media: dict[str, Any], page_url: str) -> dict[str, Any]
 
 def build_online_media(*args: Any, **kwargs: Any) -> dict[str, Any]:
     media = ORIGINAL_BUILD_ONLINE_MEDIA(*args, **kwargs)
-    page_url = kwargs.get("url") or media.get("page_url")
+    page_url = kwargs.get("url")
     if isinstance(page_url, str):
-        return enhance_online_media(media, page_url)
+        media = enhance_online_media(media, page_url)
+
+    media.pop("page_url", None)
+    media.pop("canonical_url", None)
     return media
 
 

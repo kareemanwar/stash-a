@@ -40,6 +40,11 @@ export type FrontPageContent = ISavedFilterRow | ICustomFilter;
 export const defaultMaxOptionsShown = 200;
 export const defaultPreviewVolume = 25;
 
+export interface IKOptionsConfig {
+  showScraperTestTab?: boolean;
+  enableOnlineScenes?: boolean;
+}
+
 export interface IUIConfig {
   // unknown to prevent direct access - use getFrontPageContent
   frontPageContent?: unknown;
@@ -111,6 +116,8 @@ export interface IUIConfig {
   defaultFilters?: DefaultFilters;
 
   taggerConfig?: ITaggerConfig;
+
+  kOptions?: IKOptionsConfig;
 
   title?: string;
 }

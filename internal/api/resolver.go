@@ -39,6 +39,7 @@ func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 func (r *Resolver) Scene() SceneResolver { return &sceneResolver{r} }
 func (r *Resolver) ScrapedScene() ScrapedSceneResolver { return &scrapedSceneResolver{r} }
 func (r *Resolver) Source() SourceResolver { return &sourceResolver{r} }
+func (r *Resolver) SourceCandidateScene() SourceCandidateSceneResolver { return &sourceCandidateSceneResolver{r} }
 func (r *Resolver) Image() ImageResolver { return &imageResolver{r} }
 func (r *Resolver) SceneMarker() SceneMarkerResolver { return &sceneMarkerResolver{r} }
 func (r *Resolver) Studio() StudioResolver { return &studioResolver{r} }
@@ -64,6 +65,7 @@ type performerResolver struct{ *Resolver }
 type sceneResolver struct{ *Resolver }
 type scrapedSceneResolver struct{ *Resolver }
 type sourceResolver struct{ *Resolver }
+type sourceCandidateSceneResolver struct{ *Resolver }
 type sceneMarkerResolver struct{ *Resolver }
 type imageResolver struct{ *Resolver }
 type studioResolver struct{ *Resolver }

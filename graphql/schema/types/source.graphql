@@ -77,3 +77,94 @@ type FindSourcesResultType {
   count: Int!
   sources: [Source!]!
 }
+
+type SourceCandidateRelation {
+  id: ID
+  name: String!
+  position: Int!
+}
+
+type SourceCandidateScene {
+  id: ID!
+  source_id: ID!
+  external_id: String
+  url: String!
+  title: String
+  date: String
+  details: String
+  thumbnail_url: String
+  duration_seconds: Int
+  position: Int!
+  status: SourceCandidateStatus!
+  target_scene_id: ID
+  target_scene: Scene
+  source_slug: String
+  raw_scraped_json: String
+  raw_online_media_json: String
+  user_modified: Boolean!
+  last_seen_at: Time
+  last_scraped_at: Time
+  created_at: Time!
+  updated_at: Time!
+  tags: [SourceCandidateRelation!]!
+  performers: [SourceCandidateRelation!]!
+  groups: [SourceCandidateRelation!]!
+  galleries: [SourceCandidateRelation!]!
+}
+
+input SourceCandidateRelationInput {
+  id: ID
+  name: String!
+  position: Int = 0
+}
+
+input SourceCandidateSceneInput {
+  source_id: ID!
+  external_id: String
+  url: String!
+  title: String
+  date: String
+  details: String
+  thumbnail_url: String
+  duration_seconds: Int
+  position: Int = 0
+  status: SourceCandidateStatus = NEW
+  target_scene_id: ID
+  source_slug: String
+  raw_scraped_json: String
+  raw_online_media_json: String
+  tags: [SourceCandidateRelationInput!]
+  performers: [SourceCandidateRelationInput!]
+  groups: [SourceCandidateRelationInput!]
+  galleries: [SourceCandidateRelationInput!]
+}
+
+type SourceIgnoredItem {
+  id: ID!
+  source_id: ID!
+  content_type: SourceIgnoredContentType!
+  external_id: String
+  url: String!
+  title: String
+  thumbnail_url: String
+  reason: String
+  ignored_at: Time!
+  created_at: Time!
+  updated_at: Time!
+}
+
+input SourceIgnoreItemInput {
+  source_id: ID!
+  content_type: SourceIgnoredContentType!
+  external_id: String
+  url: String!
+  title: String
+  thumbnail_url: String
+  reason: String
+}
+
+input SourceUnignoreItemInput {
+  source_id: ID!
+  content_type: SourceIgnoredContentType!
+  url: String!
+}

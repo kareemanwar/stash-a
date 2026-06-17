@@ -1,8 +1,13 @@
 import argparse
 import html
 import json
+import os
+import random
 import re
+import subprocess
 import sys
+import time
+from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, unquote_plus, urlencode, urljoin, urlparse, urlunparse
 
@@ -10,6 +15,10 @@ import Shrmha
 
 
 DEFAULT_SOURCE_PAGE_LIMIT = 500
+DEFAULT_HYDRATION_DELAY_SECONDS = 1.0
+DEFAULT_HYDRATION_JITTER_SECONDS = 0.5
+DEFAULT_HYDRATION_RETRIES = 2
+DEFAULT_HYDRATION_BACKOFF_SECONDS = 2.0
 
 ARABIC_MONTHS = {
     "يناير": 1,
@@ -342,7 +351,41 @@ def parse_page_limit(value: Any) -> int | None:
     return max_pages
 
 
-def crawl_listing_pages(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_LIMIT) -> tuple[list[tuple[str, str]], bool]:
+def parse_candidate_limit(value: Any) -> int | None:
+    if value in (None, ""):
+        return None
+    try:
+        limit = int(value)
+    except (TypeError, ValueError):
+        return None
+    return limit if limit > 0 else None
+
+
+def parse_float(value: Any, default: float) -> float:
+    if value in (None, ""):
+        return default
+    try:
+        parsed = float(value)
+    except (TypeError, ValueError):
+        return default
+    return max(0.0, parsed)
+
+
+def parse_int(value: Any, default: int) -> int:
+    if value in (None, ""):
+        return default
+    try:
+        parsed = int(value)
+    except (TypeError, ValueError):
+        return default
+    return max(0, parsed)
+
+
+def crawl_listing_pages(
+    url: str,
+    max_pages: int | None = DEFAULT_SOURCE_PAGE_LIMIT,
+    candidate_limit: int | None = None,
+) -> tuple[list[tuple[str, str]], bool]:
     start_urls = [canonical_source_url(url)]
     normalized_input_url = normalize_listing_url(url, url)
     if normalized_input_url not in start_urls:
@@ -352,6 +395,7 @@ def crawl_listing_pages(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_LI
     queued: list[str] = list(start_urls)
     queued_set: set[str] = set(start_urls)
     seen: set[str] = set()
+    candidate_urls_seen: set[str] = set()
     truncated = False
 
     while queued:
@@ -368,6 +412,17 @@ def crawl_listing_pages(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_LI
         seen.add(page_url)
         documents.append((page_url, document))
 
+        for candidate in extract_scene_candidates(document, page_url):
+            urls = candidate.get("urls")
+            if isinstance(urls, list) and urls:
+                first_url = urls[0]
+                if isinstance(first_url, str) and first_url:
+                    candidate_urls_seen.add(first_url)
+
+        if candidate_limit is not None and len(candidate_urls_seen) >= candidate_limit:
+            truncated = True
+            break
+
         for next_url in extract_pagination_urls(document, page_url):
             if next_url in seen or next_url in queued_set:
                 continue
@@ -383,7 +438,10 @@ def crawl_listing_pages(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_LI
     return documents, truncated
 
 
-def collect_scene_candidates(documents: list[tuple[str, str]]) -> list[dict[str, Any]]:
+def collect_scene_candidates(
+    documents: list[tuple[str, str]],
+    candidate_limit: int | None = None,
+) -> list[dict[str, Any]]:
     candidates: list[dict[str, Any]] = []
     seen_urls: set[str] = set()
 
@@ -395,12 +453,182 @@ def collect_scene_candidates(documents: list[tuple[str, str]]) -> list[dict[str,
             seen_urls.add(url)
             candidate["candidate_position"] = len(candidates)
             candidates.append(candidate)
+            if candidate_limit is not None and len(candidates) >= candidate_limit:
+                return candidates
 
     return candidates
 
 
-def scrape_source_by_url(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_LIMIT) -> dict[str, Any]:
-    page_documents, crawl_truncated = crawl_listing_pages(url, max_pages=max_pages)
+def candidate_urls(candidate: dict[str, Any]) -> list[str]:
+    urls = candidate.get("urls")
+    if not isinstance(urls, list):
+        return []
+    return [url for url in urls if isinstance(url, str) and url]
+
+
+def merge_unique_strings(*values: Any) -> list[str]:
+    merged: list[str] = []
+    seen: set[str] = set()
+    for value in values:
+        if isinstance(value, str):
+            items = [value]
+        elif isinstance(value, list):
+            items = [item for item in value if isinstance(item, str)]
+        else:
+            continue
+
+        for item in items:
+            if not item or item in seen:
+                continue
+            seen.add(item)
+            merged.append(item)
+
+    return merged
+
+
+def merge_tags(*tag_lists: Any) -> list[dict[str, str]]:
+    tags: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for tag_list in tag_lists:
+        if not isinstance(tag_list, list):
+            continue
+        for tag in tag_list:
+            if isinstance(tag, dict):
+                name = tag.get("name")
+            elif isinstance(tag, str):
+                name = tag
+            else:
+                continue
+            if not isinstance(name, str):
+                continue
+            name = Shrmha.clean_text(name)
+            if not name or name in seen:
+                continue
+            seen.add(name)
+            tags.append({"name": name})
+    return tags
+
+
+def run_scene_by_url(
+    url: str,
+    retries: int = DEFAULT_HYDRATION_RETRIES,
+    backoff_seconds: float = DEFAULT_HYDRATION_BACKOFF_SECONDS,
+) -> dict[str, Any]:
+    script_dir = Path(__file__).resolve().parent
+    script_path = script_dir / "ShrmhaOnline.py"
+    env = os.environ.copy()
+    env["PYTHONIOENCODING"] = "utf-8"
+
+    last_error = ""
+    for attempt in range(retries + 1):
+        result = subprocess.run(
+            [sys.executable, str(script_path), "scene-by-url", "--url", url],
+            cwd=script_dir,
+            env=env,
+            text=True,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            encoding="utf-8",
+            errors="replace",
+        )
+        if result.returncode == 0:
+            scene = json.loads(result.stdout)
+            if isinstance(scene, dict) and not scene.get("error"):
+                return scene
+            last_error = str(scene.get("error") if isinstance(scene, dict) else "scene-by-url returned non-object JSON")
+        else:
+            last_error = result.stderr.strip() or f"scene-by-url failed with exit code {result.returncode}"
+
+        if attempt < retries:
+            sleep_for = backoff_seconds * (attempt + 1)
+            if sleep_for > 0:
+                time.sleep(sleep_for)
+
+    raise RuntimeError(last_error or f"scene-by-url failed for {url}")
+
+
+def wait_before_hydration(position: int, delay_seconds: float, jitter_seconds: float) -> None:
+    if position <= 0:
+        return
+    sleep_for = delay_seconds
+    if jitter_seconds > 0:
+        sleep_for += random.uniform(0, jitter_seconds)
+    if sleep_for > 0:
+        time.sleep(sleep_for)
+
+
+def merge_scene_candidate(preview: dict[str, Any], scene: dict[str, Any], position: int) -> dict[str, Any]:
+    candidate = dict(scene)
+
+    urls = merge_unique_strings(scene.get("urls"), scene.get("url"), preview.get("urls"))
+    if urls:
+        candidate["urls"] = urls
+
+    for key in ("title", "image", "date", "details", "remote_site_id", "studio"):
+        if candidate.get(key) in (None, "", [], {}):
+            fallback = preview.get(key)
+            if fallback not in (None, "", [], {}):
+                candidate[key] = fallback
+
+    tags = merge_tags(scene.get("tags"), preview.get("tags"))
+    if tags:
+        candidate["tags"] = tags
+
+    candidate["candidate_status"] = preview.get("candidate_status") or "NEW"
+    candidate["candidate_position"] = position
+    candidate["source_preview"] = preview
+    candidate["hydrated_by"] = "scene-by-url"
+
+    return {k: v for k, v in candidate.items() if v not in (None, [], "")}
+
+
+def hydrate_scene_candidates(
+    preview_candidates: list[dict[str, Any]],
+    delay_seconds: float = DEFAULT_HYDRATION_DELAY_SECONDS,
+    jitter_seconds: float = DEFAULT_HYDRATION_JITTER_SECONDS,
+    retries: int = DEFAULT_HYDRATION_RETRIES,
+    backoff_seconds: float = DEFAULT_HYDRATION_BACKOFF_SECONDS,
+) -> list[dict[str, Any]]:
+    hydrated: list[dict[str, Any]] = []
+
+    for position, preview in enumerate(preview_candidates):
+        urls = candidate_urls(preview)
+        if not urls:
+            fallback = dict(preview)
+            fallback["candidate_position"] = position
+            fallback["hydration_error"] = "Missing candidate URL"
+            hydrated.append(fallback)
+            continue
+
+        wait_before_hydration(position, delay_seconds, jitter_seconds)
+
+        try:
+            scene = run_scene_by_url(urls[0], retries=retries, backoff_seconds=backoff_seconds)
+            hydrated.append(merge_scene_candidate(preview, scene, position))
+        except Exception as exc:
+            fallback = dict(preview)
+            fallback["candidate_position"] = position
+            fallback["hydration_error"] = str(exc)
+            hydrated.append(fallback)
+
+    return hydrated
+
+
+def scrape_source_by_url(
+    url: str,
+    max_pages: int | None = DEFAULT_SOURCE_PAGE_LIMIT,
+    candidate_limit: int | None = None,
+    hydrate_scenes: bool = True,
+    hydration_delay_seconds: float = DEFAULT_HYDRATION_DELAY_SECONDS,
+    hydration_jitter_seconds: float = DEFAULT_HYDRATION_JITTER_SECONDS,
+    hydration_retries: int = DEFAULT_HYDRATION_RETRIES,
+    hydration_backoff_seconds: float = DEFAULT_HYDRATION_BACKOFF_SECONDS,
+) -> dict[str, Any]:
+    page_documents, crawl_truncated = crawl_listing_pages(
+        url,
+        max_pages=max_pages,
+        candidate_limit=candidate_limit,
+    )
     if not page_documents:
         return {"error": f"No Shrmha source pages could be fetched for {url}"}
 
@@ -408,7 +636,18 @@ def scrape_source_by_url(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_L
     source_url = canonical_source_url(url)
     source_title = extract_source_title(source_url, first_document)
     thumbnail_url = extract_source_thumbnail(first_document, first_page_url)
-    scene_candidates = collect_scene_candidates(page_documents)
+    preview_candidates = collect_scene_candidates(page_documents, candidate_limit=candidate_limit)
+    scene_candidates = (
+        hydrate_scene_candidates(
+            preview_candidates,
+            delay_seconds=hydration_delay_seconds,
+            jitter_seconds=hydration_jitter_seconds,
+            retries=hydration_retries,
+            backoff_seconds=hydration_backoff_seconds,
+        )
+        if hydrate_scenes
+        else preview_candidates
+    )
     if not thumbnail_url and scene_candidates:
         thumb = scene_candidates[0].get("image")
         thumbnail_url = thumb if isinstance(thumb, str) else None
@@ -424,6 +663,7 @@ def scrape_source_by_url(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_L
         remote_site_id = urlparse(source_url).path or Shrmha.STUDIO_SLUG
         source_type = "SITE_SECTION"
 
+    hydration_error_count = sum(1 for candidate in scene_candidates if candidate.get("hydration_error"))
     result: dict[str, Any] = {
         "title": source_title,
         "urls": [source_url],
@@ -436,6 +676,14 @@ def scrape_source_by_url(url: str, max_pages: int | None = DEFAULT_SOURCE_PAGE_L
         "pages_crawled": len(page_documents),
         "page_limit": 0 if max_pages is None else max_pages,
         "crawl_truncated": crawl_truncated,
+        "candidate_limit": 0 if candidate_limit is None else candidate_limit,
+        "candidates_returned": len(scene_candidates),
+        "scene_hydration": "scene-by-url" if hydrate_scenes else "preview-only",
+        "hydration_delay_seconds": hydration_delay_seconds,
+        "hydration_jitter_seconds": hydration_jitter_seconds,
+        "hydration_retries": hydration_retries,
+        "hydration_backoff_seconds": hydration_backoff_seconds,
+        "hydration_error_count": hydration_error_count,
     }
 
     if source_type != "SITE":
@@ -455,6 +703,12 @@ def scraper_args() -> tuple[str, dict[str, Any]]:
     source_by_url = subparsers.add_parser("source-by-url")
     source_by_url.add_argument("--url")
     source_by_url.add_argument("--max-pages", dest="max_pages", type=int)
+    source_by_url.add_argument("--limit", dest="limit", type=int)
+    source_by_url.add_argument("--preview-only", dest="preview_only", action="store_true")
+    source_by_url.add_argument("--hydrate-delay", dest="hydrate_delay", type=float)
+    source_by_url.add_argument("--hydrate-jitter", dest="hydrate_jitter", type=float)
+    source_by_url.add_argument("--hydrate-retries", dest="hydrate_retries", type=int)
+    source_by_url.add_argument("--hydrate-backoff", dest="hydrate_backoff", type=float)
     args = vars(parser.parse_args())
 
     if not sys.stdin.isatty():
@@ -482,12 +736,36 @@ def get_max_pages_arg(args: dict[str, Any]) -> int | None:
     return parse_page_limit(args.get("max_pages", args.get("maxPages")))
 
 
+def get_candidate_limit_arg(args: dict[str, Any]) -> int | None:
+    return parse_candidate_limit(args.get("limit", args.get("candidate_limit", args.get("candidateLimit"))))
+
+
+def get_hydrate_scenes_arg(args: dict[str, Any]) -> bool:
+    if args.get("preview_only") or args.get("previewOnly"):
+        return False
+    hydrate_scenes = args.get("hydrate_scenes", args.get("hydrateScenes"))
+    if hydrate_scenes is None:
+        return True
+    return bool(hydrate_scenes)
+
+
 def main() -> None:
     operation, args = scraper_args()
     if operation == "source-by-url":
         url = get_url_arg(args)
         if url:
-            Shrmha.write_json(scrape_source_by_url(url, max_pages=get_max_pages_arg(args)))
+            Shrmha.write_json(
+                scrape_source_by_url(
+                    url,
+                    max_pages=get_max_pages_arg(args),
+                    candidate_limit=get_candidate_limit_arg(args),
+                    hydrate_scenes=get_hydrate_scenes_arg(args),
+                    hydration_delay_seconds=parse_float(args.get("hydrate_delay", args.get("hydrateDelay")), DEFAULT_HYDRATION_DELAY_SECONDS),
+                    hydration_jitter_seconds=parse_float(args.get("hydrate_jitter", args.get("hydrateJitter")), DEFAULT_HYDRATION_JITTER_SECONDS),
+                    hydration_retries=parse_int(args.get("hydrate_retries", args.get("hydrateRetries")), DEFAULT_HYDRATION_RETRIES),
+                    hydration_backoff_seconds=parse_float(args.get("hydrate_backoff", args.get("hydrateBackoff")), DEFAULT_HYDRATION_BACKOFF_SECONDS),
+                )
+            )
             return
 
     print(json.dumps({"error": f"Unsupported operation or missing URL: {operation}"}), file=sys.stderr)

@@ -11,6 +11,7 @@ from urllib.request import Request, urlopen
 
 USER_AGENT = "Mozilla/5.0 (compatible; Stash-a Shrmha scraper)"
 STUDIO_NAME = "Shrmha"
+STUDIO_SLUG = "shrmha"
 STUDIO_URL = "https://shrmha.com/"
 
 
@@ -19,6 +20,7 @@ class PageParser(HTMLParser):
         super().__init__(convert_charrefs=True)
         self.meta: dict[str, str] = {}
         self.links: dict[str, str] = {}
+        self.iframes: list[str] = []
         self.title_parts: list[str] = []
         self.h1_parts: list[str] = []
         self.time_datetimes: list[str] = []
@@ -40,6 +42,11 @@ class PageParser(HTMLParser):
             href = attr.get("href")
             if rel and href:
                 self.links[rel] = href.strip()
+
+        if tag == "iframe":
+            src = attr.get("src")
+            if src:
+                self.iframes.append(src.strip())
 
         if tag == "title":
             self._in_title = True
@@ -196,6 +203,147 @@ def strip_site_suffix(title: str) -> str:
     return re.sub(r"\s+-\s+شرمها\s*$", "", title).strip()
 
 
+def parse_number(value: str) -> int | None:
+    digits = re.sub(r"[^0-9]", "", value)
+    if not digits:
+        return None
+    try:
+        return int(digits)
+    except ValueError:
+        return None
+
+
+def extract_view_count(document: str) -> int | None:
+    patterns = [
+        r"(?:views?|مشاهدات)\D{0,32}([0-9][0-9,\. ]*)",
+        r"([0-9][0-9,\. ]*)\D{0,12}(?:views?|مشاهدات)",
+    ]
+    for pattern in patterns:
+        match = re.search(pattern, document, re.IGNORECASE)
+        if match:
+            parsed = parse_number(match.group(1))
+            if parsed is not None:
+                return parsed
+    return None
+
+
+def append_stream(
+    streams: list[dict[str, Any]],
+    seen: set[str],
+    *,
+    url: str,
+    label: str | None,
+    kind: str,
+    base_url: str,
+) -> None:
+    stream_url = urljoin(base_url, clean_text(url))
+    if not stream_url or stream_url in seen:
+        return
+    seen.add(stream_url)
+    streams.append(
+        {
+            "label": clean_text(label) or None,
+            "kind": kind,
+            "url": stream_url,
+            "position": len(streams),
+            "is_primary": len(streams) == 0,
+        }
+    )
+
+
+def extract_embed_streams(document: str, parser: PageParser, base_url: str) -> list[dict[str, Any]]:
+    streams: list[dict[str, Any]] = []
+    seen: set[str] = set()
+
+    button_pattern = re.compile(
+        r"<button\b[^>]*onclick=[\"']go\((?P<quote>[\"'])(?P<url>.*?)(?P=quote)\)[\"'][^>]*>(?P<label>.*?)</button>",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for match in button_pattern.finditer(document):
+        label = re.sub(r"<[^>]+>", "", match.group("label"))
+        append_stream(
+            streams,
+            seen,
+            url=match.group("url"),
+            label=label,
+            kind="embed",
+            base_url=base_url,
+        )
+
+    for iframe_url in parser.iframes:
+        append_stream(
+            streams,
+            seen,
+            url=iframe_url,
+            label="Primary embed" if not streams else "Embed",
+            kind="embed",
+            base_url=base_url,
+        )
+
+    return streams
+
+
+def extract_direct_streams(document: str, base_url: str, streams: list[dict[str, Any]]) -> str | None:
+    seen = {stream["url"] for stream in streams}
+    direct_patterns = [
+        r"<(?:video|source)\b[^>]+src=[\"'](?P<url>[^\"']+\.(?:mp4|m3u8)(?:\?[^\"']*)?)[\"']",
+        r"[\"'](?P<url>https?://[^\"']+\.(?:mp4|m3u8)(?:\?[^\"']*)?)[\"']",
+    ]
+
+    first_direct: str | None = None
+    for pattern in direct_patterns:
+        for match in re.finditer(pattern, document, re.IGNORECASE):
+            before = len(streams)
+            append_stream(
+                streams,
+                seen,
+                url=match.group("url"),
+                label="Direct video" if first_direct is None else "Direct video alternate",
+                kind="direct",
+                base_url=base_url,
+            )
+            if len(streams) > before and first_direct is None:
+                first_direct = streams[-1]["url"]
+    return first_direct
+
+
+def build_online_media(
+    *,
+    url: str,
+    canonical_url: str,
+    external_id: str | None,
+    image: str | None,
+    document: str,
+    parser: PageParser,
+) -> dict[str, Any]:
+    streams = extract_embed_streams(document, parser, canonical_url)
+    direct_video_url = extract_direct_streams(document, canonical_url, streams)
+    embed_url = next((stream["url"] for stream in streams if stream["kind"] == "embed"), None)
+
+    media: dict[str, Any] = {
+        "source_name": STUDIO_NAME,
+        "source_slug": STUDIO_SLUG,
+        "external_id": external_id,
+        "page_url": url,
+        "canonical_url": canonical_url,
+        "embed_url": embed_url,
+        "direct_video_url": direct_video_url,
+        "thumbnail_url": image,
+        "duration_seconds": None,
+        "external_view_count": extract_view_count(document),
+        "streams": streams,
+    }
+    media["raw_metadata_json"] = json.dumps(
+        {
+            "source": STUDIO_SLUG,
+            "external_id": external_id,
+            "streams": streams,
+        },
+        ensure_ascii=True,
+    )
+    return media
+
+
 def scrape_scene_by_url(url: str) -> dict[str, Any]:
     document = fetch_html(url)
     parser = PageParser()
@@ -241,15 +389,25 @@ def scrape_scene_by_url(url: str) -> dict[str, Any]:
         or (parser.time_datetimes[0] if parser.time_datetimes else None)
     )
 
+    external_id = extract_external_id(url, canonical_url, document)
+
     result: dict[str, Any] = {
         "title": title,
         "urls": [canonical_url],
         "studio": {
             "name": STUDIO_NAME,
             "urls": [STUDIO_URL],
-            "remote_site_id": "shrmha",
+            "remote_site_id": STUDIO_SLUG,
         },
         "tags": extract_tags(document, article),
+        "online_media": build_online_media(
+            url=url,
+            canonical_url=canonical_url,
+            external_id=external_id,
+            image=image,
+            document=document,
+            parser=parser,
+        ),
     }
 
     if description:
@@ -258,8 +416,6 @@ def scrape_scene_by_url(url: str) -> dict[str, Any]:
         result["date"] = date
     if image:
         result["image"] = image
-
-    external_id = extract_external_id(url, canonical_url, document)
     if external_id:
         result["remote_site_id"] = external_id
 

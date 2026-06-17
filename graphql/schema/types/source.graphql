@@ -73,6 +73,18 @@ input SourceDestroyInput {
   id: ID!
 }
 
+input SourceSyncByURLInput {
+  source_id: ID
+  url: String!
+}
+
+type SourceSyncResult {
+  source: Source!
+  candidate_scenes: [SourceCandidateScene!]!
+  candidate_scene_count: Int!
+  created_source: Boolean!
+}
+
 type FindSourcesResultType {
   count: Int!
   sources: [Source!]!
@@ -181,6 +193,7 @@ extend type Mutation {
   sourceCreate(input: SourceCreateInput!): Source
   sourceUpdate(input: SourceUpdateInput!): Source
   sourceDestroy(input: SourceDestroyInput!): Boolean!
+  sourceSyncByURL(input: SourceSyncByURLInput!): SourceSyncResult!
   sourceCandidateSceneSave(input: SourceCandidateSceneInput!): SourceCandidateScene
   sourceIgnoreItem(input: SourceIgnoreItemInput!): SourceIgnoredItem
   sourceUnignoreItem(input: SourceUnignoreItemInput!): Boolean!

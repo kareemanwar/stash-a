@@ -168,3 +168,24 @@ input SourceUnignoreItemInput {
   content_type: SourceIgnoredContentType!
   url: String!
 }
+
+extend type Query {
+  findSource(id: ID!): Source
+  findSourceByURL(url: String!): Source
+  findSources: FindSourcesResultType!
+  findSourceCandidateScenes(source_id: ID!): [SourceCandidateScene!]!
+  findSourceIgnoredItems(source_id: ID!): [SourceIgnoredItem!]!
+}
+
+extend type Mutation {
+  sourceCreate(input: SourceCreateInput!): Source
+  sourceUpdate(input: SourceUpdateInput!): Source
+  sourceDestroy(input: SourceDestroyInput!): Boolean!
+  sourceCandidateSceneSave(input: SourceCandidateSceneInput!): SourceCandidateScene
+  sourceIgnoreItem(input: SourceIgnoreItemInput!): SourceIgnoredItem
+  sourceUnignoreItem(input: SourceUnignoreItemInput!): Boolean!
+}
+
+extend type Scene {
+  sources: [Source!]!
+}

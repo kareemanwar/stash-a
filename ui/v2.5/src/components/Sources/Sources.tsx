@@ -14,6 +14,7 @@ import {
   Tabs,
 } from "react-bootstrap";
 import { Helmet } from "react-helmet";
+import { ListOperations } from "../List/ListOperationButtons";
 import { GridCard } from "../Shared/GridCard/GridCard";
 
 const FIND_SOURCES = gql`
@@ -425,7 +426,7 @@ const SourceCreateDialog: React.FC<{
             Cancel
           </Button>
           <Button type="submit" disabled={!canCreate || loading}>
-            {loading ? "Creating..." : "Create Source"}
+            {loading ? "Creating..." : "Create"}
           </Button>
         </Modal.Footer>
       </Form>
@@ -664,7 +665,11 @@ const Sources: React.FC = () => {
     });
   }
 
-  function handleCandidateSelected(candidate: CandidateScene, selected: boolean) {
+  function handleCandidateSelected(
+    candidate: CandidateScene,
+    selected: boolean,
+    _shiftKey: boolean
+  ) {
     setSelectedCandidateIDs((current) => {
       const next = new Set(current);
       if (selected) {
@@ -688,19 +693,34 @@ const Sources: React.FC = () => {
   }
 
   const selectedCandidateCount = selectedCandidateIDs.size;
+  const operations = (
+    <ListOperations
+      items={sources.length}
+      hasSelection={false}
+      operations={[
+        {
+          text: "New",
+          onClick: () => setShowCreateDialog(true),
+          isDisplayed: () => true,
+          className: "create-new-item",
+        },
+      ]}
+      operationsMenuClassName="source-list-operations-dropdown"
+    />
+  );
 
   return (
     <div className="sources-page">
       <Helmet title="Sources" />
 
-      <div className="d-flex justify-content-between align-items-center mb-3">
+      <div className="d-flex justify-content-between align-items-center mb-3 source-page-toolbar">
         <div>
           <h2>Sources</h2>
           <div className="text-muted">
             Review scraper-discovered media before promoting it into native Stash objects.
           </div>
         </div>
-        <Button onClick={() => setShowCreateDialog(true)}>New Source</Button>
+        {operations}
       </div>
 
       {error && <Alert variant="danger">{error}</Alert>}

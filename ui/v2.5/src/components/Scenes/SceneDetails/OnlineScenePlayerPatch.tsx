@@ -1,18 +1,11 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
-import { Alert, Badge, Button, Form } from "react-bootstrap";
+import { Alert, Button, Form } from "react-bootstrap";
 import { ErrorMessage } from "src/components/Shared/ErrorMessage";
 import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
 import { instead } from "src/patch";
 
 interface IScenePlayerPatchProps {
-  scene: {
-    id: string;
-    files: unknown[];
-  };
-}
-
-interface ISceneCardImagePatchProps {
   scene: {
     id: string;
     files: unknown[];
@@ -49,15 +42,6 @@ interface IOnlineMediaData {
   } | null;
 }
 
-interface IOnlineBadgeData {
-  findScene?: {
-    id: string;
-    online_media?: {
-      source_slug: string;
-    } | null;
-  } | null;
-}
-
 interface IOnlineMediaVariables {
   id: string;
 }
@@ -85,17 +69,6 @@ const FIND_SCENE_ONLINE_MEDIA = gql`
           position
           is_primary
         }
-      }
-    }
-  }
-`;
-
-const FIND_SCENE_ONLINE_BADGE = gql`
-  query FindSceneOnlineBadge($id: ID!) {
-    findScene(id: $id) {
-      id
-      online_media {
-        source_slug
       }
     }
   }
@@ -135,34 +108,55 @@ function buildPlaybackStreams(media: IOnlineMedia): IOnlineStream[] {
   return streams;
 }
 
-const OnlineSceneCardBadge: React.FC<{ sceneID: string }> = ({ sceneID }) => {
-  const { data } = useQuery<IOnlineBadgeData, IOnlineMediaVariables>(
-    FIND_SCENE_ONLINE_BADGE,
-    {
-      variables: { id: sceneID },
-      fetchPolicy: "cache-first",
-    }
-  );
-
-  if (!data?.findScene?.online_media) {
-    return null;
+const onlinePlayerStyle = `
+  .online-scene-player {
+    min-height: 0;
   }
 
-  return (
-    <Badge
-      variant="success"
-      style={{
-        left: "0.5rem",
-        pointerEvents: "none",
-        position: "absolute",
-        top: "0.5rem",
-        zIndex: 3,
-      }}
-    >
-      Online
-    </Badge>
-  );
-};
+  .online-scene-player__frame {
+    min-height: 0;
+    position: relative;
+  }
+
+  .online-scene-player__frame iframe,
+  .online-scene-player__frame video {
+    display: block;
+    object-fit: contain;
+  }
+
+  .online-scene-player__controls {
+    bottom: 0.75rem;
+    display: flex;
+    gap: 0.5rem;
+    max-width: min(38rem, calc(100% - 1.5rem));
+    opacity: 0.38;
+    position: absolute;
+    right: 0.75rem;
+    transition: opacity 120ms ease-in-out;
+    z-index: 4;
+  }
+
+  .online-scene-player__controls:hover,
+  .online-scene-player__controls:focus-within {
+    opacity: 1;
+  }
+
+  .online-scene-player__server {
+    background-color: rgba(10, 18, 24, 0.72);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    height: calc(1.5em + 0.5rem + 2px);
+    max-width: 13rem;
+    min-width: 9rem;
+  }
+
+  .online-scene-player__source-button.btn {
+    background-color: rgba(10, 18, 24, 0.72);
+    border-color: rgba(255, 255, 255, 0.22);
+    color: #fff;
+    white-space: nowrap;
+  }
+`;
 
 const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
   const { data, loading, error } = useQuery<IOnlineMediaData, IOnlineMediaVariables>(
@@ -206,11 +200,10 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
   const sourceURL = media.page_url || media.canonical_url || selectedStream?.url;
 
   return (
-    <div className="online-scene-player h-100 d-flex flex-column">
-      <div
-        className="online-scene-player__frame flex-grow-1 bg-black"
-        style={{ minHeight: 0 }}
-      >
+    <div className="online-scene-player h-100">
+      <style>{onlinePlayerStyle}</style>
+
+      <div className="online-scene-player__frame h-100 bg-black">
         {selectedStream && isDirectStream(selectedStream) ? (
           <video
             key={selectedStream.url}
@@ -232,51 +225,39 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
         ) : (
           <Alert variant="warning">No playable online stream was found.</Alert>
         )}
-      </div>
 
-      <div className="online-scene-player__controls d-flex align-items-center justify-content-between mt-2">
-        <div className="d-flex align-items-center flex-grow-1 mr-2">
-          {streams.length > 1 ? (
-            <>
-              <Form.Label className="small text-muted mb-0 mr-2" htmlFor="online-scene-server">
-                Server
-              </Form.Label>
-              <Form.Control
-                id="online-scene-server"
-                as="select"
-                size="sm"
-                value={selectedStream?.url ?? ""}
-                onChange={(e) => setSelectedURL(e.target.value)}
-              >
-                {streams.map((stream) => (
-                  <option key={stream.url} value={stream.url}>
-                    {stream.label || `Server ${stream.position + 1}`}
-                    {stream.kind === "direct" ? " · direct" : ""}
-                  </option>
-                ))}
-              </Form.Control>
-            </>
-          ) : (
-            <span className="small text-muted">
-              {media.source_name}
-              {media.external_view_count != null
-                ? ` · ${media.external_view_count} views`
-                : ""}
-            </span>
+        <div className="online-scene-player__controls">
+          {streams.length > 1 && (
+            <Form.Control
+              aria-label="Online media server"
+              as="select"
+              className="online-scene-player__server"
+              size="sm"
+              value={selectedStream?.url ?? ""}
+              onChange={(e) => setSelectedURL(e.target.value)}
+            >
+              {streams.map((stream) => (
+                <option key={stream.url} value={stream.url}>
+                  {stream.label || `Server ${stream.position + 1}`}
+                  {stream.kind === "direct" ? " · direct" : ""}
+                </option>
+              ))}
+            </Form.Control>
+          )}
+
+          {!!sourceURL && (
+            <Button
+              className="online-scene-player__source-button"
+              size="sm"
+              variant="outline-secondary"
+              href={sourceURL}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              Open source
+            </Button>
           )}
         </div>
-
-        {!!sourceURL && (
-          <Button
-            size="sm"
-            variant="outline-secondary"
-            href={sourceURL}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Open source
-          </Button>
-        )}
       </div>
     </div>
   );
@@ -290,24 +271,6 @@ instead(
     }
 
     return next(props);
-  }
-);
-
-instead(
-  "SceneCard.Image",
-  (props: ISceneCardImagePatchProps, next: React.FC<ISceneCardImagePatchProps>) => {
-    const ret = next(props);
-
-    if (props.scene.files.length > 0) {
-      return ret;
-    }
-
-    return (
-      <>
-        {ret}
-        <OnlineSceneCardBadge sceneID={props.scene.id} />
-      </>
-    );
   }
 );
 

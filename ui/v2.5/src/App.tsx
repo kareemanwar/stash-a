@@ -70,6 +70,7 @@ const Galleries = lazyComponent(
   () => import("./components/Galleries/Galleries")
 );
 const Sources = lazyComponent(() => import("./components/Sources/Sources"));
+const SourceNew = lazyComponent(() => import("./components/Sources/SourceNew"));
 
 const Groups = lazyComponent(() => import("./components/Groups/Groups"));
 const Tags = lazyComponent(() => import("./components/Tags/Tags"));
@@ -249,6 +250,7 @@ export const App: React.FC = () => {
             <Route path="/scenes" component={Scenes} />
             <Route path="/images" component={Images} />
             <Route path="/galleries" component={Galleries} />
+            <Route exact path="/sources/new" component={SourceNew} />
             <Route path="/sources" component={Sources} />
             <Route path="/performers" component={Performers} />
             <Route path="/tags" component={Tags} />

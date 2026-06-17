@@ -175,6 +175,23 @@ Implemented UI flow:
 - Online provider view counts belong in the card text/details area, not on thumbnail overlays.
 - Fileless online scene pages expose an `Online` tab next to the native scene tabs. The tab displays `scene_online_media`, `scene_online_streams`, provider view count, duration, native source URL from `Scene.urls`, timestamps, and raw metadata through GraphQL.
 
+## Native Sources
+
+Decision:
+
+- `Source` is a native Stash-a entity for websites, searches, categories, accounts, profiles, channels, collections, and child sources.
+- Source parent/child hierarchy is represented by `sources.parent_id`.
+- Source URLs live in `source_urls`; media page URLs still belong to native object `urls` fields.
+- Source-to-media relationships are many-to-many using `scenes_sources`, `images_sources`, `galleries_sources`, and `groups_sources`.
+- Candidate media is stored in dedicated per-type tables (`source_candidate_scenes`, `source_candidate_images`, `source_candidate_galleries`, `source_candidate_groups`, `source_candidate_sources`) so each candidate type can support native-like cards, editable working metadata, promotion, ignore/unignore, and duplicate detection.
+- Ignored media is durable in `source_ignored_items`; sync should not reintroduce ignored candidates into the main candidate lists.
+- Source sync should upsert candidate records, mark already-stored media by matching native `urls`, and avoid overwriting user-edited candidate working metadata unless explicitly requested.
+
+Initial implementation branch:
+
+- `feature/native-sources` starts from `feature/online-scenes-native`.
+- Initial foundation adds migration `88_sources.up.sql`, source/candidate model structs, sqlite store, GraphQL schema/resolver shell, and repository wiring.
+
 ## Stash-a scrapers
 
 ### Shrmha

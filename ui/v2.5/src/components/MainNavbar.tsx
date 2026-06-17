@@ -226,6 +226,17 @@ export const MainNavbar: React.FC = () => {
       return item;
     });
 
+    if (!cfgMenuItems.includes("sources")) {
+      const nextMenuItems = [...cfgMenuItems];
+      const galleriesIndex = nextMenuItems.indexOf("galleries");
+      nextMenuItems.splice(
+        galleriesIndex >= 0 ? galleriesIndex + 1 : nextMenuItems.length,
+        0,
+        "sources"
+      );
+      cfgMenuItems = nextMenuItems;
+    }
+
     return allMenuItems.filter((menuItem) =>
       cfgMenuItems!.includes(menuItem.name)
     );

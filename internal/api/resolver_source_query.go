@@ -40,3 +40,15 @@ func (r *queryResolver) FindSourceByURL(ctx context.Context, url string) (ret *m
 	}
 	return ret, nil
 }
+
+func (r *queryResolver) FindSources(ctx context.Context) (*models.FindSourcesResultType, error) {
+	var sources []*models.Source
+	if err := r.withReadTxn(ctx, func(ctx context.Context) error {
+		var err error
+		sources, err = r.repository.Source.FindAll(ctx)
+		return err
+	}); err != nil {
+		return nil, err
+	}
+	return &models.FindSourcesResultType{Count: len(sources), Sources: sources}, nil
+}

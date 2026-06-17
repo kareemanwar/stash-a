@@ -88,26 +88,26 @@ type FindSourcesResultType struct {
 }
 
 type SourceCandidateScene struct {
-	ID                 int                   `json:"id" db:"id"`
-	SourceID           int                   `json:"source_id" db:"source_id"`
-	ExternalID         *string               `json:"external_id" db:"external_id"`
-	URL                string                `json:"url" db:"url"`
-	Title              *string               `json:"title" db:"title"`
-	Date               *string               `json:"date" db:"date"`
-	Details            *string               `json:"details" db:"details"`
-	ThumbnailURL       *string               `json:"thumbnail_url" db:"thumbnail_url"`
-	DurationSeconds    *int                  `json:"duration_seconds" db:"duration_seconds"`
-	Position           int                   `json:"position" db:"position"`
-	Status             SourceCandidateStatus `json:"status" db:"status"`
-	TargetSceneID      *int                  `json:"target_scene_id" db:"target_scene_id"`
-	SourceSlug         *string               `json:"source_slug" db:"source_slug"`
-	RawScrapedJSON     *string               `json:"raw_scraped_json" db:"raw_scraped_json"`
-	RawOnlineMediaJSON *string               `json:"raw_online_media_json" db:"raw_online_media_json"`
-	UserModified       bool                  `json:"user_modified" db:"user_modified"`
-	LastSeenAt         *time.Time            `json:"last_seen_at" db:"last_seen_at"`
-	LastScrapedAt      *time.Time            `json:"last_scraped_at" db:"last_scraped_at"`
-	CreatedAt          time.Time             `json:"created_at" db:"created_at"`
-	UpdatedAt          time.Time             `json:"updated_at" db:"updated_at"`
+	ID                 int                      `json:"id" db:"id"`
+	SourceID           int                      `json:"source_id" db:"source_id"`
+	ExternalID         *string                  `json:"external_id" db:"external_id"`
+	URL                string                   `json:"url" db:"url"`
+	Title              *string                  `json:"title" db:"title"`
+	Date               *string                  `json:"date" db:"date"`
+	Details            *string                  `json:"details" db:"details"`
+	ThumbnailURL       *string                  `json:"thumbnail_url" db:"thumbnail_url"`
+	DurationSeconds    *int                     `json:"duration_seconds" db:"duration_seconds"`
+	Position           int                      `json:"position" db:"position"`
+	Status             SourceCandidateStatus    `json:"status" db:"status"`
+	TargetSceneID      *int                     `json:"target_scene_id" db:"target_scene_id"`
+	SourceSlug         *string                  `json:"source_slug" db:"source_slug"`
+	RawScrapedJSON     *string                  `json:"raw_scraped_json" db:"raw_scraped_json"`
+	RawOnlineMediaJSON *string                  `json:"raw_online_media_json" db:"raw_online_media_json"`
+	UserModified       bool                     `json:"user_modified" db:"user_modified"`
+	LastSeenAt         *time.Time               `json:"last_seen_at" db:"last_seen_at"`
+	LastScrapedAt      *time.Time               `json:"last_scraped_at" db:"last_scraped_at"`
+	CreatedAt          time.Time                `json:"created_at" db:"created_at"`
+	UpdatedAt          time.Time                `json:"updated_at" db:"updated_at"`
 	Tags               []*SourceCandidateRelation `json:"tags" db:"-"`
 	Performers         []*SourceCandidateRelation `json:"performers" db:"-"`
 	Groups             []*SourceCandidateRelation `json:"groups" db:"-"`
@@ -121,20 +121,20 @@ type SourceCandidateRelation struct {
 }
 
 type SourceCandidateSceneInput struct {
-	SourceID           string                 `json:"source_id"`
-	ExternalID         *string                `json:"external_id"`
-	URL                string                 `json:"url"`
-	Title              *string                `json:"title"`
-	Date               *string                `json:"date"`
-	Details            *string                `json:"details"`
-	ThumbnailURL       *string                `json:"thumbnail_url"`
-	DurationSeconds    *int                   `json:"duration_seconds"`
-	Position           int                    `json:"position"`
-	Status             *SourceCandidateStatus `json:"status"`
-	TargetSceneID      *string                `json:"target_scene_id"`
-	SourceSlug         *string                `json:"source_slug"`
-	RawScrapedJSON     *string                `json:"raw_scraped_json"`
-	RawOnlineMediaJSON *string                `json:"raw_online_media_json"`
+	SourceID           string                         `json:"source_id"`
+	ExternalID         *string                        `json:"external_id"`
+	URL                string                         `json:"url"`
+	Title              *string                        `json:"title"`
+	Date               *string                        `json:"date"`
+	Details            *string                        `json:"details"`
+	ThumbnailURL       *string                        `json:"thumbnail_url"`
+	DurationSeconds    *int                           `json:"duration_seconds"`
+	Position           int                            `json:"position"`
+	Status             *SourceCandidateStatus         `json:"status"`
+	TargetSceneID      *string                        `json:"target_scene_id"`
+	SourceSlug         *string                        `json:"source_slug"`
+	RawScrapedJSON     *string                        `json:"raw_scraped_json"`
+	RawOnlineMediaJSON *string                        `json:"raw_online_media_json"`
 	Tags               []*SourceCandidateRelationInput `json:"tags"`
 	Performers         []*SourceCandidateRelationInput `json:"performers"`
 	Groups             []*SourceCandidateRelationInput `json:"groups"`
@@ -148,22 +148,23 @@ type SourceCandidateRelationInput struct {
 }
 
 type SourceIgnoredItem struct {
-	ID          int                      `json:"id" db:"id"`
-	SourceID    int                      `json:"source_id" db:"source_id"`
-	ContentType SourceIgnoredContentType `json:"content_type" db:"content_type"`
-	ExternalID  *string                  `json:"external_id" db:"external_id"`
-	URL         string                   `json:"url" db:"url"`
-	Title       *string                  `json:"title" db:"title"`
-	ThumbnailURL *string                 `json:"thumbnail_url" db:"thumbnail_url"`
-	Reason      *string                  `json:"reason" db:"reason"`
-	IgnoredAt   time.Time                `json:"ignored_at" db:"ignored_at"`
-	CreatedAt   time.Time                `json:"created_at" db:"created_at"`
-	UpdatedAt   time.Time                `json:"updated_at" db:"updated_at"`
+	ID           int                      `json:"id" db:"id"`
+	SourceID     int                      `json:"source_id" db:"source_id"`
+	ContentType  SourceIgnoredContentType `json:"content_type" db:"content_type"`
+	ExternalID   *string                  `json:"external_id" db:"external_id"`
+	URL          string                   `json:"url" db:"url"`
+	Title        *string                  `json:"title" db:"title"`
+	ThumbnailURL *string                  `json:"thumbnail_url" db:"thumbnail_url"`
+	Reason       *string                  `json:"reason" db:"reason"`
+	IgnoredAt    time.Time                `json:"ignored_at" db:"ignored_at"`
+	CreatedAt    time.Time                `json:"created_at" db:"created_at"`
+	UpdatedAt    time.Time                `json:"updated_at" db:"updated_at"`
 }
 
 type SourceReaderWriter interface {
 	Find(ctx context.Context, id int) (*Source, error)
 	FindByURL(ctx context.Context, url string) (*Source, error)
+	FindBySceneID(ctx context.Context, sceneID int) ([]*Source, error)
 	FindChildren(ctx context.Context, parentID int) ([]*Source, error)
 	FindAll(ctx context.Context) ([]*Source, error)
 	Create(ctx context.Context, source *Source) error

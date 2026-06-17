@@ -143,32 +143,62 @@ function isHLSURL(url: string) {
   return /\.m3u8(?:$|[?#])/i.test(url);
 }
 
+function streamQualityRank(stream: IOnlineStream) {
+  const labelHeight = /(?:^|\D)(\d{3,4})p(?:\D|$)/i.exec(stream.label ?? "");
+  if (labelHeight) {
+    return Number.parseInt(labelHeight[1], 10);
+  }
+
+  return isDirectStream(stream) ? 1 : 0;
+}
+
+function dedupeStreams(streams: IOnlineStream[]) {
+  const seen = new Set<string>();
+  const ret: IOnlineStream[] = [];
+
+  for (const stream of streams) {
+    if (!stream.url || seen.has(stream.url)) {
+      continue;
+    }
+
+    seen.add(stream.url);
+    ret.push(stream);
+  }
+
+  return ret;
+}
+
 function buildPlaybackStreams(media: IOnlineMedia): IOnlineStream[] {
   const streams = [...(media.streams ?? [])].sort((a, b) => a.position - b.position);
-  const seen = new Set(streams.map((stream) => stream.url));
 
-  if (media.direct_video_url && !seen.has(media.direct_video_url)) {
-    streams.unshift({
+  if (media.direct_video_url && !streams.some((stream) => stream.url === media.direct_video_url)) {
+    streams.push({
       label: "Direct video",
       kind: "direct",
       url: media.direct_video_url,
-      position: -2,
+      position: streams.length,
       is_primary: streams.length === 0,
     });
-    seen.add(media.direct_video_url);
   }
 
-  if (media.embed_url && !seen.has(media.embed_url)) {
-    streams.unshift({
+  if (media.embed_url && !streams.some((stream) => stream.url === media.embed_url)) {
+    streams.push({
       label: "Primary embed",
       kind: "embed",
       url: media.embed_url,
-      position: -1,
+      position: streams.length,
       is_primary: streams.length === 0,
     });
   }
 
-  return streams;
+  const directStreams = dedupeStreams(streams.filter(isDirectStream));
+  const playbackStreams = directStreams.length > 0 ? directStreams : dedupeStreams(streams);
+
+  return playbackStreams.sort(
+    (a, b) =>
+      streamQualityRank(b) - streamQualityRank(a) ||
+      a.position - b.position
+  );
 }
 
 const onlinePlayerStyle = `

@@ -1,6 +1,6 @@
 import React from "react";
 import { gql, useQuery } from "@apollo/client";
-import { Alert, Badge, Button, Nav, Tab, Table } from "react-bootstrap";
+import { Alert, Badge, Nav, Tab, Table } from "react-bootstrap";
 import { ErrorMessage } from "src/components/Shared/ErrorMessage";
 import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
 import { after } from "src/patch";
@@ -382,7 +382,10 @@ after("ScenePage.Tabs", (...args: unknown[]) => {
     </Nav.Item>
   );
 
-  const children = React.isValidElement(ret) ? ret.props.children : ret;
+  const retProps = React.isValidElement(ret)
+    ? (ret.props as { children?: React.ReactNode })
+    : undefined;
+  const children = retProps?.children ?? ret;
   return replaceChildren(ret, insertBeforeMarkers(children, inserted));
 });
 
@@ -400,7 +403,10 @@ after("ScenePage.TabContent", (...args: unknown[]) => {
     </Tab.Pane>
   );
 
-  const children = React.isValidElement(ret) ? ret.props.children : ret;
+  const retProps = React.isValidElement(ret)
+    ? (ret.props as { children?: React.ReactNode })
+    : undefined;
+  const children = retProps?.children ?? ret;
   return replaceChildren(ret, insertBeforeMarkers(children, inserted));
 });
 

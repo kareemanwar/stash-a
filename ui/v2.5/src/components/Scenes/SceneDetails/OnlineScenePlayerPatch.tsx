@@ -1,9 +1,10 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { gql, useQuery } from "@apollo/client";
 import { Alert, Button, Form } from "react-bootstrap";
+import videojs from "video.js";
 import { ErrorMessage } from "src/components/Shared/ErrorMessage";
 import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
-import { instead } from "src/patch";
+import { after, instead } from "src/patch";
 import TextUtils from "src/utils/text";
 
 interface IScenePlayerPatchProps {
@@ -11,6 +12,14 @@ interface IScenePlayerPatchProps {
     id: string;
     files: unknown[];
   };
+}
+
+interface ISceneCardImagePatchProps {
+  scene: {
+    id: string;
+    files: unknown[];
+  };
+  selecting?: boolean;
 }
 
 interface ISceneCardSceneSpecsPatchProps {
@@ -59,6 +68,16 @@ interface IOnlineDurationData {
   } | null;
 }
 
+interface IOnlinePreviewData {
+  findScene?: {
+    id: string;
+    online_media?: {
+      direct_video_url?: string | null;
+      thumbnail_url?: string | null;
+    } | null;
+  } | null;
+}
+
 interface IOnlineMediaVariables {
   id: string;
 }
@@ -102,10 +121,26 @@ const FIND_SCENE_ONLINE_DURATION = gql`
   }
 `;
 
+const FIND_SCENE_ONLINE_PREVIEW = gql`
+  query FindSceneOnlinePreview($id: ID!) {
+    findScene(id: $id) {
+      id
+      online_media {
+        direct_video_url
+        thumbnail_url
+      }
+    }
+  }
+`;
+
 function isDirectStream(stream: IOnlineStream) {
   return (
     stream.kind === "direct" || /\.(?:mp4|m3u8)(?:$|[?#])/i.test(stream.url)
   );
+}
+
+function isHLSURL(url: string) {
+  return /\.m3u8(?:$|[?#])/i.test(url);
 }
 
 function buildPlaybackStreams(media: IOnlineMedia): IOnlineStream[] {
@@ -196,6 +231,46 @@ const onlinePlayerStyle = `
   }
 `;
 
+const onlineCardPreviewStyle = `
+  .online-scene-card-preview-wrap {
+    height: 100%;
+    position: relative;
+    width: 100%;
+  }
+
+  .online-scene-card-hover-preview {
+    background: #000;
+    inset: 0;
+    opacity: 0;
+    overflow: hidden;
+    pointer-events: none;
+    position: absolute;
+    transition: opacity 140ms ease-in-out;
+    z-index: 1;
+  }
+
+  .online-scene-card-preview-wrap:hover .online-scene-card-hover-preview--active,
+  .online-scene-card-hover-preview--active {
+    opacity: 1;
+  }
+
+  .online-scene-card-hover-preview .video-js,
+  .online-scene-card-hover-preview video {
+    height: 100%;
+    inset: 0;
+    object-fit: cover;
+    position: absolute;
+    width: 100%;
+  }
+
+  .online-scene-card-hover-preview .vjs-control-bar,
+  .online-scene-card-hover-preview .vjs-big-play-button,
+  .online-scene-card-hover-preview .vjs-loading-spinner,
+  .online-scene-card-hover-preview .vjs-modal-dialog {
+    display: none;
+  }
+`;
+
 const OnlineSceneCardDurationOverlay: React.FC<{ sceneID: string }> = ({ sceneID }) => {
   const { data } = useQuery<IOnlineDurationData, IOnlineMediaVariables>(
     FIND_SCENE_ONLINE_DURATION,
@@ -216,6 +291,128 @@ const OnlineSceneCardDurationOverlay: React.FC<{ sceneID: string }> = ({ sceneID
       <span className="overlay-duration">
         {TextUtils.secondsToTimestamp(durationSeconds)}
       </span>
+    </div>
+  );
+};
+
+const OnlineSceneCardHoverPreview: React.FC<{
+  active: boolean;
+  sceneID: string;
+}> = ({ active, sceneID }) => {
+  const videoEl = useRef<HTMLVideoElement>(null);
+  const playerRef = useRef<ReturnType<typeof videojs> | null>(null);
+  const hoverTimerRef = useRef<number>();
+  const { data } = useQuery<IOnlinePreviewData, IOnlineMediaVariables>(
+    FIND_SCENE_ONLINE_PREVIEW,
+    {
+      variables: { id: sceneID },
+      fetchPolicy: "cache-first",
+    }
+  );
+
+  const media = data?.findScene?.online_media;
+  const directVideoURL = media?.direct_video_url;
+
+  useEffect(() => {
+    return () => {
+      window.clearTimeout(hoverTimerRef.current);
+
+      const player = playerRef.current;
+      if (player && !player.isDisposed()) {
+        player.dispose();
+      }
+    };
+  }, []);
+
+  useEffect(() => {
+    if (!active || !directVideoURL || !videoEl.current) {
+      window.clearTimeout(hoverTimerRef.current);
+
+      const player = playerRef.current;
+      if (player && !player.isDisposed()) {
+        player.pause();
+        player.currentTime(0);
+      }
+
+      return;
+    }
+
+    hoverTimerRef.current = window.setTimeout(() => {
+      if (!videoEl.current) return;
+
+      const player =
+        playerRef.current && !playerRef.current.isDisposed()
+          ? playerRef.current
+          : videojs(videoEl.current, {
+              autoplay: false,
+              controls: false,
+              loop: true,
+              muted: true,
+              preload: "none",
+            });
+
+      playerRef.current = player;
+      player.muted(true);
+      player.src({
+        src: directVideoURL,
+        type: isHLSURL(directVideoURL) ? "application/x-mpegURL" : "video/mp4",
+      });
+
+      const playPromise = player.play();
+      if (playPromise) {
+        playPromise.catch(() => {});
+      }
+    }, 350);
+
+    return () => {
+      window.clearTimeout(hoverTimerRef.current);
+    };
+  }, [active, directVideoURL]);
+
+  if (!directVideoURL) {
+    return null;
+  }
+
+  return (
+    <div
+      className={`online-scene-card-hover-preview${
+        active ? " online-scene-card-hover-preview--active" : ""
+      }`}
+    >
+      <style>{onlineCardPreviewStyle}</style>
+      <video
+        ref={videoEl}
+        className="video-js scene-card-preview-video"
+        disableRemotePlayback
+        loop
+        muted
+        playsInline
+        poster={media?.thumbnail_url ?? undefined}
+        preload="none"
+      />
+    </div>
+  );
+};
+
+const OnlineSceneCardImagePatch: React.FC<{
+  props: ISceneCardImagePatchProps;
+  ret: React.ReactNode;
+}> = ({ props, ret }) => {
+  const [active, setActive] = useState(false);
+
+  if (props.scene.files.length > 0 || props.selecting) {
+    return <>{ret}</>;
+  }
+
+  return (
+    <div
+      className="online-scene-card-preview-wrap"
+      onMouseEnter={() => setActive(true)}
+      onMouseLeave={() => setActive(false)}
+    >
+      <style>{onlineCardPreviewStyle}</style>
+      {ret}
+      <OnlineSceneCardHoverPreview active={active} sceneID={props.scene.id} />
     </div>
   );
 };
@@ -349,5 +546,12 @@ instead(
     return next(props);
   }
 );
+
+after("SceneCard.Image", (...args: unknown[]) => {
+  const props = args[0] as ISceneCardImagePatchProps;
+  const ret = args[args.length - 1] as React.ReactNode;
+
+  return <OnlineSceneCardImagePatch props={props} ret={ret} />;
+});
 
 export default OnlineScenePlayer;

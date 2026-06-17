@@ -83,6 +83,10 @@ const messages = defineMessages({
     id: "galleries",
     defaultMessage: "Galleries",
   },
+  sources: {
+    id: "sources",
+    defaultMessage: "Sources",
+  },
   test: {
     id: "test",
     defaultMessage: "Test",
@@ -139,6 +143,13 @@ const allMenuItems: IMenuItem[] = [
     icon: faImages,
     hotkey: "g l",
     userCreatable: true,
+  },
+  {
+    name: "sources",
+    message: messages.sources,
+    href: "/sources",
+    icon: faVideo,
+    hotkey: "g o",
   },
   {
     name: "performers",

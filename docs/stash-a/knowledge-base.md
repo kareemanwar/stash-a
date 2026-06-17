@@ -197,8 +197,10 @@ Initial implementation branch:
 ### Shrmha
 
 - Local development path: `.local/scrapers/stash-a/Shrmha/`.
-- First implementation is `sceneByURL` only.
-- The scraper returns native `ScrapedScene` fields: title, urls, date, image, details, studio, tags, and remote_site_id when available.
+- `Shrmha.py` / `ShrmhaOnline.py` implement `sceneByURL` for native online scenes.
+- `ShrmhaSource.py` is a first-pass `source-by-url` parser for Shrmha search/category-like listing pages. It returns a Source-shaped payload plus `scene_candidates` using native `ScrapedScene`-style fields for each candidate.
+- Shrmha source listing pages are WordPress preview grids using `.post-preview` blocks; each block can provide candidate scene URL/title/thumbnail/date/tags and an external id from `?p=` or `post-<id>` classes.
+- Shrmha source sync should stay lightweight: scrape listing metadata into candidate rows first, then run full `sceneByURL` only when a candidate is promoted or explicitly refreshed.
 - Shrmha is mapped as a native scraped studio, not as a custom `source_type` field.
 - Do not return performers from Shrmha scene pages until a page source has explicit performer data.
 - The source page does not expose duration/direct media directly. `ShrmhaOnline.py` probes the embed host, POSTs `/dl`, unpacks the returned JWPlayer script, and extracts `m3u8` direct video URL and `duration_seconds` when available.

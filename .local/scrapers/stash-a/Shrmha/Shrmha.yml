@@ -5,5 +5,5 @@ sceneByURL:
       - shrmha.com
     script:
       - python
-      - Shrmha.py
+      - ShrmhaOnline.py
       - scene-by-url

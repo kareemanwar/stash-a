@@ -21,8 +21,6 @@ type ScrapedOnlineMedia = {
   source_name: string;
   source_slug: string;
   external_id?: string | null;
-  page_url: string;
-  canonical_url?: string | null;
   embed_url?: string | null;
   direct_video_url?: string | null;
   thumbnail_url?: string | null;
@@ -60,8 +58,6 @@ type SceneOnlineMediaInput = {
   source_name: string;
   source_slug: string;
   external_id?: string | null;
-  page_url: string;
-  canonical_url: string;
   embed_url?: string | null;
   direct_video_url?: string | null;
   thumbnail_url?: string | null;
@@ -93,8 +89,6 @@ const SCRAPE_ONLINE_SCENE_URL = gql`
         source_name
         source_slug
         external_id
-        page_url
-        canonical_url
         embed_url
         direct_video_url
         thumbnail_url
@@ -205,10 +199,8 @@ function mergeSceneCreateInput(
 function buildOnlineMediaInput(
   sceneID: string,
   scene: ScrapedSceneWithOnlineMedia,
-  media: ScrapedOnlineMedia,
-  sourceURL: string
+  media: ScrapedOnlineMedia
 ): SceneOnlineMediaInput {
-  const fallbackURL = scene.urls?.[0] ?? media.page_url ?? sourceURL;
   const streams = (media.streams ?? [])
     .filter((stream) => !!stream.url)
     .map((stream, index) => ({
@@ -244,8 +236,6 @@ function buildOnlineMediaInput(
     source_name: media.source_name || "Unknown",
     source_slug: media.source_slug || "unknown",
     external_id: media.external_id || scene.remote_site_id || undefined,
-    page_url: media.page_url || fallbackURL,
-    canonical_url: media.canonical_url || media.page_url || fallbackURL,
     embed_url: media.embed_url || undefined,
     direct_video_url: media.direct_video_url || undefined,
     thumbnail_url: media.thumbnail_url || scene.image || undefined,
@@ -378,8 +368,7 @@ const SceneCreate: React.FC = () => {
         input: buildOnlineMediaInput(
           sceneID,
           scrapedScene,
-          scrapedScene.online_media!,
-          onlineSourceURL
+          scrapedScene.online_media!
         ),
       },
     });

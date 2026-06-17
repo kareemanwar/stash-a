@@ -1,0 +1,26 @@
+type ScrapedSceneOnlineMedia {
+  source_name: String!
+  source_slug: String!
+  external_id: String
+  page_url: String!
+  canonical_url: String
+  embed_url: String
+  direct_video_url: String
+  thumbnail_url: String
+  duration_seconds: Int
+  external_view_count: Int
+  raw_metadata_json: String
+  streams: [ScrapedSceneOnlineStream!]!
+}
+
+type ScrapedSceneOnlineStream {
+  label: String
+  kind: String!
+  url: String!
+  position: Int!
+  is_primary: Boolean!
+}
+
+extend type ScrapedScene {
+  online_media: ScrapedSceneOnlineMedia
+}

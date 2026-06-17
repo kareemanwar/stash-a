@@ -15,6 +15,7 @@ Keep this file concise, factual, and action-oriented. Current code and upstream 
 ### `kareemanwar/CommunityScrapers-k`
 
 - Reference for Stash community scraper examples.
+- Use for Stash community scraper examples.
 - Use for YAML/Python scraper patterns and provider extraction examples.
 - Prefer upstream Stash native patterns over community scraper examples when there is a conflict.
 
@@ -168,6 +169,7 @@ Implemented UI flow:
 - `ScraperTest` can scrape a scene URL, show native review, and create a fileless online scene by creating a native Scene then saving `sceneOnlineMediaSave`.
 - `/scenes/new` exposes an `Online` checkbox and `Source URL` field below the title for new scenes.
 - When the checkbox is enabled, saving runs the native URL scraper, creates a native Scene from scraped fields plus any user-entered overrides, saves online media/streams, then opens the scene.
+- `/scenes/new` checks native `Scene.urls` for the source URL and scraped URLs before creating an online scene. If a matching scene exists, it opens the existing scene instead of creating a duplicate.
 - `ScenePlayer` is patched only for fileless scenes with online media. Local-file scenes continue to use the native Stash player.
 - Online scene card UI should avoid covering native selection controls; badges belong in card details, while duration overlays should follow the local Scene card overlay pattern.
 - Online provider view counts belong in the card text/details area, not on thumbnail overlays.

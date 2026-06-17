@@ -111,10 +111,13 @@ function buildPlaybackStreams(media: IOnlineMedia): IOnlineStream[] {
 const onlinePlayerStyle = `
   .online-scene-player {
     min-height: 0;
+    overflow: visible;
+    position: relative;
   }
 
   .online-scene-player__frame {
     min-height: 0;
+    overflow: visible;
     position: relative;
   }
 
@@ -125,13 +128,14 @@ const onlinePlayerStyle = `
   }
 
   .online-scene-player__controls {
-    bottom: 0.75rem;
+    align-items: center;
+    bottom: -2rem;
     display: flex;
-    gap: 0.5rem;
-    max-width: min(38rem, calc(100% - 1.5rem));
-    opacity: 0.38;
+    gap: 0.35rem;
+    justify-content: flex-end;
+    opacity: 0.3;
     position: absolute;
-    right: 0.75rem;
+    right: 0.25rem;
     transition: opacity 120ms ease-in-out;
     z-index: 4;
   }
@@ -143,17 +147,23 @@ const onlinePlayerStyle = `
 
   .online-scene-player__server {
     background-color: rgba(10, 18, 24, 0.72);
-    border-color: rgba(255, 255, 255, 0.22);
+    border-color: rgba(255, 255, 255, 0.2);
     color: #fff;
-    height: calc(1.5em + 0.5rem + 2px);
-    max-width: 13rem;
-    min-width: 9rem;
+    height: calc(1.5em + 0.35rem + 2px);
+    max-width: 10rem;
+    min-width: 8rem;
+    order: 2;
+    padding-bottom: 0.1rem;
+    padding-top: 0.1rem;
   }
 
   .online-scene-player__source-button.btn {
-    background-color: rgba(10, 18, 24, 0.72);
-    border-color: rgba(255, 255, 255, 0.22);
+    background-color: rgba(10, 18, 24, 0.65);
+    border-color: rgba(255, 255, 255, 0.18);
     color: #fff;
+    line-height: 1.2;
+    order: 1;
+    padding: 0.2rem 0.45rem;
     white-space: nowrap;
   }
 `;

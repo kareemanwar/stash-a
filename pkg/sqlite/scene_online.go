@@ -82,7 +82,7 @@ func (qb *SceneOnlineMediaStore) Destroy(ctx context.Context, id int) error {
 
 func (qb *SceneOnlineMediaStore) find(ctx context.Context, where string, args ...interface{}) (*models.SceneOnlineMedia, error) {
 	query := fmt.Sprintf(`
-		SELECT id, scene_id, source_name, source_slug, external_id, page_url, canonical_url,
+		SELECT id, scene_id, source_name, source_slug, external_id,
 		       embed_url, direct_video_url, thumbnail_url, duration_seconds, external_view_count,
 		       raw_metadata_json, last_scraped_at, created_at, updated_at
 		FROM %s
@@ -121,18 +121,16 @@ func (qb *SceneOnlineMediaStore) findStreams(ctx context.Context, mediaID int) (
 func (qb *SceneOnlineMediaStore) insert(ctx context.Context, media *models.SceneOnlineMedia) (int, error) {
 	query := fmt.Sprintf(`
 		INSERT INTO %s (
-			scene_id, source_name, source_slug, external_id, page_url, canonical_url,
+			scene_id, source_name, source_slug, external_id,
 			embed_url, direct_video_url, thumbnail_url, duration_seconds, external_view_count,
 			raw_metadata_json, last_scraped_at
-		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, sceneOnlineMediaTable)
+		) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)`, sceneOnlineMediaTable)
 
 	result, err := dbWrapper.Exec(ctx, query,
 		media.SceneID,
 		media.SourceName,
 		media.SourceSlug,
 		media.ExternalID,
-		media.PageURL,
-		media.CanonicalURL,
 		media.EmbedURL,
 		media.DirectVideoURL,
 		media.ThumbnailURL,
@@ -159,8 +157,6 @@ func (qb *SceneOnlineMediaStore) update(ctx context.Context, media *models.Scene
 			source_name = ?,
 			source_slug = ?,
 			external_id = ?,
-			page_url = ?,
-			canonical_url = ?,
 			embed_url = ?,
 			direct_video_url = ?,
 			thumbnail_url = ?,
@@ -175,8 +171,6 @@ func (qb *SceneOnlineMediaStore) update(ctx context.Context, media *models.Scene
 		media.SourceName,
 		media.SourceSlug,
 		media.ExternalID,
-		media.PageURL,
-		media.CanonicalURL,
 		media.EmbedURL,
 		media.DirectVideoURL,
 		media.ThumbnailURL,

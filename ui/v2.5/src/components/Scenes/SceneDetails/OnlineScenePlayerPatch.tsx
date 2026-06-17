@@ -42,8 +42,6 @@ interface IOnlineMedia {
   source_name: string;
   source_slug: string;
   external_id?: string | null;
-  page_url: string;
-  canonical_url?: string | null;
   embed_url?: string | null;
   direct_video_url?: string | null;
   thumbnail_url?: string | null;
@@ -55,6 +53,7 @@ interface IOnlineMedia {
 interface IOnlineMediaData {
   findScene?: {
     id: string;
+    urls?: string[] | null;
     online_media?: IOnlineMedia | null;
   } | null;
 }
@@ -86,12 +85,11 @@ const FIND_SCENE_ONLINE_MEDIA = gql`
   query FindSceneOnlineMedia($id: ID!) {
     findScene(id: $id) {
       id
+      urls
       online_media {
         source_name
         source_slug
         external_id
-        page_url
-        canonical_url
         embed_url
         direct_video_url
         thumbnail_url
@@ -497,7 +495,7 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
 
   const selectedStream =
     streams.find((stream) => stream.url === selectedURL) ?? primaryStream;
-  const sourceURL = media.page_url || media.canonical_url || selectedStream?.url;
+  const sourceURL = data?.findScene?.urls?.[0] || selectedStream?.url;
 
   return (
     <div className="online-scene-player h-100">

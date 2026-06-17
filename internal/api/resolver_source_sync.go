@@ -5,6 +5,7 @@ import (
 	"context"
 	"encoding/json"
 	"fmt"
+	"os"
 	"os/exec"
 	"path/filepath"
 	"strings"
@@ -25,20 +26,20 @@ type scrapedSourcePayload struct {
 }
 
 type scrapedSceneCandidate struct {
-	Title           *string              `json:"title"`
-	URLs            []string             `json:"urls"`
-	Image           *string              `json:"image"`
-	Date            *string              `json:"date"`
-	RemoteSiteID    *string              `json:"remote_site_id"`
-	Details         *string              `json:"details"`
-	Duration        *int                 `json:"duration"`
-	CandidateStatus *string              `json:"candidate_status"`
-	CandidatePos    *int                 `json:"candidate_position"`
-	Tags            []scrapedNamedObject  `json:"tags"`
-	Performers      []scrapedNamedObject  `json:"performers"`
-	Groups          []scrapedNamedObject  `json:"groups"`
-	Galleries       []scrapedNamedObject  `json:"galleries"`
-	OnlineMedia     json.RawMessage       `json:"online_media"`
+	Title           *string             `json:"title"`
+	URLs            []string            `json:"urls"`
+	Image           *string             `json:"image"`
+	Date            *string             `json:"date"`
+	RemoteSiteID    *string             `json:"remote_site_id"`
+	Details         *string             `json:"details"`
+	Duration        *int                `json:"duration"`
+	CandidateStatus *string             `json:"candidate_status"`
+	CandidatePos    *int                `json:"candidate_position"`
+	Tags            []scrapedNamedObject `json:"tags"`
+	Performers      []scrapedNamedObject `json:"performers"`
+	Groups          []scrapedNamedObject `json:"groups"`
+	Galleries       []scrapedNamedObject `json:"galleries"`
+	OnlineMedia     json.RawMessage      `json:"online_media"`
 }
 
 type scrapedNamedObject struct {
@@ -174,7 +175,10 @@ func runShrmhaSourceByURL(sourceURL string) (*scrapedSourcePayload, error) {
 		}
 	}
 
-	scriptPath := filepath.Join(".local", "scrapers", "stash-a", "Shrmha", "ShrmhaSource.py")
+	scriptPath, err := findShrmhaSourceScriptPath()
+	if err != nil {
+		return nil, err
+	}
 	cmd := exec.Command(python, scriptPath, "source-by-url", "--url", sourceURL)
 	var stderr bytes.Buffer
 	cmd.Stderr = &stderr
@@ -191,6 +195,26 @@ func runShrmhaSourceByURL(sourceURL string) (*scrapedSourcePayload, error) {
 		return nil, fmt.Errorf("Shrmha source scraper returned an empty source title")
 	}
 	return &payload, nil
+}
+
+func findShrmhaSourceScriptPath() (string, error) {
+	candidates := []string{
+		filepath.Join(".local", "scrapers", "stash-a", "Shrmha", "ShrmhaSource.py"),
+		filepath.Join("scrapers", "stash-a", "Shrmha", "ShrmhaSource.py"),
+		filepath.Join("..", ".local", "scrapers", "stash-a", "Shrmha", "ShrmhaSource.py"),
+	}
+	for _, candidate := range candidates {
+		if _, err := os.Stat(candidate); err == nil {
+			abs, absErr := filepath.Abs(candidate)
+			if absErr == nil {
+				return abs, nil
+			}
+			return candidate, nil
+		} else if !os.IsNotExist(err) {
+			return "", fmt.Errorf("failed to inspect Shrmha source scraper path %q: %w", candidate, err)
+		}
+	}
+	return "", fmt.Errorf("Shrmha source scraper script not found; checked %s", strings.Join(candidates, ", "))
 }
 
 func (r *mutationResolver) ensureScrapedSourceParent(ctx context.Context, payload *scrapedSourcePayload) (*int, error) {

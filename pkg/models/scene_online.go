@@ -16,8 +16,6 @@ type SceneOnlineMedia struct {
 	SourceName        string               `json:"source_name" db:"source_name"`
 	SourceSlug        string               `json:"source_slug" db:"source_slug"`
 	ExternalID        *string              `json:"external_id" db:"external_id"`
-	PageURL           string               `json:"page_url" db:"page_url"`
-	CanonicalURL      *string              `json:"canonical_url" db:"canonical_url"`
 	EmbedURL          *string              `json:"embed_url" db:"embed_url"`
 	DirectVideoURL    *string              `json:"direct_video_url" db:"direct_video_url"`
 	ThumbnailURL      *string              `json:"thumbnail_url" db:"thumbnail_url"`
@@ -50,8 +48,6 @@ type SceneOnlineMediaInput struct {
 	SourceName        string                    `json:"source_name"`
 	SourceSlug        string                    `json:"source_slug"`
 	ExternalID        *string                   `json:"external_id"`
-	PageURL           string                    `json:"page_url"`
-	CanonicalURL      *string                   `json:"canonical_url"`
 	EmbedURL          *string                   `json:"embed_url"`
 	DirectVideoURL    *string                   `json:"direct_video_url"`
 	ThumbnailURL      *string                   `json:"thumbnail_url"`

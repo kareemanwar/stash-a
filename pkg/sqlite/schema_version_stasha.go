@@ -1,7 +1,7 @@
 package sqlite
 
 func init() {
-	if appSchemaVersion < 86 {
-		appSchemaVersion = 86
+	if appSchemaVersion < 87 {
+		appSchemaVersion = 87
 	}
 }

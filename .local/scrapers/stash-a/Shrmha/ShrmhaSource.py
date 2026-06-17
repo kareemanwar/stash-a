@@ -4,10 +4,12 @@ import json
 import re
 import sys
 from typing import Any
-from urllib.parse import parse_qs, unquote_plus, urljoin, urlparse
+from urllib.parse import parse_qs, unquote_plus, urlencode, urljoin, urlparse, urlunparse
 
 import Shrmha
 
+
+MAX_SOURCE_PAGES = 50
 
 ARABIC_MONTHS = {
     "يناير": 1,
@@ -61,6 +63,90 @@ def normalize_preview_date(value: str | None) -> str | None:
     return text
 
 
+def first_query_value(query: dict[str, list[str]], key: str) -> str | None:
+    value = Shrmha.first(query.get(key))
+    if isinstance(value, str) and value:
+        return value
+    return None
+
+
+def listing_page_number(url: str) -> int:
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query)
+    for key in ("paged", "page"):
+        value = first_query_value(query, key)
+        if value and value.isdigit():
+            return max(1, int(value))
+
+    path_page = re.search(r"/page/(\d+)/?", parsed.path)
+    if path_page:
+        return max(1, int(path_page.group(1)))
+
+    return 1
+
+
+def canonical_source_url(url: str) -> str:
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    query.pop("paged", None)
+    query.pop("page", None)
+
+    path = parsed.path or "/"
+    path = re.sub(r"/page/\d+/?$", "/", path)
+
+    return urlunparse(
+        (
+            parsed.scheme or "https",
+            parsed.netloc or urlparse(Shrmha.STUDIO_URL).netloc,
+            path or "/",
+            "",
+            urlencode(query, doseq=True),
+            "",
+        )
+    )
+
+
+def listing_page_url(seed_url: str, page_number: int) -> str:
+    parsed = urlparse(canonical_source_url(seed_url))
+    query = parse_qs(parsed.query, keep_blank_values=True)
+
+    if page_number > 1:
+        query["paged"] = [str(page_number)]
+    else:
+        query.pop("paged", None)
+        query.pop("page", None)
+
+    return urlunparse(
+        (
+            parsed.scheme or "https",
+            parsed.netloc or urlparse(Shrmha.STUDIO_URL).netloc,
+            parsed.path or "/",
+            "",
+            urlencode(query, doseq=True),
+            "",
+        )
+    )
+
+
+def normalize_listing_url(url: str, base_url: str) -> str:
+    absolute_url = urljoin(base_url, html.unescape(url).strip())
+    candidate_page = listing_page_number(absolute_url)
+    candidate_query = parse_qs(urlparse(absolute_url).query)
+    base_query = parse_qs(urlparse(base_url).query)
+
+    seed_url = absolute_url
+    if "s" in base_query and "s" not in candidate_query:
+        seed_url = base_url
+
+    return listing_page_url(seed_url, candidate_page)
+
+
+def is_site_root(url: str) -> bool:
+    parsed = urlparse(canonical_source_url(url))
+    root = urlparse(Shrmha.STUDIO_URL)
+    return parsed.netloc == root.netloc and parsed.path in ("", "/") and not parsed.query
+
+
 def extract_query(url: str, document: str) -> str | None:
     parsed = urlparse(url)
     query_value = parse_qs(parsed.query).get("s")
@@ -106,13 +192,39 @@ def extract_source_thumbnail(document: str, base_url: str) -> str | None:
 def extract_pagination_urls(document: str, base_url: str) -> list[str]:
     urls: list[str] = []
     seen: set[str] = set()
+
+    def add(raw_url: str | None) -> None:
+        if not raw_url:
+            return
+        candidate = normalize_listing_url(raw_url, base_url)
+        if candidate in seen:
+            return
+        seen.add(candidate)
+        urls.append(candidate)
+
+    for match in re.finditer(
+        r'<link\b[^>]*rel=["\'][^"\']*(?:next|prev)[^"\']*["\'][^>]*href=["\'](?P<url>[^"\']+)["\']',
+        document,
+        re.IGNORECASE | re.DOTALL,
+    ):
+        add(match.group("url"))
+
+    for match in re.finditer(
+        r'<link\b[^>]*href=["\'](?P<url>[^"\']+)["\'][^>]*rel=["\'][^"\']*(?:next|prev)[^"\']*["\']',
+        document,
+        re.IGNORECASE | re.DOTALL,
+    ):
+        add(match.group("url"))
+
     pagination = re.search(r'<div\b[^>]*id=["\']tubeace-pagination["\'][^>]*>(?P<body>.*?)</div>\s*</nav>', document, re.IGNORECASE | re.DOTALL)
     body = pagination.group("body") if pagination else document
-    for match in re.finditer(r'<a\b[^>]*href=["\'](?P<url>[^"\']+)["\'][^>]*class=["\'][^"\']*page-numbers[^"\']*["\']', body, re.IGNORECASE | re.DOTALL):
-        candidate = urljoin(base_url, html.unescape(match.group("url")))
-        if candidate not in seen:
-            seen.add(candidate)
-            urls.append(candidate)
+    for match in re.finditer(r'<a\b(?P<attrs>[^>]*)>', body, re.IGNORECASE | re.DOTALL):
+        attrs = match.group("attrs")
+        href = attr_value(attrs, "href")
+        class_name = attr_value(attrs, "class") or ""
+        if "page-numbers" in class_name or re.search(r"(?:[?&](?:paged|page)=|/page/\d+)", href or ""):
+            add(href)
+
     return urls
 
 
@@ -218,34 +330,97 @@ def extract_scene_candidates(document: str, base_url: str) -> list[dict[str, Any
     return candidates
 
 
+def crawl_listing_pages(url: str) -> list[tuple[str, str]]:
+    start_urls = [canonical_source_url(url)]
+    normalized_input_url = normalize_listing_url(url, url)
+    if normalized_input_url not in start_urls:
+        start_urls.append(normalized_input_url)
+
+    documents: list[tuple[str, str]] = []
+    queued: list[str] = list(start_urls)
+    queued_set: set[str] = set(start_urls)
+    seen: set[str] = set()
+
+    while queued and len(documents) < MAX_SOURCE_PAGES:
+        page_url = queued.pop(0)
+        queued_set.discard(page_url)
+        if page_url in seen:
+            continue
+
+        document = Shrmha.fetch_html(page_url)
+        seen.add(page_url)
+        documents.append((page_url, document))
+
+        for next_url in extract_pagination_urls(document, page_url):
+            if next_url in seen or next_url in queued_set:
+                continue
+            if len(seen) + len(queued) >= MAX_SOURCE_PAGES:
+                break
+            queued.append(next_url)
+            queued_set.add(next_url)
+
+    return documents
+
+
+def collect_scene_candidates(documents: list[tuple[str, str]]) -> list[dict[str, Any]]:
+    candidates: list[dict[str, Any]] = []
+    seen_urls: set[str] = set()
+
+    for page_url, document in documents:
+        for candidate in extract_scene_candidates(document, page_url):
+            url = candidate["urls"][0]
+            if url in seen_urls:
+                continue
+            seen_urls.add(url)
+            candidate["candidate_position"] = len(candidates)
+            candidates.append(candidate)
+
+    return candidates
+
+
 def scrape_source_by_url(url: str) -> dict[str, Any]:
-    document = Shrmha.fetch_html(url)
-    source_title = extract_source_title(url, document)
-    thumbnail_url = extract_source_thumbnail(document, url)
-    scene_candidates = extract_scene_candidates(document, url)
+    page_documents = crawl_listing_pages(url)
+    if not page_documents:
+        return {"error": f"No Shrmha source pages could be fetched for {url}"}
+
+    first_page_url, first_document = page_documents[0]
+    source_url = canonical_source_url(url)
+    source_title = extract_source_title(source_url, first_document)
+    thumbnail_url = extract_source_thumbnail(first_document, first_page_url)
+    scene_candidates = collect_scene_candidates(page_documents)
     if not thumbnail_url and scene_candidates:
         thumb = scene_candidates[0].get("image")
         thumbnail_url = thumb if isinstance(thumb, str) else None
 
-    query = extract_query(url, document)
-    remote_site_id = f"search:{query}" if query else urlparse(url).path or Shrmha.STUDIO_SLUG
+    query = extract_query(source_url, first_document)
+    if query:
+        remote_site_id = f"search:{query}"
+        source_type = "SEARCH"
+    elif is_site_root(source_url):
+        remote_site_id = Shrmha.STUDIO_SLUG
+        source_type = "SITE"
+    else:
+        remote_site_id = urlparse(source_url).path or Shrmha.STUDIO_SLUG
+        source_type = "SITE_SECTION"
 
     result: dict[str, Any] = {
         "title": source_title,
-        "urls": [url],
-        "details": f"{Shrmha.STUDIO_NAME} source scraped from {url}",
-        "source_type": "SEARCH" if query else "SITE_SECTION",
+        "urls": [source_url],
+        "details": f"{Shrmha.STUDIO_NAME} source scraped from {source_url}",
+        "source_type": source_type,
         "thumbnail_url": thumbnail_url,
         "remote_site_id": remote_site_id,
-        "parent": {
+        "scene_candidates": scene_candidates,
+        "pagination_urls": [page_url for page_url, _ in page_documents],
+    }
+
+    if source_type != "SITE":
+        result["parent"] = {
             "title": Shrmha.STUDIO_NAME,
             "urls": [Shrmha.STUDIO_URL],
             "source_type": "SITE",
             "remote_site_id": Shrmha.STUDIO_SLUG,
-        },
-        "scene_candidates": scene_candidates,
-        "pagination_urls": extract_pagination_urls(document, url),
-    }
+        }
 
     return {k: v for k, v in result.items() if v not in (None, [], "")}
 

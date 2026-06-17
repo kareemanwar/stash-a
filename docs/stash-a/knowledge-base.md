@@ -159,6 +159,7 @@ Implemented native storage:
 
 - Online scene provider metadata is stored in native feature tables `scene_online_media` and `scene_online_streams` via sqlite migration `86_scene_online_media.up.sql`.
 - Native Scene fields remain the owner for title, date, details, urls, cover image, performers, tags, studio, groups, and galleries.
+- Source/page/canonical URLs belong in native `Scene.urls`; do not duplicate them into `scene_online_media`.
 - External-only data such as source slug/name, external id, embed URL, direct video URL, remote thumbnail URL, external view count, duration from provider/player metadata, raw provider metadata, and stream list belongs in `scene_online_media` / `scene_online_streams`.
 - Do not store online scene metadata in `custom_fields`, browser storage, local JSON, or runtime-created tables.
 
@@ -170,7 +171,7 @@ Implemented UI flow:
 - `ScenePlayer` is patched only for fileless scenes with online media. Local-file scenes continue to use the native Stash player.
 - Online scene card UI should avoid covering native selection controls; badges belong in card details, while duration overlays should follow the local Scene card overlay pattern.
 - Online provider view counts belong in the card text/details area, not on thumbnail overlays.
-- Fileless online scene pages expose an `Online` tab next to the native scene tabs. The tab displays `scene_online_media`, `scene_online_streams`, provider view count, duration, URLs, timestamps, and raw metadata through GraphQL.
+- Fileless online scene pages expose an `Online` tab next to the native scene tabs. The tab displays `scene_online_media`, `scene_online_streams`, provider view count, duration, native source URL from `Scene.urls`, timestamps, and raw metadata through GraphQL.
 
 ## Stash-a scrapers
 
@@ -182,4 +183,4 @@ Implemented UI flow:
 - Shrmha is mapped as a native scraped studio, not as a custom `source_type` field.
 - Do not return performers from Shrmha scene pages until a page source has explicit performer data.
 - The source page does not expose duration/direct media directly. `ShrmhaOnline.py` probes the embed host, POSTs `/dl`, unpacks the returned JWPlayer script, and extracts `m3u8` direct video URL and `duration_seconds` when available.
-- The Shrmha scraper should return `online_media` with embed streams, direct stream when discovered, `duration_seconds`, thumbnail URL, external id, and raw provider metadata.
+- The Shrmha scraper should return `online_media` with embed streams, direct stream when discovered, `duration_seconds`, thumbnail URL, external id, and raw provider metadata. Source page URLs belong only in native `ScrapedScene.urls` / `Scene.urls`.

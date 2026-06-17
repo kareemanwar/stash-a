@@ -4,8 +4,16 @@ import { Alert, Button, Form } from "react-bootstrap";
 import { ErrorMessage } from "src/components/Shared/ErrorMessage";
 import { LoadingIndicator } from "src/components/Shared/LoadingIndicator";
 import { instead } from "src/patch";
+import TextUtils from "src/utils/text";
 
 interface IScenePlayerPatchProps {
+  scene: {
+    id: string;
+    files: unknown[];
+  };
+}
+
+interface ISceneCardSceneSpecsPatchProps {
   scene: {
     id: string;
     files: unknown[];
@@ -42,6 +50,15 @@ interface IOnlineMediaData {
   } | null;
 }
 
+interface IOnlineDurationData {
+  findScene?: {
+    id: string;
+    online_media?: {
+      duration_seconds?: number | null;
+    } | null;
+  } | null;
+}
+
 interface IOnlineMediaVariables {
   id: string;
 }
@@ -69,6 +86,17 @@ const FIND_SCENE_ONLINE_MEDIA = gql`
           position
           is_primary
         }
+      }
+    }
+  }
+`;
+
+const FIND_SCENE_ONLINE_DURATION = gql`
+  query FindSceneOnlineDuration($id: ID!) {
+    findScene(id: $id) {
+      id
+      online_media {
+        duration_seconds
       }
     }
   }
@@ -167,6 +195,30 @@ const onlinePlayerStyle = `
     white-space: nowrap;
   }
 `;
+
+const OnlineSceneCardDurationOverlay: React.FC<{ sceneID: string }> = ({ sceneID }) => {
+  const { data } = useQuery<IOnlineDurationData, IOnlineMediaVariables>(
+    FIND_SCENE_ONLINE_DURATION,
+    {
+      variables: { id: sceneID },
+      fetchPolicy: "cache-first",
+    }
+  );
+
+  const durationSeconds = data?.findScene?.online_media?.duration_seconds;
+
+  if (!durationSeconds || durationSeconds <= 0) {
+    return null;
+  }
+
+  return (
+    <div className="scene-specs-overlay">
+      <span className="overlay-duration">
+        {TextUtils.secondsToTimestamp(durationSeconds)}
+      </span>
+    </div>
+  );
+};
 
 const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
   const { data, loading, error } = useQuery<IOnlineMediaData, IOnlineMediaVariables>(
@@ -278,6 +330,20 @@ instead(
   (props: IScenePlayerPatchProps, next: React.FC<IScenePlayerPatchProps>) => {
     if (props.scene.files.length === 0) {
       return <OnlineScenePlayer sceneID={props.scene.id} />;
+    }
+
+    return next(props);
+  }
+);
+
+instead(
+  "SceneCard.SceneSpecs",
+  (
+    props: ISceneCardSceneSpecsPatchProps,
+    next: React.FC<ISceneCardSceneSpecsPatchProps>
+  ) => {
+    if (props.scene.files.length === 0) {
+      return <OnlineSceneCardDurationOverlay sceneID={props.scene.id} />;
     }
 
     return next(props);

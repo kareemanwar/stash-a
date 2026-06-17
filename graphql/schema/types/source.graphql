@@ -1,0 +1,79 @@
+enum SourceType {
+  SITE
+  SITE_SECTION
+  SEARCH
+  CATEGORY
+  ACCOUNT
+  CHANNEL
+  PROFILE
+  COLLECTION
+  OTHER
+}
+
+enum SourceCandidateStatus {
+  NEW
+  LINKED
+  PROMOTED
+  IGNORED
+  STALE
+  ERROR
+}
+
+enum SourceIgnoredContentType {
+  SCENE
+  IMAGE
+  GALLERY
+  GROUP
+  SOURCE
+}
+
+type Source {
+  id: ID!
+  title: String!
+  urls: [String!]!
+  details: String
+  type: SourceType!
+  parent: Source
+  parent_id: ID
+  children: [Source!]!
+  thumbnail_url: String
+  rating100: Int
+  favorite: Boolean!
+  last_synced_at: Time
+  created_at: Time!
+  updated_at: Time!
+  candidate_scene_count: Int!
+  ignored_count: Int!
+}
+
+input SourceCreateInput {
+  title: String!
+  urls: [String!]
+  details: String
+  type: SourceType = OTHER
+  parent_id: ID
+  thumbnail_url: String
+  rating100: Int
+  favorite: Boolean
+}
+
+input SourceUpdateInput {
+  id: ID!
+  title: String
+  urls: [String!]
+  details: String
+  type: SourceType
+  parent_id: ID
+  thumbnail_url: String
+  rating100: Int
+  favorite: Boolean
+}
+
+input SourceDestroyInput {
+  id: ID!
+}
+
+type FindSourcesResultType {
+  count: Int!
+  sources: [Source!]!
+}

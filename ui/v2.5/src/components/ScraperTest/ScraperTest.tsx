@@ -1,6 +1,15 @@
 import React, { useEffect, useMemo, useState } from "react";
 import { gql } from "@apollo/client";
-import { Alert, Badge, Button, Card, Col, Form, Row, Spinner } from "react-bootstrap";
+import {
+  Alert,
+  Badge,
+  Button,
+  Card,
+  Col,
+  Form,
+  Row,
+  Spinner,
+} from "react-bootstrap";
 import * as GQL from "src/core/generated-graphql";
 import { SceneScrapeDialog } from "src/components/Scenes/SceneDetails/SceneScrapeDialog";
 import { SceneCard } from "src/components/Scenes/SceneCard";
@@ -21,6 +30,74 @@ type Scraper = {
   scene?: ScraperSpec | null;
 };
 
+type ScrapedSceneOnlineStream = {
+  label?: string | null;
+  kind: string;
+  url: string;
+  position: number;
+  is_primary: boolean;
+};
+
+type ScrapedSceneOnlineMedia = {
+  source_name: string;
+  source_slug: string;
+  external_id?: string | null;
+  page_url: string;
+  canonical_url: string;
+  embed_url?: string | null;
+  direct_video_url?: string | null;
+  thumbnail_url?: string | null;
+  duration_seconds?: number | null;
+  external_view_count?: number | null;
+  raw_metadata_json?: string | null;
+  streams: ScrapedSceneOnlineStream[];
+};
+
+type ScrapedSceneWithOnlineMedia = GQL.ScrapedScene & {
+  online_media?: ScrapedSceneOnlineMedia | null;
+};
+
+type UIConfiguration = {
+  kOptions?: {
+    enableOnlineScenes?: boolean;
+  };
+};
+
+type SceneCreateInput = {
+  title?: string | null;
+  code?: string | null;
+  details?: string | null;
+  director?: string | null;
+  urls?: string[];
+  date?: string | null;
+  cover_image?: string | null;
+  studio_id?: string | null;
+  performer_ids?: string[];
+  tag_ids?: string[];
+};
+
+type SceneOnlineMediaInput = {
+  scene_id: string;
+  source_name: string;
+  source_slug: string;
+  external_id?: string | null;
+  page_url: string;
+  canonical_url: string;
+  embed_url?: string | null;
+  direct_video_url?: string | null;
+  thumbnail_url?: string | null;
+  duration_seconds?: number | null;
+  external_view_count?: number | null;
+  raw_metadata_json?: string | null;
+  streams: Array<{
+    label?: string | null;
+    kind: string;
+    url: string;
+    position: number;
+    is_primary: boolean;
+  }>;
+};
+
 const LIST_SCRAPERS = gql`
   query ScraperTestListScrapers($types: [ScrapeContentType!]!) {
     listScrapers(types: $types) {
@@ -30,6 +107,14 @@ const LIST_SCRAPERS = gql`
         urls
         supported_scrapes
       }
+    }
+  }
+`;
+
+const GET_K_OPTIONS = gql`
+  query ScraperTestKOptions {
+    configuration {
+      ui
     }
   }
 `;
@@ -46,6 +131,26 @@ const SCRAPE_SCENE_URL = gql`
       image
       remote_site_id
       duration
+      online_media {
+        source_name
+        source_slug
+        external_id
+        page_url
+        canonical_url
+        embed_url
+        direct_video_url
+        thumbnail_url
+        duration_seconds
+        external_view_count
+        raw_metadata_json
+        streams {
+          label
+          kind
+          url
+          position
+          is_primary
+        }
+      }
       studio {
         stored_id
         name
@@ -66,6 +171,27 @@ const SCRAPE_SCENE_URL = gql`
         name
         remote_site_id
       }
+    }
+  }
+`;
+
+const CREATE_SCENE = gql`
+  mutation ScraperTestCreateOnlineScene($input: SceneCreateInput!) {
+    sceneCreate(input: $input) {
+      id
+      title
+    }
+  }
+`;
+
+const SAVE_ONLINE_MEDIA = gql`
+  mutation ScraperTestSaveOnlineMedia($input: SceneOnlineMediaInput!) {
+    sceneOnlineMediaSave(input: $input) {
+      id
+      scene_id
+      embed_url
+      direct_video_url
+      external_view_count
     }
   }
 `;
@@ -93,6 +219,16 @@ function urlLooksSupportedByScraper(scraper: Scraper, url: string) {
   }
 
   return patterns.some((pattern) => url.includes(pattern));
+}
+
+function getOnlineMedia(scene: ScrapedSceneWithOnlineMedia | null) {
+  return scene?.online_media ?? null;
+}
+
+function storedIDs<T extends { stored_id?: string | null }>(items?: T[] | null) {
+  return (items ?? [])
+    .map((item) => item.stored_id)
+    .filter((id): id is string => !!id);
 }
 
 function makeVirtualScene(scene: GQL.ScrapedScene): GQL.SlimSceneDataFragment {
@@ -142,6 +278,79 @@ function makeVirtualScene(scene: GQL.ScrapedScene): GQL.SlimSceneDataFragment {
   } as unknown as GQL.SlimSceneDataFragment;
 }
 
+function buildSceneCreateInput(scene: ScrapedSceneWithOnlineMedia): SceneCreateInput {
+  const urls = (scene.urls ?? []).filter(Boolean);
+  const performerIDs = storedIDs(scene.performers);
+  const tagIDs = storedIDs(scene.tags);
+  const input: SceneCreateInput = {
+    title: scene.title || undefined,
+    code: scene.code || undefined,
+    details: scene.details || undefined,
+    director: scene.director || undefined,
+    urls: urls.length ? urls : undefined,
+    date: scene.date || undefined,
+    cover_image: scene.image || getOnlineMedia(scene)?.thumbnail_url || undefined,
+    studio_id: scene.studio?.stored_id || undefined,
+    performer_ids: performerIDs.length ? performerIDs : undefined,
+    tag_ids: tagIDs.length ? tagIDs : undefined,
+  };
+
+  return input;
+}
+
+function buildOnlineMediaInput(
+  sceneID: string,
+  scene: ScrapedSceneWithOnlineMedia,
+  media: ScrapedSceneOnlineMedia
+): SceneOnlineMediaInput {
+  const fallbackURL = scene.urls?.[0] ?? media.page_url;
+  const streams = (media.streams ?? [])
+    .filter((stream) => !!stream.url)
+    .map((stream, index) => ({
+      label: stream.label || undefined,
+      kind: stream.kind || "embed",
+      url: stream.url,
+      position: stream.position ?? index,
+      is_primary: stream.is_primary ?? index === 0,
+    }));
+
+  if (streams.length === 0 && media.embed_url) {
+    streams.push({
+      label: "Primary embed",
+      kind: "embed",
+      url: media.embed_url,
+      position: 0,
+      is_primary: true,
+    });
+  }
+
+  if (streams.length === 0 && media.direct_video_url) {
+    streams.push({
+      label: "Direct video",
+      kind: "direct",
+      url: media.direct_video_url,
+      position: 0,
+      is_primary: true,
+    });
+  }
+
+  return {
+    scene_id: sceneID,
+    source_name: media.source_name || "Unknown",
+    source_slug: media.source_slug || "unknown",
+    external_id: media.external_id || scene.remote_site_id || undefined,
+    page_url: media.page_url || fallbackURL,
+    canonical_url: media.canonical_url || media.page_url || fallbackURL,
+    embed_url: media.embed_url || undefined,
+    direct_video_url: media.direct_video_url || undefined,
+    thumbnail_url: media.thumbnail_url || scene.image || undefined,
+    duration_seconds: media.duration_seconds ?? scene.duration ?? undefined,
+    external_view_count: media.external_view_count ?? undefined,
+    raw_metadata_json: media.raw_metadata_json || undefined,
+    streams,
+  };
+}
+
 export const ScraperTest: React.FC = () => {
   const [url, setURL] = useState("");
   const [contentType, setContentType] = useState(contentTypes[0].value);
@@ -149,10 +358,44 @@ export const ScraperTest: React.FC = () => {
   const [selectedScraperID, setSelectedScraperID] = useState("");
   const [loadingScrapers, setLoadingScrapers] = useState(false);
   const [testing, setTesting] = useState(false);
+  const [creatingOnlineScene, setCreatingOnlineScene] = useState(false);
+  const [onlineScenesEnabled, setOnlineScenesEnabled] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [result, setResult] = useState<GQL.ScrapedScene | null>(null);
+  const [createdSceneID, setCreatedSceneID] = useState<string | null>(null);
+  const [result, setResult] = useState<ScrapedSceneWithOnlineMedia | null>(null);
   const [rawResult, setRawResult] = useState<unknown>(null);
   const [showScrapeDialog, setShowScrapeDialog] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+
+    async function loadKOptions() {
+      try {
+        const response = await getClient().query<{
+          configuration: { ui?: UIConfiguration | null };
+        }>({
+          query: GET_K_OPTIONS,
+          fetchPolicy: "network-only",
+        });
+
+        if (!cancelled) {
+          setOnlineScenesEnabled(
+            response.data.configuration.ui?.kOptions?.enableOnlineScenes !== false
+          );
+        }
+      } catch {
+        if (!cancelled) {
+          setOnlineScenesEnabled(true);
+        }
+      }
+    }
+
+    loadKOptions();
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -215,6 +458,8 @@ export const ScraperTest: React.FC = () => {
     [result]
   );
 
+  const onlineMedia = useMemo(() => getOnlineMedia(result), [result]);
+
   const urlSupportedBySelectedScraper = selectedScraper
     ? urlLooksSupportedByScraper(selectedScraper, url.trim())
     : false;
@@ -227,6 +472,9 @@ export const ScraperTest: React.FC = () => {
     urlSupportedBySelectedScraper &&
     !testing;
 
+  const canCreateOnlineScene =
+    onlineScenesEnabled && !!result && !!onlineMedia && !creatingOnlineScene;
+
   async function testScraper() {
     if (!canTest || !selectedScraper) {
       return;
@@ -234,13 +482,14 @@ export const ScraperTest: React.FC = () => {
 
     setTesting(true);
     setError(null);
+    setCreatedSceneID(null);
     setResult(null);
     setRawResult(null);
     setShowScrapeDialog(false);
 
     try {
       const response = await getClient().query<{
-        scrapeSceneURL: GQL.ScrapedScene | null;
+        scrapeSceneURL: ScrapedSceneWithOnlineMedia | null;
       }>({
         query: SCRAPE_SCENE_URL,
         variables: {
@@ -261,6 +510,45 @@ export const ScraperTest: React.FC = () => {
       setError(err instanceof Error ? err.message : `${err}`);
     } finally {
       setTesting(false);
+    }
+  }
+
+  async function createOnlineScene() {
+    if (!result || !onlineMedia || !canCreateOnlineScene) {
+      return;
+    }
+
+    setCreatingOnlineScene(true);
+    setError(null);
+    setCreatedSceneID(null);
+
+    try {
+      const sceneResponse = await getClient().mutate<{
+        sceneCreate: { id: string } | null;
+      }>({
+        mutation: CREATE_SCENE,
+        variables: {
+          input: buildSceneCreateInput(result),
+        },
+      });
+
+      const sceneID = sceneResponse.data?.sceneCreate?.id;
+      if (!sceneID) {
+        throw new Error("Scene creation did not return a scene id.");
+      }
+
+      await getClient().mutate({
+        mutation: SAVE_ONLINE_MEDIA,
+        variables: {
+          input: buildOnlineMediaInput(sceneID, result, onlineMedia),
+        },
+      });
+
+      setCreatedSceneID(sceneID);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : `${err}`);
+    } finally {
+      setCreatingOnlineScene(false);
     }
   }
 
@@ -305,6 +593,17 @@ export const ScraperTest: React.FC = () => {
               </p>
 
               {error && <Alert variant="danger">{error}</Alert>}
+              {createdSceneID && (
+                <Alert variant="success">
+                  Online scene created. <a href={`/scenes/${createdSceneID}`}>Open scene</a>
+                </Alert>
+              )}
+              {!onlineScenesEnabled && (
+                <Alert variant="warning">
+                  Online scenes are disabled in K-Options. You can still test scrapers,
+                  but imports are disabled.
+                </Alert>
+              )}
 
               <Form>
                 <Form.Group controlId="scraper-test-content-type">
@@ -316,6 +615,7 @@ export const ScraperTest: React.FC = () => {
                       setContentType(event.currentTarget.value);
                       setResult(null);
                       setRawResult(null);
+                      setCreatedSceneID(null);
                       setShowScrapeDialog(false);
                     }}
                   >
@@ -337,6 +637,7 @@ export const ScraperTest: React.FC = () => {
                       setSelectedScraperID(event.currentTarget.value);
                       setResult(null);
                       setRawResult(null);
+                      setCreatedSceneID(null);
                       setShowScrapeDialog(false);
                     }}
                   >
@@ -363,6 +664,7 @@ export const ScraperTest: React.FC = () => {
                       setURL(event.currentTarget.value);
                       setResult(null);
                       setRawResult(null);
+                      setCreatedSceneID(null);
                       setShowScrapeDialog(false);
                     }}
                     placeholder="Paste a scene URL to test"
@@ -396,6 +698,31 @@ export const ScraperTest: React.FC = () => {
                   </Button>
                 )}
 
+                {result && onlineMedia && (
+                  <Button
+                    type="button"
+                    variant="success"
+                    className="ml-2"
+                    disabled={!canCreateOnlineScene}
+                    onClick={createOnlineScene}
+                  >
+                    {creatingOnlineScene ? (
+                      <>
+                        <Spinner animation="border" size="sm" className="mr-2" />
+                        Creating
+                      </>
+                    ) : (
+                      "Create Online Scene"
+                    )}
+                  </Button>
+                )}
+
+                {result && !onlineMedia && (
+                  <Form.Text muted className="d-block mt-2">
+                    This scrape result does not include online media metadata yet.
+                  </Form.Text>
+                )}
+
                 {selectedScraper && !scraperSupportsURL(selectedScraper) && (
                   <Form.Text muted className="d-block mt-2">
                     Selected scraper does not support scene URL scraping.
@@ -407,7 +734,7 @@ export const ScraperTest: React.FC = () => {
                   !urlSupportedBySelectedScraper &&
                   !!url.trim() && (
                     <Form.Text muted className="d-block mt-2">
-                      URL does not match this scraper's URL patterns:{" "}
+                      URL does not match this scraper's URL patterns: {" "}
                       {scraperURLPatterns(selectedScraper).join(", ")}
                     </Form.Text>
                   )}
@@ -477,6 +804,59 @@ export const ScraperTest: React.FC = () => {
                       </dl>
                     </Col>
                   </Row>
+                </>
+              )}
+            </Card.Body>
+          </Card>
+
+          <Card className="mb-3">
+            <Card.Header>
+              <h5 className="mb-0">Online Media</h5>
+            </Card.Header>
+            <Card.Body>
+              {!onlineMedia && (
+                <p className="text-muted mb-0">
+                  Online media fields will appear here when the scraper returns them.
+                </p>
+              )}
+
+              {onlineMedia && (
+                <>
+                  <dl className="row">
+                    <dt className="col-sm-3">Source</dt>
+                    <dd className="col-sm-9">{onlineMedia.source_name}</dd>
+
+                    <dt className="col-sm-3">External ID</dt>
+                    <dd className="col-sm-9">{onlineMedia.external_id || "—"}</dd>
+
+                    <dt className="col-sm-3">Page URL</dt>
+                    <dd className="col-sm-9">{onlineMedia.page_url || "—"}</dd>
+
+                    <dt className="col-sm-3">Embed URL</dt>
+                    <dd className="col-sm-9">{onlineMedia.embed_url || "—"}</dd>
+
+                    <dt className="col-sm-3">Direct video URL</dt>
+                    <dd className="col-sm-9">{onlineMedia.direct_video_url || "—"}</dd>
+
+                    <dt className="col-sm-3">External views</dt>
+                    <dd className="col-sm-9">
+                      {onlineMedia.external_view_count ?? "—"}
+                    </dd>
+                  </dl>
+
+                  <h6>Streams</h6>
+                  {onlineMedia.streams.length === 0 ? (
+                    <p className="text-muted mb-0">No streams returned.</p>
+                  ) : (
+                    <ul className="mb-0">
+                      {onlineMedia.streams.map((stream, index) => (
+                        <li key={`${stream.url}-${index}`}>
+                          {stream.label || `Stream ${index + 1}`} · {stream.kind} ·{" "}
+                          {stream.is_primary ? "primary" : "backup"} · {stream.url}
+                        </li>
+                      ))}
+                    </ul>
+                  )}
                 </>
               )}
             </Card.Body>

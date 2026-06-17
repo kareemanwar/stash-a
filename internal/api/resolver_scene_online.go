@@ -94,8 +94,6 @@ func (r *mutationResolver) SceneOnlineMediaSave(ctx context.Context, input model
 		SourceName:        input.SourceName,
 		SourceSlug:        input.SourceSlug,
 		ExternalID:        input.ExternalID,
-		PageURL:           input.PageURL,
-		CanonicalURL:      input.CanonicalURL,
 		EmbedURL:          input.EmbedURL,
 		DirectVideoURL:    input.DirectVideoURL,
 		ThumbnailURL:      input.ThumbnailURL,

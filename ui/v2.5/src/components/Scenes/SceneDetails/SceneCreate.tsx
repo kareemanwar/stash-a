@@ -73,6 +73,12 @@ type SceneOnlineMediaInput = {
   }>;
 };
 
+type ExistingScene = {
+  id: string;
+  title?: string | null;
+  urls: string[];
+};
+
 const SCRAPE_ONLINE_SCENE_URL = gql`
   query SceneCreateScrapeOnlineSceneURL($url: String!) {
     scrapeSceneURL(url: $url) {
@@ -127,6 +133,22 @@ const SCRAPE_ONLINE_SCENE_URL = gql`
   }
 `;
 
+const FIND_DUPLICATE_SCENE_BY_URL = gql`
+  query SceneCreateFindDuplicateSceneByURL($url: String!) {
+    findScenes(
+      filter: { per_page: 1 }
+      scene_filter: { url: { value: $url, modifier: EQUALS } }
+    ) {
+      count
+      scenes {
+        id
+        title
+        urls
+      }
+    }
+  }
+`;
+
 const SAVE_ONLINE_MEDIA = gql`
   mutation SceneCreateSaveOnlineMedia($input: SceneOnlineMediaInput!) {
     sceneOnlineMediaSave(input: $input) {
@@ -144,6 +166,40 @@ function storedIDs(items?: ScrapedStoredEntity[] | null) {
 
 function uniqueStrings(values: string[]) {
   return Array.from(new Set(values.filter(Boolean)));
+}
+
+function normalizeURLForDuplicateCheck(value?: string | null) {
+  return value?.trim() ?? "";
+}
+
+function duplicateCandidateURLs(
+  scene: ScrapedSceneWithOnlineMedia,
+  sourceURL: string
+) {
+  return uniqueStrings(
+    [sourceURL, ...(scene.urls ?? [])].map(normalizeURLForDuplicateCheck)
+  );
+}
+
+async function findExistingSceneByURL(url: string): Promise<ExistingScene | null> {
+  const response = await getClient().query<{
+    findScenes: { count: number; scenes: ExistingScene[] };
+  }>({
+    query: FIND_DUPLICATE_SCENE_BY_URL,
+    variables: { url },
+    fetchPolicy: "network-only",
+  });
+
+  return response.data.findScenes.scenes[0] ?? null;
+}
+
+async function findExistingSceneForURLs(urls: string[]) {
+  for (const candidateURL of urls) {
+    const scene = await findExistingSceneByURL(candidateURL);
+    if (scene) return scene;
+  }
+
+  return null;
 }
 
 function buildScrapedSceneInput(
@@ -344,6 +400,11 @@ const SceneCreate: React.FC = () => {
     );
   }
 
+  function onDuplicateFound(scene: ExistingScene) {
+    history.push(`/scenes/${scene.id}`);
+    Toast.success("Scene already exists for this source URL. Opened existing scene.");
+  }
+
   async function onSave(
     input: GQL.SceneCreateInput,
     andNew?: boolean,
@@ -356,6 +417,14 @@ const SceneCreate: React.FC = () => {
     }
 
     const scrapedScene = await scrapeOnlineScene(onlineSourceURL);
+    const existingScene = await findExistingSceneForURLs(
+      duplicateCandidateURLs(scrapedScene, onlineSourceURL)
+    );
+    if (existingScene) {
+      onDuplicateFound(existingScene);
+      return;
+    }
+
     const mergedInput = mergeSceneCreateInput(
       buildScrapedSceneInput(scrapedScene, onlineSourceURL),
       input

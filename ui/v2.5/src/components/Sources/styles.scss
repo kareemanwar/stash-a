@@ -1,0 +1,108 @@
+.sources-page {
+  .source-list-panel {
+    max-height: calc(100vh - 14rem);
+    overflow-y: auto;
+    padding: 0.75rem;
+  }
+
+  .source-summary-card {
+    cursor: pointer;
+
+    &.active {
+      border-color: #007bff;
+      box-shadow: 0 0 0 1px #007bff;
+    }
+  }
+
+  .source-summary-thumb {
+    background: #111;
+    border-radius: 4px;
+    height: 3rem;
+    object-fit: cover;
+    width: 4rem;
+  }
+
+  .source-summary-title {
+    display: block;
+  }
+
+  .source-detail-title-block {
+    min-width: 0;
+  }
+
+  .source-detail-description {
+    white-space: pre-line;
+  }
+
+  .source-candidate-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: repeat(auto-fill, minmax(14rem, 1fr));
+  }
+
+  .source-candidate-scene-card {
+    margin: 0;
+    width: 100% !important;
+
+    .thumbnail-section {
+      border-top: 3px solid transparent;
+    }
+
+    &--new .thumbnail-section {
+      border-top-color: #ffc107;
+    }
+
+    &--linked .thumbnail-section,
+    &--promoted .thumbnail-section {
+      border-top-color: #28a745;
+    }
+
+    &--ignored .thumbnail-section,
+    &--stale .thumbnail-section {
+      border-top-color: #6c757d;
+      opacity: 0.75;
+    }
+
+    &--error .thumbnail-section {
+      border-top-color: #dc3545;
+    }
+  }
+
+  .source-candidate-preview {
+    background: #111;
+    min-height: 10rem;
+    position: relative;
+
+    img {
+      display: block;
+      height: 100%;
+      object-fit: cover;
+      width: 100%;
+    }
+  }
+
+  .source-candidate-preview-placeholder {
+    align-items: center;
+    color: #aaa;
+    display: flex;
+    justify-content: center;
+    min-height: 10rem;
+  }
+
+  .source-candidate-status-overlay {
+    position: absolute;
+    right: 0.5rem;
+    top: 0.5rem;
+    z-index: 2;
+  }
+
+  .source-candidate-details {
+    .source-candidate-relations {
+      margin-top: 0.35rem;
+    }
+  }
+
+  .source-candidate-actions {
+    padding: 0 0.75rem 0.75rem;
+  }
+}

@@ -13,7 +13,7 @@ import {
 import * as GQL from "src/core/generated-graphql";
 import { SceneScrapeDialog } from "src/components/Scenes/SceneDetails/SceneScrapeDialog";
 import { SceneCard } from "src/components/Scenes/SceneCard";
-import { getClient } from "../../core/StashService";
+import { getClient } from "src/core/StashService";
 
 const contentTypes = [{ label: "Scene", value: "SCENE" }];
 
@@ -42,8 +42,6 @@ type ScrapedSceneOnlineMedia = {
   source_name: string;
   source_slug: string;
   external_id?: string | null;
-  page_url: string;
-  canonical_url: string;
   embed_url?: string | null;
   direct_video_url?: string | null;
   thumbnail_url?: string | null;
@@ -81,8 +79,6 @@ type SceneOnlineMediaInput = {
   source_name: string;
   source_slug: string;
   external_id?: string | null;
-  page_url: string;
-  canonical_url: string;
   embed_url?: string | null;
   direct_video_url?: string | null;
   thumbnail_url?: string | null;
@@ -135,8 +131,6 @@ const SCRAPE_SCENE_URL = gql`
         source_name
         source_slug
         external_id
-        page_url
-        canonical_url
         embed_url
         direct_video_url
         thumbnail_url
@@ -197,11 +191,7 @@ const SAVE_ONLINE_MEDIA = gql`
 `;
 
 function formatJSON(value: unknown) {
-  if (!value) {
-    return "";
-  }
-
-  return JSON.stringify(value, null, 2);
+  return value ? JSON.stringify(value, null, 2) : "";
 }
 
 function scraperSupportsURL(scraper: Scraper) {
@@ -214,10 +204,7 @@ function scraperURLPatterns(scraper: Scraper) {
 
 function urlLooksSupportedByScraper(scraper: Scraper, url: string) {
   const patterns = scraperURLPatterns(scraper);
-  if (patterns.length === 0) {
-    return true;
-  }
-
+  if (patterns.length === 0) return true;
   return patterns.some((pattern) => url.includes(pattern));
 }
 
@@ -282,7 +269,8 @@ function buildSceneCreateInput(scene: ScrapedSceneWithOnlineMedia): SceneCreateI
   const urls = (scene.urls ?? []).filter(Boolean);
   const performerIDs = storedIDs(scene.performers);
   const tagIDs = storedIDs(scene.tags);
-  const input: SceneCreateInput = {
+
+  return {
     title: scene.title || undefined,
     code: scene.code || undefined,
     details: scene.details || undefined,
@@ -294,8 +282,6 @@ function buildSceneCreateInput(scene: ScrapedSceneWithOnlineMedia): SceneCreateI
     performer_ids: performerIDs.length ? performerIDs : undefined,
     tag_ids: tagIDs.length ? tagIDs : undefined,
   };
-
-  return input;
 }
 
 function buildOnlineMediaInput(
@@ -303,7 +289,6 @@ function buildOnlineMediaInput(
   scene: ScrapedSceneWithOnlineMedia,
   media: ScrapedSceneOnlineMedia
 ): SceneOnlineMediaInput {
-  const fallbackURL = scene.urls?.[0] ?? media.page_url;
   const streams = (media.streams ?? [])
     .filter((stream) => !!stream.url)
     .map((stream, index) => ({
@@ -339,8 +324,6 @@ function buildOnlineMediaInput(
     source_name: media.source_name || "Unknown",
     source_slug: media.source_slug || "unknown",
     external_id: media.external_id || scene.remote_site_id || undefined,
-    page_url: media.page_url || fallbackURL,
-    canonical_url: media.canonical_url || media.page_url || fallbackURL,
     embed_url: media.embed_url || undefined,
     direct_video_url: media.direct_video_url || undefined,
     thumbnail_url: media.thumbnail_url || scene.image || undefined,
@@ -384,14 +367,11 @@ export const ScraperTest: React.FC = () => {
           );
         }
       } catch {
-        if (!cancelled) {
-          setOnlineScenesEnabled(true);
-        }
+        if (!cancelled) setOnlineScenesEnabled(true);
       }
     }
 
     loadKOptions();
-
     return () => {
       cancelled = true;
     };
@@ -413,18 +393,12 @@ export const ScraperTest: React.FC = () => {
           fetchPolicy: "network-only",
         });
 
-        if (cancelled) {
-          return;
-        }
+        if (cancelled) return;
 
         const nextScrapers = response.data.listScrapers ?? [];
         setScrapers(nextScrapers);
-
         setSelectedScraperID((currentID) => {
-          if (nextScrapers.some((scraper) => scraper.id === currentID)) {
-            return currentID;
-          }
-
+          if (nextScrapers.some((scraper) => scraper.id === currentID)) return currentID;
           const urlScraper = nextScrapers.find(scraperSupportsURL);
           return urlScraper?.id ?? nextScrapers[0]?.id ?? "";
         });
@@ -435,14 +409,11 @@ export const ScraperTest: React.FC = () => {
           setSelectedScraperID("");
         }
       } finally {
-        if (!cancelled) {
-          setLoadingScrapers(false);
-        }
+        if (!cancelled) setLoadingScrapers(false);
       }
     }
 
     loadScrapers();
-
     return () => {
       cancelled = true;
     };
@@ -476,9 +447,7 @@ export const ScraperTest: React.FC = () => {
     onlineScenesEnabled && !!result && !!onlineMedia && !creatingOnlineScene;
 
   async function testScraper() {
-    if (!canTest || !selectedScraper) {
-      return;
-    }
+    if (!canTest || !selectedScraper) return;
 
     setTesting(true);
     setError(null);
@@ -492,9 +461,7 @@ export const ScraperTest: React.FC = () => {
         scrapeSceneURL: ScrapedSceneWithOnlineMedia | null;
       }>({
         query: SCRAPE_SCENE_URL,
-        variables: {
-          url: url.trim(),
-        },
+        variables: { url: url.trim() },
         fetchPolicy: "network-only",
       });
 
@@ -503,9 +470,7 @@ export const ScraperTest: React.FC = () => {
       setRawResult(response.data);
       setShowScrapeDialog(!!scene);
 
-      if (!scene) {
-        setError("No scene result was returned for this URL.");
-      }
+      if (!scene) setError("No scene result was returned for this URL.");
     } catch (err) {
       setError(err instanceof Error ? err.message : `${err}`);
     } finally {
@@ -514,9 +479,7 @@ export const ScraperTest: React.FC = () => {
   }
 
   async function createOnlineScene() {
-    if (!result || !onlineMedia || !canCreateOnlineScene) {
-      return;
-    }
+    if (!result || !onlineMedia || !canCreateOnlineScene) return;
 
     setCreatingOnlineScene(true);
     setError(null);
@@ -527,21 +490,15 @@ export const ScraperTest: React.FC = () => {
         sceneCreate: { id: string } | null;
       }>({
         mutation: CREATE_SCENE,
-        variables: {
-          input: buildSceneCreateInput(result),
-        },
+        variables: { input: buildSceneCreateInput(result) },
       });
 
       const sceneID = sceneResponse.data?.sceneCreate?.id;
-      if (!sceneID) {
-        throw new Error("Scene creation did not return a scene id.");
-      }
+      if (!sceneID) throw new Error("Scene creation did not return a scene id.");
 
       await getClient().mutate({
         mutation: SAVE_ONLINE_MEDIA,
-        variables: {
-          input: buildOnlineMediaInput(sceneID, result, onlineMedia),
-        },
+        variables: { input: buildOnlineMediaInput(sceneID, result, onlineMedia) },
       });
 
       setCreatedSceneID(sceneID);
@@ -556,7 +513,6 @@ export const ScraperTest: React.FC = () => {
     if (appliedScene && result) {
       setResult({ ...result, ...appliedScene });
     }
-
     setShowScrapeDialog(false);
   }
 
@@ -564,13 +520,7 @@ export const ScraperTest: React.FC = () => {
     <div className="mt-4">
       {showScrapeDialog && result && (
         <SceneScrapeDialog
-          scene={{
-            title: "",
-            urls: [],
-            performer_ids: [],
-            tag_ids: [],
-            groups: [],
-          }}
+          scene={{ title: "", urls: [], performer_ids: [], tag_ids: [], groups: [] }}
           sceneStudio={null}
           scenePerformers={[]}
           sceneTags={[]}
@@ -671,12 +621,7 @@ export const ScraperTest: React.FC = () => {
                   />
                 </Form.Group>
 
-                <Button
-                  type="button"
-                  variant="primary"
-                  disabled={!canTest}
-                  onClick={testScraper}
-                >
+                <Button type="button" variant="primary" disabled={!canTest} onClick={testScraper}>
                   {testing ? (
                     <>
                       <Spinner animation="border" size="sm" className="mr-2" />
@@ -828,9 +773,6 @@ export const ScraperTest: React.FC = () => {
 
                     <dt className="col-sm-3">External ID</dt>
                     <dd className="col-sm-9">{onlineMedia.external_id || "—"}</dd>
-
-                    <dt className="col-sm-3">Page URL</dt>
-                    <dd className="col-sm-9">{onlineMedia.page_url || "—"}</dd>
 
                     <dt className="col-sm-3">Embed URL</dt>
                     <dd className="col-sm-9">{onlineMedia.embed_url || "—"}</dd>

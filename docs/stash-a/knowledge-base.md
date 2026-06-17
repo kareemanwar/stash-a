@@ -193,6 +193,7 @@ Initial implementation branch:
 - Initial foundation adds migration `88_sources.up.sql`, source/candidate model structs, sqlite store, GraphQL schema/resolver shell, and repository wiring.
 - `sourceSyncByURL` is the first GraphQL sync bridge. For Shrmha URLs it runs `.local/scrapers/stash-a/Shrmha/ShrmhaSource.py`, upserts/updates the Source, persists candidate scenes, marks candidates as `LINKED` when their URL already exists in native `scene_urls`, and respects durable ignored scene URLs.
 - The first UI shell registers `/sources`, adds Sources to the navbar between Galleries and Performers, keeps it visible for existing saved menu configs, and displays synced source candidate scenes as native-like review cards with status-colored borders and ignore support.
+- Phase 2 UI should move `/sources` toward native Stash page patterns: New Source opens a proper create modal, candidate videos reuse shared `GridCard`/scene-card styling, and detail tabs include Details, Videos, Images, Galleries, Groups, Sources, and Ignored.
 
 ## Stash-a scrapers
 
@@ -203,6 +204,7 @@ Initial implementation branch:
 - `ShrmhaSource.py` is a first-pass `source-by-url` parser for Shrmha search/category-like listing pages. It returns a Source-shaped payload plus `scene_candidates` using native `ScrapedScene`-style fields for each candidate.
 - Shrmha source listing pages are WordPress preview grids using `.post-preview` blocks; each block can provide candidate scene URL/title/thumbnail/date/tags and an external id from `?p=` or `post-<id>` classes.
 - Shrmha source-by-url now crawls discovered WordPress pagination links before returning candidates, so a search URL or the site root syncs all discovered pages in that listing up to the scraper cap instead of only the supplied page.
+- User verification on 2026-06-17: the Angy Khoury search source synced 37 candidate scenes, and the Shrmha site root synced 797 candidate scenes.
 - Shrmha source sync should stay lightweight: scrape listing metadata into candidate rows first, then run full `sceneByURL` only when a candidate is promoted or explicitly refreshed.
 - Shrmha is mapped as a native scraped studio, not as a custom `source_type` field.
 - Do not return performers from Shrmha scene pages until a page source has explicit performer data.

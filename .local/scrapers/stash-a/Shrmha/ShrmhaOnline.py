@@ -4,12 +4,21 @@ import re
 from http.cookiejar import CookieJar
 from typing import Any
 from urllib.parse import urlencode, urljoin, urlparse
-from urllib.request import HTTPCookieProcessor, Request, build_opener
+from urllib.request import HTTPCookieProcessor, Request, build_opener, urlopen
 
 import Shrmha
 
 
 ORIGINAL_BUILD_ONLINE_MEDIA = Shrmha.build_online_media
+
+UNAVAILABLE_PLAYER_MARKERS = (
+    "file is no longer available",
+    "expired or has been deleted",
+    "file was deleted",
+    "file has been deleted",
+    "video has been deleted",
+    "file not found",
+)
 
 
 def html_label(value: str | None) -> str | None:
@@ -70,7 +79,7 @@ def extract_embed_streams(document: str, parser: Shrmha.PageParser, base_url: st
 
 
 def js_string(value: str) -> str:
-    return bytes(value, "utf-8").decode("unicode_escape").replace("\\/", "/")
+    return bytes(value, "utf-8").decode("unicode_escape").replace("\/", "/")
 
 
 def base_n(value: int, radix: int) -> str:
@@ -108,6 +117,11 @@ def unpack_packed_scripts(document: str) -> list[str]:
     return unpacked
 
 
+def is_unavailable_player_document(document: str) -> bool:
+    text = re.sub(r"\s+", " ", html.unescape(document)).lower()
+    return any(marker in text for marker in UNAVAILABLE_PLAYER_MARKERS)
+
+
 def fetch_embed_player_document(embed_url: str, page_url: str) -> str | None:
     parsed = urlparse(embed_url)
     if not parsed.scheme or not parsed.netloc:
@@ -130,8 +144,14 @@ def fetch_embed_player_document(embed_url: str, page_url: str) -> str | None:
     )
     try:
         with opener.open(get_request, timeout=30) as response:
-            response.read()
+            embed_document = response.read().decode(
+                response.headers.get_content_charset() or "utf-8",
+                errors="replace",
+            )
     except Exception:
+        return None
+
+    if is_unavailable_player_document(embed_document):
         return None
 
     data = urlencode(
@@ -159,9 +179,51 @@ def fetch_embed_player_document(embed_url: str, page_url: str) -> str | None:
     try:
         with opener.open(post_request, timeout=30) as response:
             charset = response.headers.get_content_charset() or "utf-8"
+            player_document = response.read().decode(charset, errors="replace")
+    except Exception:
+        return None
+
+    if is_unavailable_player_document(player_document):
+        return None
+
+    return player_document
+
+
+def fetch_text(url: str, referer: str) -> str | None:
+    request = Request(
+        url,
+        headers={
+            "User-Agent": Shrmha.USER_AGENT,
+            "Referer": referer,
+            "Accept": "*/*",
+        },
+    )
+    try:
+        with urlopen(request, timeout=30) as response:
+            charset = response.headers.get_content_charset() or "utf-8"
             return response.read().decode(charset, errors="replace")
     except Exception:
         return None
+
+
+def parse_hls_max_height(playlist: str) -> int | None:
+    heights: list[int] = []
+    for match in re.finditer(r"RESOLUTION=\d+x(?P<height>\d+)", playlist, re.IGNORECASE):
+        try:
+            heights.append(int(match.group("height")))
+        except ValueError:
+            continue
+    return max(heights) if heights else None
+
+
+def probe_direct_quality(direct_url: str, referer: str) -> int | None:
+    if not re.search(r"\.m3u8(?:\?|$)", direct_url, re.IGNORECASE):
+        return None
+
+    playlist = fetch_text(direct_url, referer)
+    if not playlist:
+        return None
+    return parse_hls_max_height(playlist)
 
 
 def parse_seconds(value: str) -> int | None:
@@ -184,7 +246,10 @@ def parse_seconds(value: str) -> int | None:
     return None
 
 
-def extract_player_metadata(player_document: str, base_url: str) -> tuple[str | None, int | None]:
+def extract_player_metadata(
+    player_document: str,
+    base_url: str,
+) -> tuple[str | None, int | None, int | None]:
     documents = [player_document]
     documents.extend(unpack_packed_scripts(player_document))
     joined = "\n".join(html.unescape(doc) for doc in documents)
@@ -221,7 +286,21 @@ def extract_player_metadata(player_document: str, base_url: str) -> tuple[str | 
         if duration_seconds:
             break
 
-    return direct_url, duration_seconds
+    quality_height = probe_direct_quality(direct_url, base_url) if direct_url else None
+    return direct_url, duration_seconds, quality_height
+
+
+def quality_label(label: str | None, height: int | None) -> str:
+    base = Shrmha.clean_text(label) or "Direct video"
+    if height and f"{height}p" not in base:
+        return f"{base} · {height}p"
+    return base
+
+
+def reset_stream_order(streams: list[dict[str, Any]]) -> None:
+    for index, stream in enumerate(streams):
+        stream["position"] = index
+        stream["is_primary"] = index == 0
 
 
 def enhance_online_media(media: dict[str, Any], page_url: str) -> dict[str, Any]:
@@ -229,8 +308,13 @@ def enhance_online_media(media: dict[str, Any], page_url: str) -> dict[str, Any]
     if not isinstance(streams, list):
         return media
 
-    seen = {stream.get("url") for stream in streams if isinstance(stream, dict)}
-    for stream in list(streams)[:5]:
+    available_direct_streams: list[tuple[int, int, dict[str, Any]]] = []
+    available_embed_streams: list[dict[str, Any]] = []
+    unavailable_streams: list[dict[str, Any]] = []
+    seen_direct_urls: set[str] = set()
+    duration_seconds: int | None = media.get("duration_seconds")
+
+    for source_index, stream in enumerate(list(streams)[:8]):
         if not isinstance(stream, dict) or stream.get("kind") != "embed":
             continue
 
@@ -240,27 +324,57 @@ def enhance_online_media(media: dict[str, Any], page_url: str) -> dict[str, Any]
 
         player_document = fetch_embed_player_document(embed_url, page_url)
         if not player_document:
+            unavailable_streams.append(stream)
             continue
 
-        direct_url, duration_seconds = extract_player_metadata(player_document, embed_url)
-        if direct_url and not media.get("direct_video_url"):
-            before = len(streams)
-            Shrmha.append_stream(
-                streams,
-                seen,
-                url=direct_url,
-                label="Direct video",
-                kind="direct",
-                base_url=embed_url,
+        direct_url, parsed_duration, quality_height = extract_player_metadata(player_document, embed_url)
+        if parsed_duration and not duration_seconds:
+            duration_seconds = parsed_duration
+
+        if not direct_url:
+            unavailable_streams.append(stream)
+            continue
+
+        if direct_url in seen_direct_urls:
+            continue
+        seen_direct_urls.add(direct_url)
+
+        available_embed_streams.append(stream)
+        available_direct_streams.append(
+            (
+                quality_height or 0,
+                source_index,
+                {
+                    "label": quality_label(stream.get("label"), quality_height),
+                    "kind": "direct",
+                    "url": direct_url,
+                    "position": 0,
+                    "is_primary": False,
+                },
             )
-            if len(streams) > before:
-                media["direct_video_url"] = streams[-1]["url"]
+        )
 
-        if duration_seconds and not media.get("duration_seconds"):
-            media["duration_seconds"] = duration_seconds
+    if available_direct_streams:
+        available_direct_streams.sort(key=lambda item: (-item[0], item[1]))
+        streams = [stream for _, _, stream in available_direct_streams]
+        reset_stream_order(streams)
+        media["streams"] = streams
+        media["direct_video_url"] = streams[0]["url"]
+        media["embed_url"] = available_embed_streams[0].get("url") if available_embed_streams else media.get("embed_url")
+    else:
+        fallback_streams = available_embed_streams or [
+            stream for stream in streams if isinstance(stream, dict) and stream not in unavailable_streams
+        ]
+        reset_stream_order(fallback_streams)
+        media["streams"] = fallback_streams
+        media["direct_video_url"] = None
+        media["embed_url"] = next(
+            (stream.get("url") for stream in fallback_streams if stream.get("kind") == "embed"),
+            None,
+        )
 
-        if media.get("direct_video_url") and media.get("duration_seconds"):
-            break
+    if duration_seconds:
+        media["duration_seconds"] = duration_seconds
 
     media["raw_metadata_json"] = json.dumps(
         {
@@ -268,7 +382,8 @@ def enhance_online_media(media: dict[str, Any], page_url: str) -> dict[str, Any]
             "external_id": media.get("external_id"),
             "direct_video_url": media.get("direct_video_url"),
             "duration_seconds": media.get("duration_seconds"),
-            "streams": streams,
+            "streams": media.get("streams"),
+            "unavailable_streams": unavailable_streams,
         },
         ensure_ascii=True,
     )

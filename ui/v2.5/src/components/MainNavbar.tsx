@@ -150,7 +150,6 @@ const allMenuItems: IMenuItem[] = [
     href: "/sources",
     icon: faVideo,
     hotkey: "g o",
-    userCreatable: true,
   },
   {
     name: "performers",
@@ -288,7 +287,11 @@ export const MainNavbar: React.FC = () => {
   );
 
   const pathname = location.pathname.replace(/\/$/, "");
-  let newPath = newPathsList.includes(pathname) ? `${pathname}/new` : null;
+  let newPath = newPathsList.includes(pathname)
+    ? `${pathname}/new`
+    : pathname === "/sources"
+      ? "/sources/new"
+      : null;
   if (newPath !== null) {
     const queryParam = new URLSearchParams(location.search).get("q");
     if (queryParam) {

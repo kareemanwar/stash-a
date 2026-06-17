@@ -12,30 +12,12 @@ Keep this file concise, factual, and action-oriented. Current code and upstream 
 - Default branch: `develop`.
 - New feature work should happen on feature branches, not directly on `develop`.
 
-### `kareemanwar/CommunityScrapers-k`
+### Related `-k` repos
 
-- Reference for Stash community scraper examples.
-- Use for Stash community scraper examples.
-- Use for YAML/Python scraper patterns and provider extraction examples.
-- Prefer upstream Stash native patterns over community scraper examples when there is a conflict.
-
-### `kareemanwar/CommunityScripts-k`
-
-- Reference for community plugins, themes, userscripts, and utility scripts.
-- Useful for understanding plugin/script conventions.
-- Do not copy plugin architecture into core Stash unless upstream Stash uses the same native pattern.
-
-### `kareemanwar/plugins-repo-template-k`
-
-- Template/reference for Stash plugins source index.
-- Plugins are placed under a `plugins/` directory and published as an index.
-- Use for plugin distribution/index structure only, not core feature architecture.
-
-### `kareemanwar/scrapers-repo-template-k`
-
-- Template/reference for a Stash scrapers source index.
-- Scrapers are placed under a `scrapers/` directory and published as an index.
-- Use if Stash-a later needs a dedicated scraper source repo.
+- `kareemanwar/CommunityScrapers-k`: Stash community scraper examples and YAML/Python scraper patterns.
+- `kareemanwar/CommunityScripts-k`: community plugins, themes, userscripts, and utilities. Do not copy plugin architecture into core unless upstream uses the same native pattern.
+- `kareemanwar/plugins-repo-template-k`: plugin source-index template/reference only.
+- `kareemanwar/scrapers-repo-template-k`: scraper source-index template/reference only.
 
 ## Native-first rules
 
@@ -193,7 +175,7 @@ Initial implementation branch:
 - Initial foundation adds migration `88_sources.up.sql`, source/candidate model structs, sqlite store, GraphQL schema/resolver shell, and repository wiring.
 - `sourceSyncByURL` is the first GraphQL sync bridge. For Shrmha URLs it runs `.local/scrapers/stash-a/Shrmha/ShrmhaSource.py`, upserts/updates the Source, persists candidate scenes, marks candidates as `LINKED` when their URL already exists in native `scene_urls`, and respects durable ignored scene URLs.
 - The first UI shell registers `/sources`, adds Sources to the navbar between Galleries and Performers, keeps it visible for existing saved menu configs, and displays synced source candidate scenes as native-like review cards with status-colored borders and ignore support.
-- Phase 2 UI should move `/sources` toward native Stash page patterns: New Source opens a proper create modal, candidate videos reuse shared `GridCard`/scene-card styling, and detail tabs include Details, Videos, Images, Galleries, Groups, Sources, and Ignored.
+- Phase 2 UI should move `/sources` toward native Stash page patterns: Source create actions should follow the Scene list toolbar pattern with `ListOperations`, action text `New`, and `className: create-new-item`; candidate videos reuse shared `GridCard`/scene-card styling; detail tabs include Details, Videos, Images, Galleries, Groups, Sources, and Ignored.
 
 ## Stash-a scrapers
 

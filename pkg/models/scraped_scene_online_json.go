@@ -37,6 +37,73 @@ func GetScrapedSceneOnlineMedia(scene *ScrapedScene) (json.RawMessage, bool) {
 	return raw, ok
 }
 
+// CopyScrapedSceneOnlineMedia copies transient online media data when scraped
+// scenes are converted or copied through API helper functions.
+func CopyScrapedSceneOnlineMedia(dst *ScrapedScene, src interface{}) {
+	if dst == nil || src == nil {
+		return
+	}
+
+	srcScene, ok := src.(*ScrapedScene)
+	if !ok {
+		return
+	}
+
+	raw, ok := GetScrapedSceneOnlineMedia(srcScene)
+	if !ok {
+		return
+	}
+
+	SetScrapedSceneOnlineMedia(dst, raw)
+}
+
+// AttachScrapedSceneOnlineMediaFromJSON attaches online_media from a raw script
+// response to already-decoded ScrapedScene values. This covers scraper runners
+// that decode into pointers and then copy/convert values before GraphQL resolves
+// extension fields.
+func AttachScrapedSceneOnlineMediaFromJSON(out interface{}, data []byte) error {
+	if len(data) == 0 || out == nil {
+		return nil
+	}
+
+	switch v := out.(type) {
+	case **ScrapedScene:
+		if v == nil || *v == nil {
+			return nil
+		}
+		return attachSingleScrapedSceneOnlineMedia(*v, data)
+	case *[]ScrapedScene:
+		if v == nil {
+			return nil
+		}
+		var rawItems []struct {
+			OnlineMedia json.RawMessage `json:"online_media,omitempty"`
+		}
+		if err := json.Unmarshal(data, &rawItems); err != nil {
+			return err
+		}
+		for i := range *v {
+			if i < len(rawItems) {
+				SetScrapedSceneOnlineMedia(&(*v)[i], rawItems[i].OnlineMedia)
+			}
+		}
+	}
+
+	return nil
+}
+
+func attachSingleScrapedSceneOnlineMedia(scene *ScrapedScene, data []byte) error {
+	var raw struct {
+		OnlineMedia json.RawMessage `json:"online_media,omitempty"`
+	}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return err
+	}
+
+	SetScrapedSceneOnlineMedia(scene, raw.OnlineMedia)
+	return nil
+}
+
 // UnmarshalJSON preserves the upstream ScrapedScene shape while accepting the
 // Stash-a online_media extension returned by script scrapers. Unknown fields are
 // intentionally ignored here to match the scraper runner's lenient fallback.

@@ -4,6 +4,8 @@ CREATE TABLE scene_online_media (
   source_name TEXT NOT NULL,
   source_slug TEXT NOT NULL,
   external_id TEXT,
+  page_url TEXT NOT NULL,
+  canonical_url TEXT,
   embed_url TEXT,
   direct_video_url TEXT,
   thumbnail_url TEXT,

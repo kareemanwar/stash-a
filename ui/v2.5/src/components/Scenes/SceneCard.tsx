@@ -157,6 +157,24 @@ const OnlineSceneCardBadge: React.FC<{ disabled?: boolean; sceneID: string }> = 
   );
 };
 
+const OnlineSceneCardDurationOverlay: React.FC<{ sceneID: string }> = ({ sceneID }) => {
+  const { data } = useQuery<
+    { findScene?: { online_media?: { source_slug: string } | null } | null },
+    { id: string }
+  >(FIND_SCENE_ONLINE_CARD_BADGE, {
+    variables: { id: sceneID },
+    fetchPolicy: "cache-first",
+  });
+
+  if (!data?.findScene?.online_media) return null;
+
+  return (
+    <div className="scene-specs-overlay">
+      <span className="overlay-duration">66:66</span>
+    </div>
+  );
+};
+
 const Description: React.FC<{
   sceneNumber?: number;
 }> = ({ sceneNumber }) => {
@@ -357,7 +375,7 @@ export const SceneSpecsOverlay: React.FC<ISceneSpecsOverlay> = PatchComponent(
   "SceneCard.SceneSpecs",
   ({ scene }) => {
     const file = scene.files?.[0];
-    if (!file) return null;
+    if (!file) return <OnlineSceneCardDurationOverlay sceneID={scene.id} />;
     return (
       <div className="scene-specs-overlay">
         <span className="overlay-filesize extra-scene-info">

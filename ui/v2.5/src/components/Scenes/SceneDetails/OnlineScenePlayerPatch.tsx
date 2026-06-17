@@ -168,6 +168,18 @@ function dedupeStreams(streams: IOnlineStream[]) {
   return ret;
 }
 
+function sortDirectStreams(streams: IOnlineStream[]) {
+  return [...streams].sort(
+    (a, b) =>
+      streamQualityRank(b) - streamQualityRank(a) ||
+      a.position - b.position
+  );
+}
+
+function sortFallbackStreams(streams: IOnlineStream[]) {
+  return [...streams].sort((a, b) => a.position - b.position);
+}
+
 function buildPlaybackStreams(media: IOnlineMedia): IOnlineStream[] {
   const streams = [...(media.streams ?? [])].sort((a, b) => a.position - b.position);
 
@@ -191,14 +203,13 @@ function buildPlaybackStreams(media: IOnlineMedia): IOnlineStream[] {
     });
   }
 
-  const directStreams = dedupeStreams(streams.filter(isDirectStream));
-  const playbackStreams = directStreams.length > 0 ? directStreams : dedupeStreams(streams);
-
-  return playbackStreams.sort(
-    (a, b) =>
-      streamQualityRank(b) - streamQualityRank(a) ||
-      a.position - b.position
+  const dedupedStreams = dedupeStreams(streams);
+  const directStreams = sortDirectStreams(dedupedStreams.filter(isDirectStream));
+  const fallbackStreams = sortFallbackStreams(
+    dedupedStreams.filter((stream) => !isDirectStream(stream))
   );
+
+  return [...directStreams, ...fallbackStreams];
 }
 
 const onlinePlayerStyle = `
@@ -528,7 +539,7 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
               {streams.map((stream) => (
                 <option key={stream.url} value={stream.url}>
                   {stream.label || `Server ${stream.position + 1}`}
-                  {stream.kind === "direct" ? " · direct" : ""}
+                  {stream.kind === "direct" ? " · direct" : " · embed"}
                 </option>
               ))}
             </Form.Control>

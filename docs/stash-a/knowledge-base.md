@@ -153,13 +153,31 @@ Implementation rules:
 - Reuse React Bootstrap/Stash shared component style.
 - Keep the first version intentionally small so future scraper work can iterate on it.
 
+## Online scenes
+
+Implemented native storage:
+
+- Online scene provider metadata is stored in native feature tables `scene_online_media` and `scene_online_streams` via sqlite migration `86_scene_online_media.up.sql`.
+- Native Scene fields remain the owner for title, date, details, urls, cover image, performers, tags, studio, groups, and galleries.
+- External-only data such as source slug/name, external id, embed URL, direct video URL, remote thumbnail URL, external view count, duration from provider/player metadata, raw provider metadata, and stream list belongs in `scene_online_media` / `scene_online_streams`.
+- Do not store online scene metadata in `custom_fields`, browser storage, local JSON, or runtime-created tables.
+
+Implemented UI flow:
+
+- `ScraperTest` can scrape a scene URL, show native review, and create a fileless online scene by creating a native Scene then saving `sceneOnlineMediaSave`.
+- `/scenes/new` exposes an `Online` checkbox and `Source URL` field below the title for new scenes.
+- When the checkbox is enabled, saving runs the native URL scraper, creates a native Scene from scraped fields plus any user-entered overrides, saves online media/streams, then opens the scene.
+- `ScenePlayer` is patched only for fileless scenes with online media. Local-file scenes continue to use the native Stash player.
+- Online scene card UI should avoid covering native selection controls; badges belong in card details, while duration overlays should follow the local Scene card overlay pattern.
+
 ## Stash-a scrapers
 
 ### Shrmha
 
 - Local development path: `.local/scrapers/stash-a/Shrmha/`.
 - First implementation is `sceneByURL` only.
-- The scraper returns native `ScrapedScene` fields only: title, urls, date, image, details, studio, tags, and remote_site_id when available.
+- The scraper returns native `ScrapedScene` fields: title, urls, date, image, details, studio, tags, and remote_site_id when available.
 - Shrmha is mapped as a native scraped studio, not as a custom `source_type` field.
 - Do not return performers from Shrmha scene pages until a page source has explicit performer data.
-- Duration and direct video URL are not available in the supplied Shrmha page source and should be left unset until studied through embed hosts or another reliable source.
+- The source page does not expose duration/direct media directly. `ShrmhaOnline.py` probes the embed host, POSTs `/dl`, unpacks the returned JWPlayer script, and extracts `m3u8` direct video URL and `duration_seconds` when available.
+- The Shrmha scraper should return `online_media` with embed streams, direct stream when discovered, `duration_seconds`, thumbnail URL, external id, and raw provider metadata.

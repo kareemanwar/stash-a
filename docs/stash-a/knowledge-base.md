@@ -192,6 +192,7 @@ Initial implementation branch:
 - `feature/native-sources` starts from `feature/online-scenes-native`.
 - Initial foundation adds migration `88_sources.up.sql`, source/candidate model structs, sqlite store, GraphQL schema/resolver shell, and repository wiring.
 - `sourceSyncByURL` is the first GraphQL sync bridge. For Shrmha URLs it runs `.local/scrapers/stash-a/Shrmha/ShrmhaSource.py`, upserts/updates the Source, persists candidate scenes, marks candidates as `LINKED` when their URL already exists in native `scene_urls`, and respects durable ignored scene URLs.
+- The first UI shell registers `/sources`, adds Sources to the navbar between Galleries and Performers, keeps it visible for existing saved menu configs, and displays synced source candidate scenes as native-like review cards with status-colored borders and ignore support.
 
 ## Stash-a scrapers
 

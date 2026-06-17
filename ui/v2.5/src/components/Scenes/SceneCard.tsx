@@ -115,12 +115,22 @@ interface ISceneCardProps {
   fromGroupId?: string;
 }
 
-const FIND_SCENE_ONLINE_CARD_BADGE = gql`
-  query FindSceneOnlineCardBadge($id: ID!) {
+interface IOnlineSceneCardData {
+  findScene?: {
+    online_media?: {
+      source_slug: string;
+      duration_seconds?: number | null;
+    } | null;
+  } | null;
+}
+
+const FIND_SCENE_ONLINE_CARD = gql`
+  query FindSceneOnlineCard($id: ID!) {
     findScene(id: $id) {
       id
       online_media {
         source_slug
+        duration_seconds
       }
     }
   }
@@ -130,47 +140,42 @@ const OnlineSceneCardBadge: React.FC<{ disabled?: boolean; sceneID: string }> = 
   disabled,
   sceneID,
 }) => {
-  const { data } = useQuery<
-    { findScene?: { online_media?: { source_slug: string } | null } | null },
-    { id: string }
-  >(FIND_SCENE_ONLINE_CARD_BADGE, {
-    variables: { id: sceneID },
-    skip: disabled,
-    fetchPolicy: "cache-first",
-  });
+  const { data } = useQuery<IOnlineSceneCardData, { id: string }>(
+    FIND_SCENE_ONLINE_CARD,
+    {
+      variables: { id: sceneID },
+      skip: disabled,
+      fetchPolicy: "cache-first",
+    }
+  );
 
   if (!data?.findScene?.online_media) return null;
 
   return (
-    <Badge
-      variant="success"
-      style={{
-        left: "0.5rem",
-        pointerEvents: "none",
-        position: "absolute",
-        top: "0.5rem",
-        zIndex: 3,
-      }}
-    >
+    <Badge variant="success" className="ml-2 align-middle">
       Online
     </Badge>
   );
 };
 
 const OnlineSceneCardDurationOverlay: React.FC<{ sceneID: string }> = ({ sceneID }) => {
-  const { data } = useQuery<
-    { findScene?: { online_media?: { source_slug: string } | null } | null },
-    { id: string }
-  >(FIND_SCENE_ONLINE_CARD_BADGE, {
-    variables: { id: sceneID },
-    fetchPolicy: "cache-first",
-  });
+  const { data } = useQuery<IOnlineSceneCardData, { id: string }>(
+    FIND_SCENE_ONLINE_CARD,
+    {
+      variables: { id: sceneID },
+      fetchPolicy: "cache-first",
+    }
+  );
 
-  if (!data?.findScene?.online_media) return null;
+  const duration = data?.findScene?.online_media?.duration_seconds;
+
+  if (!duration || duration <= 0) return null;
 
   return (
     <div className="scene-specs-overlay">
-      <span className="overlay-duration">66:66</span>
+      <span className="overlay-duration">
+        {TextUtils.secondsToTimestamp(duration)}
+      </span>
     </div>
   );
 };
@@ -349,7 +354,13 @@ const SceneCardDetails = PatchComponent(
   (props: ISceneCardProps) => {
     return (
       <div className="scene-card__details">
-        <span className="scene-card__date">{props.scene.date}</span>
+        <div className="d-flex align-items-center flex-wrap">
+          <span className="scene-card__date">{props.scene.date}</span>
+          <OnlineSceneCardBadge
+            disabled={props.scene.files.length > 0}
+            sceneID={props.scene.id}
+          />
+        </div>
         <span className="file-path extra-scene-info">{objectPath(props.scene)}</span>
         <TruncatedText className="scene-card__description" text={props.scene.details} lineCount={3} />
       </div>
@@ -439,7 +450,6 @@ const SceneCardImage = PatchComponent(
         />
         <RatingBanner rating={props.scene.rating100} />
         <SceneSpecsOverlay scene={props.scene} />
-        <OnlineSceneCardBadge disabled={props.scene.files.length > 0} sceneID={props.scene.id} />
         {maybeRenderInteractiveSpeedOverlay()}
       </>
     );

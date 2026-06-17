@@ -6,8 +6,8 @@ import (
 	"github.com/stashapp/stash/pkg/models"
 )
 
-func (r *queryResolver) FindSourceCandidateScenes(ctx context.Context, sourceID string) (ret []*models.SourceCandidateScene, err error) {
-	sid, err := sourceID(sourceID)
+func (r *queryResolver) FindSourceCandidateScenes(ctx context.Context, id string) (ret []*models.SourceCandidateScene, err error) {
+	sid, err := sourceID(id)
 	if err != nil {
 		return nil, err
 	}
@@ -20,8 +20,8 @@ func (r *queryResolver) FindSourceCandidateScenes(ctx context.Context, sourceID 
 	return ret, nil
 }
 
-func (r *queryResolver) FindSourceIgnoredItems(ctx context.Context, sourceID string) (ret []*models.SourceIgnoredItem, err error) {
-	sid, err := sourceID(sourceID)
+func (r *queryResolver) FindSourceIgnoredItems(ctx context.Context, id string) (ret []*models.SourceIgnoredItem, err error) {
+	sid, err := sourceID(id)
 	if err != nil {
 		return nil, err
 	}

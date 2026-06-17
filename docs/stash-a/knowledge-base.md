@@ -27,7 +27,7 @@ Keep this file concise, factual, and action-oriented. Current code and upstream 
 
 ### `kareemanwar/plugins-repo-template-k`
 
-- Template/reference for a Stash plugins source index.
+- Template/reference for Stash plugins source index.
 - Plugins are placed under a `plugins/` directory and published as an index.
 - Use for plugin distribution/index structure only, not core feature architecture.
 
@@ -202,6 +202,7 @@ Initial implementation branch:
 - `Shrmha.py` / `ShrmhaOnline.py` implement `sceneByURL` for native online scenes.
 - `ShrmhaSource.py` is a first-pass `source-by-url` parser for Shrmha search/category-like listing pages. It returns a Source-shaped payload plus `scene_candidates` using native `ScrapedScene`-style fields for each candidate.
 - Shrmha source listing pages are WordPress preview grids using `.post-preview` blocks; each block can provide candidate scene URL/title/thumbnail/date/tags and an external id from `?p=` or `post-<id>` classes.
+- Shrmha source-by-url now crawls discovered WordPress pagination links before returning candidates, so a search URL or the site root syncs all discovered pages in that listing up to the scraper cap instead of only the supplied page.
 - Shrmha source sync should stay lightweight: scrape listing metadata into candidate rows first, then run full `sceneByURL` only when a candidate is promoted or explicitly refreshed.
 - Shrmha is mapped as a native scraped studio, not as a custom `source_type` field.
 - Do not return performers from Shrmha scene pages until a page source has explicit performer data.

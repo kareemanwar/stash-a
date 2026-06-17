@@ -69,6 +69,7 @@ const Studios = lazyComponent(() => import("./components/Studios/Studios"));
 const Galleries = lazyComponent(
   () => import("./components/Galleries/Galleries")
 );
+const Sources = lazyComponent(() => import("./components/Sources/Sources"));
 
 const Groups = lazyComponent(() => import("./components/Groups/Groups"));
 const Tags = lazyComponent(() => import("./components/Tags/Tags"));
@@ -112,7 +113,6 @@ const AppContainer: React.FC<React.PropsWithChildren<unknown>> = PatchFunction(
 ) as React.FC;
 
 const MainContainer: React.FC = ({ children }) => {
-  // use optional here because the configuration may have be loading or errored
   const { configuration } = useConfigurationContextOptional() || {};
   const { sfwContentMode } = configuration?.interface || {};
 
@@ -129,10 +129,8 @@ const MainContainer: React.FC = ({ children }) => {
 };
 
 function translateLanguageLocale(l: string) {
-  // intl doesn't support all locales, so we need to map some to supported ones
   switch (l) {
     case "nn-NO":
-      // use other Norwegian locale for intl
       return "nb-NO";
     default:
       return l;
@@ -149,7 +147,6 @@ export const App: React.FC = () => {
     config.data?.configuration?.interface?.language ?? defaultLocale;
   const intlLanguage = translateLanguageLocale(language);
 
-  // use en-GB as default messages if any messages aren't found in the chosen language
   const [messages, setMessages] = useState<Record<string, string>>();
   const [customMessages, setCustomMessages] = useState<NestedMessage>();
 
@@ -171,7 +168,6 @@ export const App: React.FC = () => {
       const defaultMessageLanguage = languageMessageString(defaultLocale);
       const messageLanguage = languageMessageString(language);
 
-      // register countries for the chosen language
       await registerCountry(language);
 
       const defaultMessages = (await locales[defaultMessageLanguage]()).default;
@@ -208,12 +204,10 @@ export const App: React.FC = () => {
   const history = useHistory();
   const setupMatch = useRouteMatch(["/setup", "/migrate"]);
 
-  // dispatch event when location changes
   useEffect(() => {
     Event.dispatch("location", "", { location });
   }, [location]);
 
-  // redirect to setup or migrate as needed
   useEffect(() => {
     if (!systemStatusData) {
       return;
@@ -225,7 +219,6 @@ export const App: React.FC = () => {
       location.pathname !== "/setup" &&
       status === GQL.SystemStatusEnum.Setup
     ) {
-      // redirect to setup page
       history.push("/setup");
     }
 
@@ -233,13 +226,11 @@ export const App: React.FC = () => {
       location.pathname !== "/migrate" &&
       status === GQL.SystemStatusEnum.NeedsMigration
     ) {
-      // redirect to migrate page
       history.replace("/migrate");
     }
   }, [systemStatusData, history, location.pathname]);
 
   function maybeRenderNavbar() {
-    // don't render navbar for setup views
     if (!setupMatch) {
       return <MainNavbar />;
     }
@@ -258,6 +249,7 @@ export const App: React.FC = () => {
             <Route path="/scenes" component={Scenes} />
             <Route path="/images" component={Images} />
             <Route path="/galleries" component={Galleries} />
+            <Route path="/sources" component={Sources} />
             <Route path="/performers" component={Performers} />
             <Route path="/tags" component={Tags} />
             <Route path="/studios" component={Studios} />

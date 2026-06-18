@@ -203,3 +203,17 @@ Initial implementation branch:
 - Do not return performers from Shrmha scene pages until a page source has explicit performer data.
 - The source page does not expose duration/direct media directly. `ShrmhaOnline.py` probes the embed host, POSTs `/dl`, unpacks the returned JWPlayer script, and extracts `m3u8` direct video URL and `duration_seconds` when available.
 - The Shrmha scraper should return `online_media` with embed streams, direct stream when discovered, `duration_seconds`, thumbnail URL, external id, and raw provider metadata. Source page URLs belong only in native `ScrapedScene.urls` / `Scene.urls`.
+
+### Nafak
+
+- Local development path: `.local/scrapers/stash-a/Nafak/`.
+- `Nafak.py` implements scene URL scraping for native fields plus online media embed streams.
+- `NafakSourceHydrated.py` reuses the Shrmha source parser shape for TubeAce-style `post-preview` cards and `/page/N/` pagination, but maps hydrated candidates through the Nafak scene scraper.
+- Nafak source pages expose listing metadata; each candidate should be hydrated through `NafakOnline.py scene-by-url` before import.
+
+### Source candidate import utility
+
+- `scripts/dev/import_source_candidate_scenes.py` imports Shrmha/Nafak source candidates one-by-one through GraphQL.
+- The utility prints live stderr feedback for each candidate (`CHECK`, `SCRAPE`, `SCRAPED`, `CREATED`, `ONLINE_MEDIA`, `ERROR`).
+- Duplicate safety must use native `Scene.urls` exact matching through `scene_filter.url`, not free-text `q` search.
+- The utility is for development imports only; it does not create side storage or bypass native schema.

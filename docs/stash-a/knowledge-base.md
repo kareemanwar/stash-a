@@ -208,6 +208,7 @@ Initial implementation branch:
 
 - Local development path: `.local/scrapers/stash-a/Nafak/`.
 - `Nafak.py` implements scene URL scraping for native fields plus online media embed streams.
+- `NafakOnline.py` wraps the base scene scraper and mirrors the Shrmha online enhancement path: it probes embed hosts, tries `/dl`, unpacks packed player scripts, extracts direct `mp4`/`m3u8` URLs and duration when available, sorts direct streams by detected HLS height before embed fallbacks, and removes duplicate page/canonical URL fields from online media.
 - `NafakSourceHydrated.py` reuses the Shrmha source parser shape for TubeAce-style `post-preview` cards and `/page/N/` pagination, but maps hydrated candidates through the Nafak scene scraper.
 - Nafak source pages expose listing metadata; each candidate should be hydrated through `NafakOnline.py scene-by-url` before import.
 

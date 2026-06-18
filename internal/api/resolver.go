@@ -37,7 +37,6 @@ func (r *Resolver) Mutation() MutationResolver { return &mutationResolver{r} }
 func (r *Resolver) Performer() PerformerResolver { return &performerResolver{r} }
 func (r *Resolver) Query() QueryResolver { return &queryResolver{r} }
 func (r *Resolver) Scene() SceneResolver { return &sceneResolver{r} }
-func (r *Resolver) ScrapedScene() ScrapedSceneResolver { return &scrapedSceneResolver{r} }
 func (r *Resolver) Source() SourceResolver { return &sourceResolver{r} }
 func (r *Resolver) SourceCandidateScene() SourceCandidateSceneResolver { return &sourceCandidateSceneResolver{r} }
 func (r *Resolver) Image() ImageResolver { return &imageResolver{r} }
@@ -63,7 +62,6 @@ type galleryResolver struct{ *Resolver }
 type galleryChapterResolver struct{ *Resolver }
 type performerResolver struct{ *Resolver }
 type sceneResolver struct{ *Resolver }
-type scrapedSceneResolver struct{ *Resolver }
 type sourceResolver struct{ *Resolver }
 type sourceCandidateSceneResolver struct{ *Resolver }
 type sceneMarkerResolver struct{ *Resolver }
@@ -86,7 +84,4 @@ func (r *Resolver) withReadTxn(ctx context.Context, fn func(ctx context.Context)
 func (r *Resolver) idOnly(ctx context.Context) bool {
 	fields := graphql.CollectAllFields(ctx)
 	return len(fields) == 1 && fields[0] == "id"
-}
-func (r *scrapedSceneResolver) OnlineMedia(ctx context.Context, obj *models.ScrapedScene) (*ScrapedSceneOnlineMedia, error) {
-	return scrapedSceneOnlineMediaForScene(obj)
 }

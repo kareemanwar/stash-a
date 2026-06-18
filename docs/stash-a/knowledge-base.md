@@ -236,3 +236,12 @@ Initial implementation branch:
 - ShrmhaOnline should normalize those URLs to the file code, keep the embed as a fallback, and probe the player document for direct HLS/MP4 plus duration.
 - Verified with `https://shrmha.com/?p=306`: scraper returned duration 87, direct StreamRuby HLS, and the original iframe fallback.
 
+
+### Scraped scene online media transport
+
+- `ScrapedScene.online_media` is defined through `graphql/schema/types/scraper_online.graphql` as a native scrape-result extension.
+- The GraphQL scrape online types are bound to `pkg/models.ScrapedSceneOnlineMedia` and `pkg/models.ScrapedSceneOnlineStream` in `gqlgen.yml`.
+- `models.ScrapedScene` carries transient `OnlineMedia` typed data for scraper review/apply flows; persistent playback data still belongs in `scene_online_media` and `scene_online_streams`.
+- Avoid the previous raw JSON/generated resolver bridge for scraped online media; typed model binding is the preferred pattern.
+- Verified with `scrapeSceneURL("https://shrmha.com/?p=306")`: GraphQL returned Shrmha online media with duration 87, direct HLS stream, and legacy embed fallback.
+

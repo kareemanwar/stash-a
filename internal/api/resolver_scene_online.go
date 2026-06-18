@@ -2,7 +2,6 @@ package api
 
 import (
 	"context"
-	"encoding/json"
 	"fmt"
 	"strconv"
 	"time"
@@ -16,23 +15,6 @@ func sceneOnlineMediaID(id string) (int, error) {
 		return 0, fmt.Errorf("invalid online scene id %q: %w", id, err)
 	}
 	return ret, nil
-}
-
-func scrapedSceneOnlineMediaForScene(obj *models.ScrapedScene) (*ScrapedSceneOnlineMedia, error) {
-	raw, ok := models.GetScrapedSceneOnlineMedia(obj)
-	if !ok || len(raw) == 0 {
-		return nil, nil
-	}
-
-	var ret ScrapedSceneOnlineMedia
-	if err := json.Unmarshal(raw, &ret); err != nil {
-		return nil, err
-	}
-	if ret.Streams == nil {
-		ret.Streams = []*ScrapedSceneOnlineStream{}
-	}
-
-	return &ret, nil
 }
 
 func (r *sceneResolver) OnlineMedia(ctx context.Context, obj *models.Scene) (ret *models.SceneOnlineMedia, err error) {

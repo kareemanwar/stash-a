@@ -1,51 +1,39 @@
 package models
 
-import (
-	"encoding/json"
-	"sync"
-)
+import "encoding/json"
 
-var scrapedSceneOnlineMedia sync.Map
-var scrapedSceneOnlineMediaByKey sync.Map
-
-// SetScrapedSceneOnlineMedia attaches raw online media scrape data to a scraped scene.
-// This is used only as transient scrape transport so script scrapers can return
-// provider playback metadata without storing it in custom_fields or native Scene
-// metadata before the user creates/imports the scene.
+// SetScrapedSceneOnlineMedia attaches online media scrape data to a scraped
+// scene. This is transient scrape transport only; persistent online playback is
+// stored through SceneOnlineMedia after the user applies/saves the scrape result.
 func SetScrapedSceneOnlineMedia(scene *ScrapedScene, raw json.RawMessage) {
 	if scene == nil || len(raw) == 0 || string(raw) == "null" {
 		return
 	}
 
-	copied := make(json.RawMessage, len(raw))
-	copy(copied, raw)
-	scrapedSceneOnlineMedia.Store(scene, copied)
-
-	for _, key := range scrapedSceneOnlineMediaKeys(scene) {
-		scrapedSceneOnlineMediaByKey.Store(key, copied)
+	var media ScrapedSceneOnlineMedia
+	if err := json.Unmarshal(raw, &media); err != nil {
+		return
 	}
+	if media.Streams == nil {
+		media.Streams = []*ScrapedSceneOnlineStream{}
+	}
+
+	scene.OnlineMedia = &media
 }
 
-// GetScrapedSceneOnlineMedia returns raw online media scrape data previously
-// attached to a scraped scene by SetScrapedSceneOnlineMedia.
+// GetScrapedSceneOnlineMedia returns online media scrape data attached to a
+// scraped scene.
 func GetScrapedSceneOnlineMedia(scene *ScrapedScene) (json.RawMessage, bool) {
-	if scene == nil {
+	if scene == nil || scene.OnlineMedia == nil {
 		return nil, false
 	}
 
-	if value, ok := scrapedSceneOnlineMedia.Load(scene); ok {
-		raw, ok := value.(json.RawMessage)
-		return raw, ok
+	raw, err := json.Marshal(scene.OnlineMedia)
+	if err != nil {
+		return nil, false
 	}
 
-	for _, key := range scrapedSceneOnlineMediaKeys(scene) {
-		if value, ok := scrapedSceneOnlineMediaByKey.Load(key); ok {
-			raw, ok := value.(json.RawMessage)
-			return raw, ok
-		}
-	}
-
-	return nil, false
+	return raw, true
 }
 
 // CopyScrapedSceneOnlineMedia copies transient online media data when scraped
@@ -56,7 +44,7 @@ func CopyScrapedSceneOnlineMedia(dst *ScrapedScene, src interface{}) {
 	}
 
 	srcScene, ok := src.(*ScrapedScene)
-	if !ok {
+	if !ok || srcScene.OnlineMedia == nil {
 		return
 	}
 
@@ -69,9 +57,8 @@ func CopyScrapedSceneOnlineMedia(dst *ScrapedScene, src interface{}) {
 }
 
 // AttachScrapedSceneOnlineMediaFromJSON attaches online_media from a raw script
-// response to already-decoded ScrapedScene values. This covers scraper runners
-// that decode into pointers and then copy/convert values before GraphQL resolves
-// extension fields.
+// response to already-decoded ScrapedScene values. This preserves compatibility
+// with scraper runners that decode and then copy/convert values.
 func AttachScrapedSceneOnlineMediaFromJSON(out interface{}, data []byte) error {
 	if len(data) == 0 || out == nil {
 		return nil
@@ -115,57 +102,17 @@ func attachSingleScrapedSceneOnlineMedia(scene *ScrapedScene, data []byte) error
 	return nil
 }
 
-func scrapedSceneOnlineMediaKeys(scene *ScrapedScene) []string {
-	if scene == nil {
-		return nil
-	}
-
-	payload, err := json.Marshal(scene)
-	if err != nil {
-		return nil
-	}
-
-	var probe struct {
-		URL          *string  `json:"url"`
-		URLs         []string `json:"urls"`
-		RemoteSiteID *string  `json:"remote_site_id"`
-	}
-	if err := json.Unmarshal(payload, &probe); err != nil {
-		return nil
-	}
-
-	keys := make([]string, 0, len(probe.URLs)+2)
-	for _, url := range probe.URLs {
-		if url != "" {
-			keys = append(keys, "url:"+url)
-		}
-	}
-	if probe.URL != nil && *probe.URL != "" {
-		keys = append(keys, "url:"+*probe.URL)
-	}
-	if probe.RemoteSiteID != nil && *probe.RemoteSiteID != "" {
-		keys = append(keys, "remote_site_id:"+*probe.RemoteSiteID)
-	}
-
-	return keys
-}
-
 // UnmarshalJSON preserves the upstream ScrapedScene shape while accepting the
-// Stash-a online_media extension returned by script scrapers. Unknown fields are
-// intentionally ignored here to match the scraper runner's lenient fallback.
+// Stash-a online_media extension returned by script scrapers.
 func (s *ScrapedScene) UnmarshalJSON(data []byte) error {
 	type scrapedSceneAlias ScrapedScene
-	aux := struct {
-		*scrapedSceneAlias
-		OnlineMedia json.RawMessage `json:"online_media,omitempty"`
-	}{
-		scrapedSceneAlias: (*scrapedSceneAlias)(s),
-	}
 
-	if err := json.Unmarshal(data, &aux); err != nil {
+	if err := json.Unmarshal(data, (*scrapedSceneAlias)(s)); err != nil {
 		return err
 	}
+	if s.OnlineMedia != nil && s.OnlineMedia.Streams == nil {
+		s.OnlineMedia.Streams = []*ScrapedSceneOnlineStream{}
+	}
 
-	SetScrapedSceneOnlineMedia(s, aux.OnlineMedia)
 	return nil
 }

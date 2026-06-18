@@ -123,6 +123,10 @@ models:
     model: github.com/stashapp/stash/internal/identify.FieldOptions
   IdentifyFieldStrategy:
     model: github.com/stashapp/stash/internal/identify.FieldStrategy
+  ScrapedSceneOnlineMedia:
+    model: github.com/stashapp/stash/pkg/models.ScrapedSceneOnlineMedia
+  ScrapedSceneOnlineStream:
+    model: github.com/stashapp/stash/pkg/models.ScrapedSceneOnlineStream
   ScraperSource:
     model: github.com/stashapp/stash/pkg/scraper.Source
   IdentifySourceInput:

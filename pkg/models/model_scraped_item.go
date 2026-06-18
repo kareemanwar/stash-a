@@ -671,6 +671,27 @@ func (g ScrapedGroup) ScrapedMovie() ScrapedMovie {
 	return ret
 }
 
+type ScrapedSceneOnlineStream struct {
+	Label     *string `json:"label"`
+	Kind      string  `json:"kind"`
+	URL       string  `json:"url"`
+	Position  int     `json:"position"`
+	IsPrimary bool    `json:"is_primary"`
+}
+
+type ScrapedSceneOnlineMedia struct {
+	SourceName        string                      `json:"source_name"`
+	SourceSlug        string                      `json:"source_slug"`
+	ExternalID        *string                     `json:"external_id"`
+	EmbedURL          *string                     `json:"embed_url"`
+	DirectVideoURL    *string                     `json:"direct_video_url"`
+	ThumbnailURL      *string                     `json:"thumbnail_url"`
+	DurationSeconds   *int                        `json:"duration_seconds"`
+	ExternalViewCount *int                        `json:"external_view_count"`
+	RawMetadataJSON   *string                     `json:"raw_metadata_json"`
+	Streams           []*ScrapedSceneOnlineStream `json:"streams"`
+}
+
 type ScrapedScene struct {
 	Title    *string  `json:"title"`
 	Code     *string  `json:"code"`
@@ -680,16 +701,17 @@ type ScrapedScene struct {
 	URLs     []string `json:"urls"`
 	Date     *string  `json:"date"`
 	// This should be a base64 encoded data URL
-	Image        *string                `json:"image"`
-	File         *SceneFileType         `json:"file"`
-	Studio       *ScrapedStudio         `json:"studio"`
-	Tags         []*ScrapedTag          `json:"tags"`
-	Performers   []*ScrapedPerformer    `json:"performers"`
-	Groups       []*ScrapedGroup        `json:"groups"`
-	Movies       []*ScrapedMovie        `json:"movies"`
-	RemoteSiteID *string                `json:"remote_site_id"`
-	Duration     *int                   `json:"duration"`
-	Fingerprints []*StashBoxFingerprint `json:"fingerprints"`
+	Image        *string                  `json:"image"`
+	File         *SceneFileType           `json:"file"`
+	Studio       *ScrapedStudio           `json:"studio"`
+	Tags         []*ScrapedTag            `json:"tags"`
+	Performers   []*ScrapedPerformer      `json:"performers"`
+	Groups       []*ScrapedGroup          `json:"groups"`
+	Movies       []*ScrapedMovie          `json:"movies"`
+	RemoteSiteID *string                  `json:"remote_site_id"`
+	Duration     *int                     `json:"duration"`
+	Fingerprints []*StashBoxFingerprint   `json:"fingerprints"`
+	OnlineMedia  *ScrapedSceneOnlineMedia `json:"online_media"`
 }
 
 func (ScrapedScene) IsScrapedContent() {}

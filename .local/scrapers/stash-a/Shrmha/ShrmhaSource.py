@@ -2,11 +2,9 @@ import argparse
 import html
 import json
 import os
-import random
 import re
 import subprocess
 import sys
-import time
 from pathlib import Path
 from typing import Any
 from urllib.parse import parse_qs, unquote_plus, urlencode, urljoin, urlparse, urlunparse
@@ -15,10 +13,6 @@ import Shrmha
 
 
 DEFAULT_SOURCE_PAGE_LIMIT = 500
-DEFAULT_HYDRATION_DELAY_SECONDS = 1.0
-DEFAULT_HYDRATION_JITTER_SECONDS = 0.5
-DEFAULT_HYDRATION_RETRIES = 2
-DEFAULT_HYDRATION_BACKOFF_SECONDS = 2.0
 
 ARABIC_MONTHS = {
     "يناير": 1,
@@ -361,26 +355,6 @@ def parse_candidate_limit(value: Any) -> int | None:
     return limit if limit > 0 else None
 
 
-def parse_float(value: Any, default: float) -> float:
-    if value in (None, ""):
-        return default
-    try:
-        parsed = float(value)
-    except (TypeError, ValueError):
-        return default
-    return max(0.0, parsed)
-
-
-def parse_int(value: Any, default: int) -> int:
-    if value in (None, ""):
-        return default
-    try:
-        parsed = int(value)
-    except (TypeError, ValueError):
-        return default
-    return max(0, parsed)
-
-
 def crawl_listing_pages(
     url: str,
     max_pages: int | None = DEFAULT_SOURCE_PAGE_LIMIT,
@@ -509,52 +483,32 @@ def merge_tags(*tag_lists: Any) -> list[dict[str, str]]:
     return tags
 
 
-def run_scene_by_url(
-    url: str,
-    retries: int = DEFAULT_HYDRATION_RETRIES,
-    backoff_seconds: float = DEFAULT_HYDRATION_BACKOFF_SECONDS,
-) -> dict[str, Any]:
+def run_scene_by_url(url: str) -> dict[str, Any]:
     script_dir = Path(__file__).resolve().parent
     script_path = script_dir / "ShrmhaOnline.py"
     env = os.environ.copy()
     env["PYTHONIOENCODING"] = "utf-8"
 
-    last_error = ""
-    for attempt in range(retries + 1):
-        result = subprocess.run(
-            [sys.executable, str(script_path), "scene-by-url", "--url", url],
-            cwd=script_dir,
-            env=env,
-            text=True,
-            stdout=subprocess.PIPE,
-            stderr=subprocess.PIPE,
-            encoding="utf-8",
-            errors="replace",
-        )
-        if result.returncode == 0:
-            scene = json.loads(result.stdout)
-            if isinstance(scene, dict) and not scene.get("error"):
-                return scene
-            last_error = str(scene.get("error") if isinstance(scene, dict) else "scene-by-url returned non-object JSON")
-        else:
-            last_error = result.stderr.strip() or f"scene-by-url failed with exit code {result.returncode}"
+    result = subprocess.run(
+        [sys.executable, str(script_path), "scene-by-url", "--url", url],
+        cwd=script_dir,
+        env=env,
+        text=True,
+        stdout=subprocess.PIPE,
+        stderr=subprocess.PIPE,
+        encoding="utf-8",
+        errors="replace",
+    )
+    if result.returncode != 0:
+        raise RuntimeError(result.stderr.strip() or f"scene-by-url failed with exit code {result.returncode}")
 
-        if attempt < retries:
-            sleep_for = backoff_seconds * (attempt + 1)
-            if sleep_for > 0:
-                time.sleep(sleep_for)
+    scene = json.loads(result.stdout)
+    if not isinstance(scene, dict):
+        raise RuntimeError("scene-by-url returned non-object JSON")
+    if scene.get("error"):
+        raise RuntimeError(str(scene["error"]))
 
-    raise RuntimeError(last_error or f"scene-by-url failed for {url}")
-
-
-def wait_before_hydration(position: int, delay_seconds: float, jitter_seconds: float) -> None:
-    if position <= 0:
-        return
-    sleep_for = delay_seconds
-    if jitter_seconds > 0:
-        sleep_for += random.uniform(0, jitter_seconds)
-    if sleep_for > 0:
-        time.sleep(sleep_for)
+    return scene
 
 
 def merge_scene_candidate(preview: dict[str, Any], scene: dict[str, Any], position: int) -> dict[str, Any]:
@@ -582,13 +536,7 @@ def merge_scene_candidate(preview: dict[str, Any], scene: dict[str, Any], positi
     return {k: v for k, v in candidate.items() if v not in (None, [], "")}
 
 
-def hydrate_scene_candidates(
-    preview_candidates: list[dict[str, Any]],
-    delay_seconds: float = DEFAULT_HYDRATION_DELAY_SECONDS,
-    jitter_seconds: float = DEFAULT_HYDRATION_JITTER_SECONDS,
-    retries: int = DEFAULT_HYDRATION_RETRIES,
-    backoff_seconds: float = DEFAULT_HYDRATION_BACKOFF_SECONDS,
-) -> list[dict[str, Any]]:
+def hydrate_scene_candidates(preview_candidates: list[dict[str, Any]]) -> list[dict[str, Any]]:
     hydrated: list[dict[str, Any]] = []
 
     for position, preview in enumerate(preview_candidates):
@@ -600,10 +548,8 @@ def hydrate_scene_candidates(
             hydrated.append(fallback)
             continue
 
-        wait_before_hydration(position, delay_seconds, jitter_seconds)
-
         try:
-            scene = run_scene_by_url(urls[0], retries=retries, backoff_seconds=backoff_seconds)
+            scene = run_scene_by_url(urls[0])
             hydrated.append(merge_scene_candidate(preview, scene, position))
         except Exception as exc:
             fallback = dict(preview)
@@ -619,10 +565,6 @@ def scrape_source_by_url(
     max_pages: int | None = DEFAULT_SOURCE_PAGE_LIMIT,
     candidate_limit: int | None = None,
     hydrate_scenes: bool = True,
-    hydration_delay_seconds: float = DEFAULT_HYDRATION_DELAY_SECONDS,
-    hydration_jitter_seconds: float = DEFAULT_HYDRATION_JITTER_SECONDS,
-    hydration_retries: int = DEFAULT_HYDRATION_RETRIES,
-    hydration_backoff_seconds: float = DEFAULT_HYDRATION_BACKOFF_SECONDS,
 ) -> dict[str, Any]:
     page_documents, crawl_truncated = crawl_listing_pages(
         url,
@@ -637,17 +579,7 @@ def scrape_source_by_url(
     source_title = extract_source_title(source_url, first_document)
     thumbnail_url = extract_source_thumbnail(first_document, first_page_url)
     preview_candidates = collect_scene_candidates(page_documents, candidate_limit=candidate_limit)
-    scene_candidates = (
-        hydrate_scene_candidates(
-            preview_candidates,
-            delay_seconds=hydration_delay_seconds,
-            jitter_seconds=hydration_jitter_seconds,
-            retries=hydration_retries,
-            backoff_seconds=hydration_backoff_seconds,
-        )
-        if hydrate_scenes
-        else preview_candidates
-    )
+    scene_candidates = hydrate_scene_candidates(preview_candidates) if hydrate_scenes else preview_candidates
     if not thumbnail_url and scene_candidates:
         thumb = scene_candidates[0].get("image")
         thumbnail_url = thumb if isinstance(thumb, str) else None
@@ -679,10 +611,6 @@ def scrape_source_by_url(
         "candidate_limit": 0 if candidate_limit is None else candidate_limit,
         "candidates_returned": len(scene_candidates),
         "scene_hydration": "scene-by-url" if hydrate_scenes else "preview-only",
-        "hydration_delay_seconds": hydration_delay_seconds,
-        "hydration_jitter_seconds": hydration_jitter_seconds,
-        "hydration_retries": hydration_retries,
-        "hydration_backoff_seconds": hydration_backoff_seconds,
         "hydration_error_count": hydration_error_count,
     }
 
@@ -700,15 +628,13 @@ def scrape_source_by_url(
 def scraper_args() -> tuple[str, dict[str, Any]]:
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="operation", required=True)
+
     source_by_url = subparsers.add_parser("source-by-url")
     source_by_url.add_argument("--url")
     source_by_url.add_argument("--max-pages", dest="max_pages", type=int)
     source_by_url.add_argument("--limit", dest="limit", type=int)
     source_by_url.add_argument("--preview-only", dest="preview_only", action="store_true")
-    source_by_url.add_argument("--hydrate-delay", dest="hydrate_delay", type=float)
-    source_by_url.add_argument("--hydrate-jitter", dest="hydrate_jitter", type=float)
-    source_by_url.add_argument("--hydrate-retries", dest="hydrate_retries", type=int)
-    source_by_url.add_argument("--hydrate-backoff", dest="hydrate_backoff", type=float)
+
     args = vars(parser.parse_args())
 
     if not sys.stdin.isatty():
@@ -760,10 +686,6 @@ def main() -> None:
                     max_pages=get_max_pages_arg(args),
                     candidate_limit=get_candidate_limit_arg(args),
                     hydrate_scenes=get_hydrate_scenes_arg(args),
-                    hydration_delay_seconds=parse_float(args.get("hydrate_delay", args.get("hydrateDelay")), DEFAULT_HYDRATION_DELAY_SECONDS),
-                    hydration_jitter_seconds=parse_float(args.get("hydrate_jitter", args.get("hydrateJitter")), DEFAULT_HYDRATION_JITTER_SECONDS),
-                    hydration_retries=parse_int(args.get("hydrate_retries", args.get("hydrateRetries")), DEFAULT_HYDRATION_RETRIES),
-                    hydration_backoff_seconds=parse_float(args.get("hydrate_backoff", args.get("hydrateBackoff")), DEFAULT_HYDRATION_BACKOFF_SECONDS),
                 )
             )
             return

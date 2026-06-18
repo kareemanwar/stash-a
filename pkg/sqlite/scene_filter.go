@@ -121,7 +121,7 @@ func (qb *sceneFilterHandler) criterionHandler() criterionHandler {
 		qb.oCountCriterionHandler(sceneFilter.OCounter),
 		boolCriterionHandler(sceneFilter.Organized, "scenes.organized", nil),
 
-		floatIntCriterionHandler(sceneFilter.Duration, "video_files.duration", qb.addVideoFilesTable),
+		floatIntCriterionHandler(sceneFilter.Duration, "COALESCE(video_files.duration, scene_online_media.duration_seconds)", qb.addDurationTables),
 		resolutionCriterionHandler(sceneFilter.Resolution, "video_files.height", "video_files.width", qb.addVideoFilesTable),
 		orientationCriterionHandler(sceneFilter.Orientation, "video_files.height", "video_files.width", qb.addVideoFilesTable),
 		floatIntCriterionHandler(sceneFilter.Framerate, "ROUND(video_files.frame_rate)", qb.addVideoFilesTable),
@@ -284,6 +284,16 @@ func (qb *sceneFilterHandler) addFoldersTable(f *filterBuilder, joinType joinTyp
 func (qb *sceneFilterHandler) addVideoFilesTable(f *filterBuilder, joinType joinType) {
 	qb.addSceneFilesTable(f, joinType)
 	f.addJoin(joinType, videoFileTable, "", "video_files.file_id = scenes_files.file_id")
+}
+
+func (qb *sceneFilterHandler) addSceneOnlineMediaTable(f *filterBuilder, joinType joinType) {
+	f.addJoin(joinType, sceneOnlineMediaTable, "", "scene_online_media.scene_id = scenes.id")
+}
+
+func (qb *sceneFilterHandler) addDurationTables(f *filterBuilder, joinType joinType) {
+	qb.addSceneFilesTable(f, joinTypeLeft)
+	f.addJoin(joinTypeLeft, videoFileTable, "", "video_files.file_id = scenes_files.file_id")
+	qb.addSceneOnlineMediaTable(f, joinTypeLeft)
 }
 
 func (qb *sceneFilterHandler) playCountCriterionHandler(count *models.IntCriterionInput) criterionHandlerFunc {

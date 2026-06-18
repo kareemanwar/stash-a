@@ -1191,6 +1191,10 @@ func (qb *SceneStore) setSceneSort(query *queryBuilder, findFilter *models.FindF
 		)
 	}
 
+	addSceneOnlineMediaTable := func() {
+		query.joinSort(sceneOnlineMediaTable, "", "scene_online_media.scene_id = scenes.id")
+	}
+
 	addFolderTable := func() {
 		query.addJoins(
 			join{
@@ -1253,7 +1257,8 @@ func (qb *SceneStore) setSceneSort(query *queryBuilder, findFilter *models.FindF
 		query.sortAndPagination += getSort(sort, direction, fileTable)
 	case "duration":
 		addVideoFileTable()
-		query.sortAndPagination += getSort(sort, direction, videoFileTable)
+		addSceneOnlineMediaTable()
+		query.sortAndPagination += fmt.Sprintf(" ORDER BY COALESCE(%s.duration, %s.duration_seconds, 0) %s", videoFileTable, sceneOnlineMediaTable, getSortDirection(direction))
 	case "interactive", "interactive_speed":
 		addVideoFileTable()
 		query.sortAndPagination += getSort(sort, direction, videoFileTable)

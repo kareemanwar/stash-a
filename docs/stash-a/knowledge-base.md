@@ -220,3 +220,12 @@ Initial implementation branch:
 - The utility still performs a second duplicate check after scene hydration because a scene scraper may add or normalize additional URLs.
 - Duplicate safety must use native `Scene.urls` exact matching through `scene_filter.url`, not free-text `q` search.
 - The utility is for development imports only; it does not create side storage or bypass native schema.
+
+
+### Online scene duration sorting
+
+- Scene duration sort/filter should use hybrid local/online duration:
+  `COALESCE(video_files.duration, scene_online_media.duration_seconds)`.
+- Join only `scene_online_media` for online duration. Do not join `scene_online_streams` in scene list sorting/filtering because it is one-to-many and can duplicate scene rows.
+- Verified with GraphQL `findScenes(filter: { sort: "duration", direction: DESC })`; online scenes sorted by `scene_online_media.duration_seconds`.
+

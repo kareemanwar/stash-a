@@ -245,3 +245,15 @@ Initial implementation branch:
 - Avoid the previous raw JSON/generated resolver bridge for scraped online media; typed model binding is the preferred pattern.
 - Verified with `scrapeSceneURL("https://shrmha.com/?p=306")`: GraphQL returned Shrmha online media with duration 87, direct HLS stream, and legacy embed fallback.
 
+
+### Shared online host extraction
+
+- Online site scrapers should keep site-specific parsing separate from host/player extraction.
+- `ShrmhaOnline.py` and `NafakOnline.py` now share XFileSharing-style embed enhancement through `.local/scrapers/stash-a/_shared/online_hosts.py`.
+- The shared enhancer owns player document fetching, `/dl` probing, packed JavaScript unpacking, direct MP4/HLS extraction, duration parsing, HLS quality probing, stream ordering, unavailable embed tracking, and removal of internal `page_url`/`canonical_url` fields.
+- Site-specific scraper wrappers should call their native `build_online_media` first, then pass the result to the shared enhancer.
+- Unknown or unsupported hosts should remain as embed fallback streams instead of being dropped.
+- Verified regression checks:
+  - Shrmha `https://shrmha.com/?p=306` returns duration `87`, direct HLS, and embed fallback.
+  - Nafak `https://nafakarab.com/?p=6878` returns duration `145`, direct streams, and embed fallbacks.
+- Streamtape is not handled by this refactor yet; add it as a separate host extractor/change.

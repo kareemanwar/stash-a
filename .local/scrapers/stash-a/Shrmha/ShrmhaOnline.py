@@ -52,7 +52,7 @@ def extract_embed_streams(document: str, parser: Shrmha.PageParser, base_url: st
     # of onclick handlers. Restrict to player/embed-looking paths to avoid
     # collecting the source article URL or thumbnails.
     data_pattern = re.compile(
-        r"\b(?:data-(?:src|url|embed)|href|src)=[\"'](?P<url>https?://[^\"']+/(?:e|embed|iframe|player)/[^\"']+)[\"']",
+        r"\b(?:data-(?:src|url|embed)|href|src)=[\"'](?P<url>https?://[^\"']+(?:/(?:e|embed|iframe|player)/[^\"']+|/embed-[^\"'/]+\.html(?:\?[^\"']*)?))[\"']",
         re.IGNORECASE,
     )
     for match in data_pattern.finditer(document):
@@ -122,6 +122,29 @@ def is_unavailable_player_document(document: str) -> bool:
     return any(marker in text for marker in UNAVAILABLE_PLAYER_MARKERS)
 
 
+def extract_file_code_from_embed_url(embed_url: str) -> str | None:
+    parsed = urlparse(embed_url)
+    path = parsed.path.rstrip("/")
+    if not path:
+        return None
+
+    filename = path.split("/")[-1]
+
+    # Legacy XFileSharing-style URLs:
+    #   /embed-tcltzs9kguns.html -> tcltzs9kguns
+    legacy_match = re.match(r"embed-([^/?#]+?)(?:\.html)?$", filename, re.IGNORECASE)
+    if legacy_match:
+        return legacy_match.group(1)
+
+    # Modern player paths:
+    #   /embed/code, /e/code, /iframe/code, /player/code
+    path_match = re.search(r"/(?:e|embed|iframe|player)/([^/?#]+)", path, re.IGNORECASE)
+    if path_match:
+        return path_match.group(1).removesuffix(".html")
+
+    return filename.removeprefix("embed-").removesuffix(".html") or None
+
+
 def fetch_embed_player_document(embed_url: str, page_url: str) -> tuple[str | None, bool]:
     """Return the player document and whether the embed is confirmed dead.
 
@@ -134,7 +157,7 @@ def fetch_embed_player_document(embed_url: str, page_url: str) -> tuple[str | No
         return None, False
 
     origin = f"{parsed.scheme}://{parsed.netloc}"
-    file_code = parsed.path.rstrip("/").split("/")[-1]
+    file_code = extract_file_code_from_embed_url(embed_url)
     if not file_code:
         return None, False
 
@@ -187,12 +210,15 @@ def fetch_embed_player_document(embed_url: str, page_url: str) -> tuple[str | No
             charset = response.headers.get_content_charset() or "utf-8"
             player_document = response.read().decode(charset, errors="replace")
     except Exception:
-        return None, False
+        # Some legacy embed pages expose the packed player directly on GET and
+        # do not accept the /dl POST flow. Keep the GET document for direct
+        # extraction instead of discarding the server.
+        return embed_document, False
 
     if is_unavailable_player_document(player_document):
         return None, True
 
-    return player_document, False
+    return embed_document + "\n" + player_document, False
 
 
 def fetch_text(url: str, referer: str) -> str | None:

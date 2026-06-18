@@ -229,3 +229,10 @@ Initial implementation branch:
 - Join only `scene_online_media` for online duration. Do not join `scene_online_streams` in scene list sorting/filtering because it is one-to-many and can duplicate scene rows.
 - Verified with GraphQL `findScenes(filter: { sort: "duration", direction: DESC })`; online scenes sorted by `scene_online_media.duration_seconds`.
 
+
+### Shrmha legacy embed players
+
+- Some Shrmha pages use legacy XFileSharing embed URLs like `/embed-code.html`, for example `shrmharuby.com/embed-tcltzs9kguns.html`.
+- ShrmhaOnline should normalize those URLs to the file code, keep the embed as a fallback, and probe the player document for direct HLS/MP4 plus duration.
+- Verified with `https://shrmha.com/?p=306`: scraper returned duration 87, direct StreamRuby HLS, and the original iframe fallback.
+

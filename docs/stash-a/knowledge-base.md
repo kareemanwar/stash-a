@@ -215,5 +215,7 @@ Initial implementation branch:
 
 - `scripts/dev/import_source_candidate_scenes.py` imports Shrmha/Nafak source candidates one-by-one through GraphQL.
 - The utility prints live stderr feedback for each candidate (`CHECK`, `SCRAPE`, `SCRAPED`, `CREATED`, `ONLINE_MEDIA`, `ERROR`).
+- After the source preview crawl, the utility prefilters candidates against native `Scene.urls` before invoking `scene-by-url`, so existing scenes do not pay the expensive scene scrape cost.
+- The utility still performs a second duplicate check after scene hydration because a scene scraper may add or normalize additional URLs.
 - Duplicate safety must use native `Scene.urls` exact matching through `scene_filter.url`, not free-text `q` search.
 - The utility is for development imports only; it does not create side storage or bypass native schema.

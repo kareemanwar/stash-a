@@ -234,6 +234,43 @@ def stream_count(scene: dict[str, Any]) -> int:
     return len(media.get("streams") or []) if isinstance(media, dict) else 0
 
 
+def prefilter_candidates(endpoint: str, candidates: list[dict[str, Any]], start_at: int, stats: dict[str, int]) -> list[tuple[int, dict[str, Any]]]:
+    filtered: list[tuple[int, dict[str, Any]]] = []
+    processed_urls: set[str] = set()
+
+    log("Filtering candidates against existing native Scene.urls before scene scraping...")
+    for index, preview in enumerate(candidates, start_at):
+        prefix = f"[source#{index}]"
+        urls = item_urls(preview)
+        url = urls[0] if urls else None
+
+        if not url:
+            stats["missing_url"] += 1
+            log(f"{prefix} SKIP missing URL")
+            continue
+
+        if any(u in processed_urls for u in urls):
+            stats["duplicates_in_source"] += 1
+            log(f"{prefix} SKIP duplicate in source result {url}")
+            continue
+        processed_urls.update(urls)
+
+        existing = find_any_scene(endpoint, urls)
+        if existing:
+            stats["existing_prefiltered"] += 1
+            log(f"{prefix} EXISTS_PREFILTER scene={existing['id']} title={existing.get('title')!r}")
+            continue
+
+        filtered.append((index, preview))
+
+    log(
+        "Prefilter summary: "
+        f"new={len(filtered)} existing={stats['existing_prefiltered']} "
+        f"duplicates={stats['duplicates_in_source']} missing_url={stats['missing_url']}"
+    )
+    return filtered
+
+
 def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--url", required=True)
@@ -253,34 +290,30 @@ def main() -> int:
     log("Collecting candidate URLs in preview mode...")
     candidates = preview_candidates(conf, args.url, args.max_pages, args.limit)[start_at - 1:]
     log(f"Mode: {'APPLY' if args.apply else 'DRY RUN'}")
-    log(f"Candidates to process: {len(candidates)}")
+    log(f"Source candidates collected: {len(candidates)}")
 
     studio_cache: dict[str, str] = {}
     tag_cache: dict[str, str] = {}
-    processed: set[str] = set()
-    stats = {"created": 0, "existing": 0, "duplicates_in_run": 0, "errors": 0, "online_media_saved": 0, "dry_run": 0}
+    stats = {
+        "created": 0,
+        "existing_prefiltered": 0,
+        "existing_after_scrape": 0,
+        "duplicates_in_source": 0,
+        "missing_url": 0,
+        "errors": 0,
+        "online_media_saved": 0,
+        "dry_run": 0,
+    }
 
-    for index, preview in enumerate(candidates, 1):
-        source_index = start_at + index - 1
-        prefix = f"[{index}/{len(candidates)} source#{source_index}]"
+    candidates_to_scrape = prefilter_candidates(args.endpoint, candidates, start_at, stats)
+    log(f"Candidates to scene-scrape: {len(candidates_to_scrape)}")
+
+    for index, (source_index, preview) in enumerate(candidates_to_scrape, 1):
+        prefix = f"[{index}/{len(candidates_to_scrape)} source#{source_index}]"
         urls = item_urls(preview)
-        url = urls[0] if urls else None
-        if not url:
-            stats["errors"] += 1
-            log(f"{prefix} SKIP missing URL")
-            continue
-        if any(u in processed for u in urls):
-            stats["duplicates_in_run"] += 1
-            log(f"{prefix} SKIP duplicate in this run {url}")
-            continue
-        processed.update(urls)
+        url = urls[0]
+
         try:
-            log(f"{prefix} CHECK {url}")
-            existing = find_any_scene(args.endpoint, urls)
-            if existing:
-                stats["existing"] += 1
-                log(f"{prefix} EXISTS scene={existing['id']} title={existing.get('title')!r}")
-                continue
             log(f"{prefix} SCRAPE {url}")
             scene = scrape_scene(conf, url)
             for key in ("urls", "title", "image", "date", "tags", "studio"):
@@ -288,7 +321,7 @@ def main() -> int:
                     scene[key] = preview[key]
             existing = find_any_scene(args.endpoint, item_urls(scene) or urls)
             if existing:
-                stats["existing"] += 1
+                stats["existing_after_scrape"] += 1
                 log(f"{prefix} EXISTS_AFTER_SCRAPE scene={existing['id']} title={existing.get('title')!r}")
                 continue
             log(f"{prefix} SCRAPED title={clean(scene.get('title'))!r} streams={stream_count(scene)}")

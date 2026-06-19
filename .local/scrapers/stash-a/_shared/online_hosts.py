@@ -1,9 +1,11 @@
 import html
 import json
 import re
+import shutil
+import subprocess
 from http.cookiejar import CookieJar
 from typing import Any, Callable
-from urllib.parse import urlencode, urljoin, urlparse
+from urllib.parse import parse_qs, urlencode, urljoin, urlparse
 from urllib.request import HTTPCookieProcessor, Request, build_opener, urlopen
 
 
@@ -296,6 +298,329 @@ def reset_stream_order(streams: list[dict[str, Any]]) -> None:
         stream["is_primary"] = index == 0
 
 
+
+STREAMTAPE_HOST_MARKER = "streamtape"
+
+
+def is_streamtape_url(url: str) -> bool:
+    host = urlparse(url).netloc.lower()
+    return STREAMTAPE_HOST_MARKER in host
+
+
+def fetch_streamtape_player_document(
+    embed_url: str,
+    page_url: str,
+    user_agent: str,
+) -> tuple[str | None, bool]:
+    """Return Streamtape player document and whether it is confirmed unavailable."""
+
+    parsed = urlparse(embed_url)
+    if not parsed.scheme or not parsed.netloc:
+        return None, False
+
+    request = Request(
+        embed_url,
+        headers={
+            "User-Agent": user_agent,
+            "Referer": page_url,
+            "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+        },
+    )
+
+    try:
+        with urlopen(request, timeout=30) as response:
+            document = response.read().decode(
+                response.headers.get_content_charset() or "utf-8",
+                errors="replace",
+            )
+    except Exception:
+        return None, False
+
+    if is_unavailable_player_document(document):
+        return None, True
+
+    return document, False
+
+
+
+def normalize_streamtape_direct_url(candidate: str, base_url: str) -> str | None:
+    candidate = html.unescape(candidate or "")
+    candidate = candidate.replace("\\/", "/").replace("\\u0026", "&")
+    candidate = candidate.strip().strip('"\'')
+    candidate = re.sub(r"\s+", "", candidate)
+
+    if not candidate:
+        return None
+
+    if candidate.startswith("//"):
+        candidate = "https:" + candidate
+    elif candidate.startswith("/streamtape.com/"):
+        candidate = "https:/" + candidate
+    elif candidate.startswith("streamtape.com/"):
+        candidate = "https://" + candidate
+    elif candidate.startswith("/get_video?"):
+        candidate = urljoin(base_url, candidate)
+    else:
+        candidate = urljoin(base_url, candidate)
+
+    parsed = urlparse(candidate)
+    if STREAMTAPE_HOST_MARKER not in parsed.netloc.lower():
+        return None
+    if "get_video" not in parsed.path:
+        return None
+
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    video_id = (query.get("id") or [""])[0].strip()
+    if not video_id or video_id.lower() in {"undefined", "null", "none"}:
+        return None
+
+    has_token = bool((query.get("token") or [""])[0].strip())
+    has_expires = bool((query.get("expires") or [""])[0].strip())
+    if not (has_token or has_expires):
+        return None
+
+    return candidate
+
+
+
+def streamtape_embed_id(base_url: str) -> str | None:
+    path = urlparse(base_url).path
+    match = re.search(r"/(?:e|v)/([^/?#]+)", path, re.IGNORECASE)
+    return match.group(1) if match else None
+
+
+def streamtape_direct_url_score(url: str, base_url: str) -> int:
+    parsed = urlparse(url)
+    query = parse_qs(parsed.query, keep_blank_values=True)
+    score = 0
+
+    embed_id = streamtape_embed_id(base_url)
+    video_id = (query.get("id") or [""])[0]
+    if embed_id and video_id == embed_id:
+        score += 1000
+    if (query.get("token") or [""])[0]:
+        score += 200
+    if (query.get("expires") or [""])[0]:
+        score += 100
+    if (query.get("ip") or [""])[0]:
+        score += 50
+    if parsed.scheme == "https":
+        score += 10
+
+    return score
+
+
+def apply_javascript_substrings(value: str, ops: str) -> str:
+    value = js_string(value)
+    for match in re.finditer(r"\.substring\((\d+)\)", ops or ""):
+        value = value[int(match.group(1)) :]
+    return value
+
+
+def reconstruct_javascript_string_expression(expression: str) -> str:
+    pieces: list[str] = []
+    string_pattern = re.compile(
+        r"(?P<quote>['\"])(?P<value>(?:\\.|(?!\1).)*)(?P=quote)(?P<ops>(?:\.substring\(\d+\))*)",
+        re.DOTALL,
+    )
+
+    for match in string_pattern.finditer(expression):
+        pieces.append(apply_javascript_substrings(match.group("value"), match.group("ops")))
+
+    return "".join(pieces)
+
+
+def add_streamtape_candidate(
+    candidates: list[str],
+    seen: set[str],
+    candidate: str | None,
+    base_url: str,
+) -> None:
+    if not candidate:
+        return
+
+    normalized = normalize_streamtape_direct_url(candidate, base_url)
+    if not normalized or normalized in seen:
+        return
+
+    seen.add(normalized)
+    candidates.append(normalized)
+
+
+def extract_streamtape_direct_urls(player_document: str, base_url: str) -> list[str]:
+    documents = [player_document]
+    documents.extend(unpack_packed_scripts(player_document))
+    joined = "\n".join(html.unescape(doc) for doc in documents).replace("\\/", "/")
+
+    candidates: list[str] = []
+    seen: set[str] = set()
+
+    assignment_pattern = re.compile(
+        r"document\.getElementById\(['\"](?:ideoolink|botlink|robotlink)['\"]\)\.innerHTML\s*=\s*(?P<expr>.*?);",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for match in assignment_pattern.finditer(joined):
+        reconstructed = reconstruct_javascript_string_expression(match.group("expr"))
+        add_streamtape_candidate(candidates, seen, reconstructed, base_url)
+
+    hidden_pattern = re.compile(
+        r"<(?:div|span)\b[^>]+id=[\"'](?:ideoolink|botlink|robotlink)[\"'][^>]*>\s*(?P<url>[^<]+?)\s*</(?:div|span)>",
+        re.IGNORECASE | re.DOTALL,
+    )
+    for match in hidden_pattern.finditer(joined):
+        add_streamtape_candidate(candidates, seen, match.group("url"), base_url)
+
+    url_patterns = [
+        r"(?P<url>https?://[^\"'<>\\\s]+/get_video\?[^\"'<>\\\s]+)",
+        r"(?P<url>//[^\"'<>\\\s]+/get_video\?[^\"'<>\\\s]+)",
+        r"(?P<url>/streamtape\.com/get_video\?[^\"'<>\\\s]+)",
+        r"(?P<url>/get_video\?[^\"'<>\\\s]+)",
+    ]
+    for pattern in url_patterns:
+        for match in re.finditer(pattern, joined, re.IGNORECASE):
+            add_streamtape_candidate(candidates, seen, match.group("url"), base_url)
+
+    candidates.sort(key=lambda url: streamtape_direct_url_score(url, base_url), reverse=True)
+    return candidates
+
+
+def extract_streamtape_direct_url(player_document: str, base_url: str) -> str | None:
+    urls = extract_streamtape_direct_urls(player_document, base_url)
+    return urls[0] if urls else None
+
+
+FFPROBE_TIMEOUT_SECONDS = 12
+
+
+def ffprobe_binary() -> str | None:
+    return shutil.which("ffprobe")
+
+
+def probe_media_metadata_with_ffprobe(
+    direct_url: str,
+    referer: str,
+    user_agent: str,
+) -> tuple[int | None, int | None]:
+    """Probe direct media URL with ffprobe when available.
+
+    ffprobe is optional. Scraping must continue if it is missing or if probing
+    fails because direct media URLs can be short-lived or host-protected.
+    """
+
+    binary = ffprobe_binary()
+    if not binary:
+        return None, None
+
+    headers = f"Referer: {referer}\r\nUser-Agent: {user_agent}\r\n"
+    command = [
+        binary,
+        "-v",
+        "error",
+        "-hide_banner",
+        "-user_agent",
+        user_agent,
+        "-headers",
+        headers,
+        "-show_entries",
+        "format=duration:stream=codec_type,width,height",
+        "-of",
+        "json",
+        direct_url,
+    ]
+
+    try:
+        result = subprocess.run(
+            command,
+            capture_output=True,
+            text=True,
+            timeout=FFPROBE_TIMEOUT_SECONDS,
+            check=False,
+        )
+    except Exception:
+        return None, None
+
+    if result.returncode != 0 or not result.stdout.strip():
+        return None, None
+
+    try:
+        payload = json.loads(result.stdout)
+    except Exception:
+        return None, None
+
+    duration_seconds: int | None = None
+    duration_value = (payload.get("format") or {}).get("duration")
+    if duration_value is not None:
+        try:
+            parsed_duration = round(float(duration_value))
+            if parsed_duration > 5:
+                duration_seconds = parsed_duration
+        except (TypeError, ValueError):
+            pass
+
+    heights: list[int] = []
+    for stream in payload.get("streams") or []:
+        if stream.get("codec_type") != "video":
+            continue
+
+        height = stream.get("height")
+        try:
+            if height:
+                heights.append(int(height))
+        except (TypeError, ValueError):
+            continue
+
+    quality_height = max(heights) if heights else None
+    return duration_seconds, quality_height
+
+def extract_streamtape_player_metadata(
+    player_document: str,
+    base_url: str,
+    user_agent: str,
+) -> tuple[str | None, int | None, int | None]:
+    documents = [player_document]
+    documents.extend(unpack_packed_scripts(player_document))
+    joined = "\n".join(html.unescape(doc) for doc in documents)
+
+    direct_urls = extract_streamtape_direct_urls(player_document, base_url)
+    direct_url = direct_urls[0] if direct_urls else None
+
+    duration_seconds: int | None = None
+    duration_patterns = [
+        r"[\"']duration[\"']\s*:\s*[\"']?([^,\"'\}\]\s]+)",
+        r"\bduration\s*[:=]\s*[\"']?([^,\"'\}\]\s]+)",
+        r"[\"']length[\"']\s*:\s*[\"']?([^,\"'\}\]\s]+)",
+        r"(\d{1,2}:\d{2}(?::\d{2})?)",
+    ]
+    for pattern in duration_patterns:
+        for match in re.finditer(pattern, joined, re.IGNORECASE):
+            parsed = parse_seconds(match.group(1))
+            if parsed:
+                duration_seconds = parsed
+                break
+        if duration_seconds:
+            break
+
+    quality_height: int | None = None
+    probeable_direct_url: str | None = None
+    for candidate_url in direct_urls:
+        probed_duration, probed_height = probe_media_metadata_with_ffprobe(
+            candidate_url,
+            base_url,
+            user_agent,
+        )
+        if probed_duration or probed_height:
+            probeable_direct_url = candidate_url
+            if probed_duration and not duration_seconds:
+                duration_seconds = probed_duration
+            if probed_height:
+                quality_height = probed_height
+            break
+
+    # Streamtape may expose get_video candidates that currently return JSON/HTML
+    # errors instead of media. Do not publish broken direct URLs; keep the embed
+    # fallback unless a candidate is probeable as real media.
+    return probeable_direct_url, duration_seconds, quality_height
+
 def enhance_online_media(
     media: dict[str, Any],
     page_url: str,
@@ -323,11 +648,20 @@ def enhance_online_media(
         if not isinstance(embed_url, str) or not embed_url:
             continue
 
-        player_document, confirmed_unavailable = fetch_xfilesharing_player_document(
-            embed_url,
-            page_url,
-            user_agent,
-        )
+        streamtape_embed = is_streamtape_url(embed_url)
+        if streamtape_embed:
+            player_document, confirmed_unavailable = fetch_streamtape_player_document(
+                embed_url,
+                page_url,
+                user_agent,
+            )
+        else:
+            player_document, confirmed_unavailable = fetch_xfilesharing_player_document(
+                embed_url,
+                page_url,
+                user_agent,
+            )
+
         if confirmed_unavailable:
             unavailable_streams.append(stream)
             continue
@@ -337,11 +671,18 @@ def enhance_online_media(
         if not player_document:
             continue
 
-        direct_url, parsed_duration, quality_height = extract_player_metadata(
-            player_document,
-            embed_url,
-            user_agent,
-        )
+        if streamtape_embed:
+            direct_url, parsed_duration, quality_height = extract_streamtape_player_metadata(
+                player_document,
+                embed_url,
+                user_agent,
+            )
+        else:
+            direct_url, parsed_duration, quality_height = extract_player_metadata(
+                player_document,
+                embed_url,
+                user_agent,
+            )
         if parsed_duration and not duration_seconds:
             duration_seconds = parsed_duration
 

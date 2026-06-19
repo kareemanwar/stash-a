@@ -257,3 +257,10 @@ Initial implementation branch:
   - Shrmha `https://shrmha.com/?p=306` returns duration `87`, direct HLS, and embed fallback.
   - Nafak `https://nafakarab.com/?p=6878` returns duration `145`, direct streams, and embed fallbacks.
 - Streamtape is not handled by this refactor yet; add it as a separate host extractor/change.
+
+### Streamtape direct URL reconstruction
+
+- Streamtape player pages may expose multiple `get_video` candidates through hidden elements and JavaScript `substring(...)` reconstruction.
+- The shared Streamtape extractor rejects truncated candidates such as `get_video?id=`.
+- Candidate URLs are only published as `direct_video_url` when `ffprobe` can probe them as real media.
+- If Streamtape returns JSON/HTML errors for all candidates, keep only the embed fallback and leave `duration_seconds` null.

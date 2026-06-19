@@ -264,3 +264,13 @@ Initial implementation branch:
 - The shared Streamtape extractor rejects truncated candidates such as `get_video?id=`.
 - Candidate URLs are only published as `direct_video_url` when `ffprobe` can probe them as real media.
 - If Streamtape returns JSON/HTML errors for all candidates, keep only the embed fallback and leave `duration_seconds` null.
+
+### Streamtape duration via JavaScript reconstruction and ffprobe
+
+- Streamtape direct links are generated from JavaScript string concatenation with `.substring(...)`; substring calls may appear after a wrapped string expression like `('xyzavideo?...').substring(4)`.
+- The shared Streamtape extractor reconstructs these expressions before probing candidates.
+- Candidate direct URLs are validated and probed with optional `ffprobe`; only probeable media URLs should be published as direct streams.
+- Verified Shrmha `https://shrmha.com/?p=233` returns duration `429`, a 1080p direct stream, and the Streamtape embed fallback.
+- Regression checks after the parser fix:
+  - Shrmha `https://shrmha.com/?p=306` still returns duration `87`, direct HLS, and embed fallback.
+  - Nafak `https://nafakarab.com/?p=6878` still returns duration `145`, direct streams, and embed fallbacks.

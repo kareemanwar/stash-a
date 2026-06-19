@@ -418,14 +418,79 @@ def apply_javascript_substrings(value: str, ops: str) -> str:
 
 
 def reconstruct_javascript_string_expression(expression: str) -> str:
-    pieces: list[str] = []
-    string_pattern = re.compile(
-        r"(?P<quote>['\"])(?P<value>(?:\\.|(?!\1).)*)(?P=quote)(?P<ops>(?:\.substring\(\d+\))*)",
-        re.DOTALL,
-    )
+    """Reconstruct simple Streamtape JS string concatenation expressions.
 
-    for match in string_pattern.finditer(expression):
-        pieces.append(apply_javascript_substrings(match.group("value"), match.group("ops")))
+    Streamtape commonly hides direct URLs as:
+      'prefix' + ('noisevideo?...').substring(4)
+
+    The substring calls may appear after a closing parenthesis, not directly
+    after the string literal, so a simple quoted-string regex is not enough.
+    """
+
+    pieces: list[str] = []
+    index = 0
+    length = len(expression)
+
+    while index < length:
+        quote_index = -1
+        quote_char = ""
+        for candidate_quote in ("'", '"'):
+            candidate_index = expression.find(candidate_quote, index)
+            if candidate_index != -1 and (quote_index == -1 or candidate_index < quote_index):
+                quote_index = candidate_index
+                quote_char = candidate_quote
+
+        if quote_index == -1:
+            break
+
+        value_chars: list[str] = []
+        cursor = quote_index + 1
+        escaped = False
+
+        while cursor < length:
+            char = expression[cursor]
+            if escaped:
+                value_chars.append("\\" + char)
+                escaped = False
+            elif char == "\\":
+                escaped = True
+            elif char == quote_char:
+                break
+            else:
+                value_chars.append(char)
+            cursor += 1
+
+        if cursor >= length:
+            break
+
+        after_quote = cursor + 1
+        probe = after_quote
+
+        # Dynamic Streamtape fragments are often wrapped in parentheses:
+        # ('xyzavideo?...').substring(4)
+        while probe < length and expression[probe].isspace():
+            probe += 1
+        if probe < length and expression[probe] == ")":
+            probe += 1
+
+        ops_start = probe
+        while True:
+            while probe < length and expression[probe].isspace():
+                probe += 1
+            prefix = ".substring("
+            if not expression.startswith(prefix, probe):
+                break
+            probe += len(prefix)
+            while probe < length and expression[probe].isdigit():
+                probe += 1
+            if probe < length and expression[probe] == ")":
+                probe += 1
+            else:
+                break
+
+        ops = expression[ops_start:probe]
+        pieces.append(apply_javascript_substrings("".join(value_chars), ops))
+        index = probe
 
     return "".join(pieces)
 

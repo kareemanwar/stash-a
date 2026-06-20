@@ -274,3 +274,13 @@ Initial implementation branch:
 - Regression checks after the parser fix:
   - Shrmha `https://shrmha.com/?p=306` still returns duration `87`, direct HLS, and embed fallback.
   - Nafak `https://nafakarab.com/?p=6878` still returns duration `145`, direct streams, and embed fallbacks.
+
+### T7tAl7zam decoded URL handling
+
+- `T7tAl7zam.py` percent-encodes decoded Arabic/non-ASCII scene URLs with `http_safe_url()` before `urllib.request.Request`, preserving already-encoded paths with `%` marked safe.
+- `T7tAl7zamOnline.py` passes the ASCII-safe page URL to shared online host probing so non-ASCII Referer values do not break player requests.
+- Verified locally with decoded Arabic URL `https://t7t-al7zam.com/حفلة-سكس-مصري-رباعي-مزتين-معاهم-دكرين-ي/`: returned title, thumbnail, embed fallback, three direct HLS streams, duration `345`, and six total streams.
+- Regression checks after the T7t fix:
+  - `python -m py_compile` passed for `_shared/online_hosts.py`, T7tAl7zam, Shrmha, Nafak, and Shraraa scraper modules.
+  - Shrmha `https://shrmha.com/?p=306` still returns duration `87`, direct stream, and embed fallback.
+  - Nafak `https://nafakarab.com/?p=6878` still returns duration `145`, direct stream, and embed fallbacks.

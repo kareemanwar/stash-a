@@ -161,6 +161,23 @@ def _path_has_slug(href: str, path_prefix: str) -> bool:
     return path.startswith(prefix + "/")
 
 
+def _scene_path_key(url: str | None) -> str | None:
+    if not url:
+        return None
+    parsed = urlparse(url)
+    path = parsed.path.strip("/")
+    if not path:
+        return None
+    path = re.sub(r"^[a-z]{2}/", "", path, flags=re.IGNORECASE)
+    return path.rstrip("/")
+
+
+def _same_scene_url(left: str | None, right: str | None) -> bool:
+    left_key = _scene_path_key(left)
+    right_key = _scene_path_key(right)
+    return bool(left_key and right_key and left_key == right_key)
+
+
 def extract_link_names(
     document: str,
     path_prefix: str,
@@ -187,22 +204,6 @@ def extract_link_names(
         seen.add(name)
         values.append({"name": name, "urls": [href] if href.startswith("http") else []})
     return values
-
-
-def extract_performers(document: str) -> list[dict[str, Any]]:
-    performers: list[dict[str, Any]] = []
-    seen: set[str] = set()
-    for performer in extract_link_names(document, "/models/", class_hint="models__item"):
-        name = performer.get("name")
-        if not isinstance(name, str):
-            continue
-        if name.strip().lower() in GENERIC_PERFORMER_LINK_NAMES:
-            continue
-        if name in seen:
-            continue
-        seen.add(name)
-        performers.append(performer)
-    return performers
 
 
 def extract_studio(document: str, default_name: str, default_url: str, default_slug: str) -> dict[str, Any]:
@@ -297,9 +298,13 @@ def parse_scene_page(
         streams.append(make_stream("Embed", "embed", urljoin(canonical_url, embed_url)))
     streams = normalize_streams(streams)
 
+    current_card = extract_current_scene_card(document, page_url, canonical_url)
+    card_performers = current_card.get("performers") if isinstance(current_card, dict) else None
+    card_studio = current_card.get("studio") if isinstance(current_card, dict) else None
+
     tags = unique_dicts_by_name(extract_meta_tags(document))
-    performers = extract_performers(document)
-    studio = extract_studio(document, source_name, source_url, source_slug)
+    performers = card_performers if isinstance(card_performers, list) else []
+    studio = card_studio if isinstance(card_studio, dict) else {"name": source_name, "urls": [source_url], "remote_site_id": source_slug}
 
     online_media = drop_empty(
         {
@@ -323,6 +328,7 @@ def parse_scene_page(
             "direct_stream_count": sum(1 for stream in streams if stream.get("kind") == "direct"),
             "embed_stream_count": sum(1 for stream in streams if stream.get("kind") == "embed"),
             "jsonld_video_object": bool(video_obj),
+            "matched_scene_card": bool(current_card),
         }
     )
 
@@ -458,6 +464,16 @@ class KVSListParser(HTMLParser):
         self._capture_title = False
         self._capture_duration = False
         self._capture_model = None
+
+
+def extract_current_scene_card(document: str, page_url: str, canonical_url: str | None) -> dict[str, Any]:
+    parser = KVSListParser(canonical_url or page_url)
+    parser.feed(document)
+    for item in parser.items:
+        item_url = item.get("url")
+        if isinstance(item_url, str) and (_same_scene_url(item_url, canonical_url) or _same_scene_url(item_url, page_url)):
+            return item
+    return {}
 
 
 def parse_source_page(

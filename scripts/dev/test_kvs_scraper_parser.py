@@ -94,7 +94,8 @@ def main() -> None:
     assert scene["online_media"]["streams"][0]["label"] == "2160p"
     assert scene["online_media"]["streams"][-1]["kind"] == "embed"
     assert scene["studio"]["name"] == "Sample Studio"
-    assert [p["name"] for p in scene["performers"]] == ["Person One", "Person Two"]\n    assert "Related Person" not in [p["name"] for p in scene["performers"]]
+    assert [p["name"] for p in scene["performers"]] == ["Person One", "Person Two"]
+    assert "Related Person" not in [p["name"] for p in scene["performers"]]
 
     source = parse_source_page(
         LIST_HTML,

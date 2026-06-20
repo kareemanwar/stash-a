@@ -1,0 +1,51 @@
+name: AI Clean Cache Generic
+
+on:
+  push:
+    branches:
+      - feature/scrapers-sync
+    paths:
+      - .github/workflows/ai-clean-cache-generic.yml
+
+permissions:
+  contents: write
+
+jobs:
+  clean:
+    if: github.actor != 'github-actions[bot]'
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: feature/scrapers-sync
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Remove tracked bytecode cache artifacts
+        shell: bash
+        run: |
+          git ls-files -z | python - <<'PY' > /tmp/cache-files.txt
+          import sys
+          data = sys.stdin.buffer.read().split(b'\0')
+          for raw in data:
+              if not raw:
+                  continue
+              path = raw.decode('utf-8', 'surrogateescape')
+              if '/__pycache__/' in path or path.endswith(('.pyc', '.pyo', '.pyd')):
+                  print(path)
+          PY
+          if [ -s /tmp/cache-files.txt ]; then
+            while IFS= read -r file; do
+              git rm -f -- "$file"
+            done < /tmp/cache-files.txt
+          fi
+          rm -f .github/workflows/ai-clean-cache-generic.yml
+          git add .github/workflows/ai-clean-cache-generic.yml
+
+      - name: Commit cleanup
+        shell: bash
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git diff --cached --check
+          git commit -m "Remove remaining tracked cache artifacts" || exit 0
+          git push origin HEAD:feature/scrapers-sync

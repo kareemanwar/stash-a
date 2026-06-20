@@ -23,7 +23,7 @@ Fetch -> Page Parse -> Media Resolve -> Output Normalize
 - `.local/scrapers/stash-a/_shared/profiles/kvs.py`
 - `.local/scrapers/stash-a/1Porn/1Porn.yml`
 - `.local/scrapers/stash-a/1Porn/scraper.py`
-- `scripts/dev/test_1porn_scraper_parser.py`
+- `scripts/dev/test_kvs_scraper_parser.py`
 
 ## Behavior
 
@@ -51,10 +51,10 @@ The KVS profile reads:
 - `pageContext.videoId`.
 - direct `<video>/<source>` MP4 streams.
 - stable `/embed/<id>` fallback.
-- model links as performers.
-- site links as studio.
+- matching list-card model links as performers.
+- matching list-card site links as studio.
 
-Direct streams are sorted before embed streams, but the embed fallback is preserved. Generic navigation links such as `/models/` are excluded from performers.
+Direct streams are sorted before embed streams, but the embed fallback is preserved. Generic navigation/model directory links and unrelated related-video cards are not used as scene performers.
 
 ### Source/list scraping
 
@@ -79,8 +79,8 @@ Preview candidates include title, URL, thumbnail, preview clip URL in `source_pr
 Preparation environment checks:
 
 ```bash
-python -m py_compile /mnt/data/1porn_impl/_shared/*.py /mnt/data/1porn_impl/_shared/profiles/*.py /mnt/data/1porn_impl/1Porn/scraper.py /mnt/data/1porn_impl/scripts/dev/test_1porn_scraper_parser.py
-python /mnt/data/1porn_testrepo/scripts/dev/test_1porn_scraper_parser.py
+python -m py_compile /mnt/data/1porn_impl/_shared/*.py /mnt/data/1porn_impl/_shared/profiles/*.py /mnt/data/1porn_impl/1Porn/scraper.py /mnt/data/1porn_impl/scripts/dev/test_kvs_scraper_parser.py
+python /mnt/data/1porn_testrepo/scripts/dev/test_kvs_scraper_parser.py
 ```
 
 Both passed.
@@ -92,15 +92,15 @@ python -m py_compile \
   .local/scrapers/stash-a/_shared/*.py \
   .local/scrapers/stash-a/_shared/profiles/*.py \
   .local/scrapers/stash-a/1Porn/scraper.py \
-  scripts/dev/test_1porn_scraper_parser.py
-python scripts/dev/test_1porn_scraper_parser.py
+  scripts/dev/test_kvs_scraper_parser.py
+python scripts/dev/test_kvs_scraper_parser.py
 python .local/scrapers/stash-a/1Porn/scraper.py scene-by-url --url "https://www.1porn.tv/videos/deepthroat-foursome-in-sex-class/"
 python .local/scrapers/stash-a/1Porn/scraper.py source-by-url --url "https://www.1porn.tv/search/alina-angel/relevance/"
 ```
 
-Results:
+Results before the matching-card fix:
 
 - Offline parser test returned `{"status": "ok", "scene_title": "Innocent High - Deepthroat Foursome in Sex Class", "source_candidates": 1}` before the neutral-fixture update.
 - Live scene scrape returned title, thumbnail, duration `2694`, embed URL, 2160p direct MP4 URL, four streams, studio `Team Skeet X Series`, and performer names.
 - Live source scrape returned source type `SEARCH`, 24 candidates, and six pagination URLs.
-- Follow-up fix tightened scene performer extraction because the first live result included the generic navigation label `Pornstars` as a performer.
+- Follow-up fixes tightened scene performer extraction because the first live result included generic and unrelated list-card performers.

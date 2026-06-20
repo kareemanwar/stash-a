@@ -12,6 +12,8 @@ from ..streams import best_direct_url, best_embed_url, make_stream, normalize_st
 from ..text import attr_value, clean_text, first_non_empty, strip_tags, unique_dicts_by_name
 from ..urls import absolute_url, unique_strings
 
+GENERIC_PERFORMER_LINK_NAMES = {"pornstars", "porn stars", "models", "pornstar"}
+
 
 def meta_content(document: str, key: str) -> str | None:
     patterns = [
@@ -151,7 +153,20 @@ def extract_meta_tags(document: str) -> list[str]:
     return tags
 
 
-def extract_link_names(document: str, path_prefix: str, class_hint: str | None = None) -> list[dict[str, Any]]:
+def _path_has_slug(href: str, path_prefix: str) -> bool:
+    path = urlparse(href).path.strip("/")
+    prefix = path_prefix.strip("/")
+    if path == prefix:
+        return False
+    return path.startswith(prefix + "/")
+
+
+def extract_link_names(
+    document: str,
+    path_prefix: str,
+    class_hint: str | None = None,
+    require_slug: bool = True,
+) -> list[dict[str, Any]]:
     values: list[dict[str, Any]] = []
     seen: set[str] = set()
     for match in re.finditer(r"<a\b(?P<attrs>[^>]*)>(?P<body>.*?)</a>", document, re.IGNORECASE | re.DOTALL):
@@ -159,6 +174,8 @@ def extract_link_names(document: str, path_prefix: str, class_hint: str | None =
         href = attr_value(attrs, "href") or ""
         class_name = attr_value(attrs, "class") or ""
         if path_prefix not in href:
+            continue
+        if require_slug and not _path_has_slug(href, path_prefix):
             continue
         if class_hint and class_hint not in class_name:
             continue
@@ -173,11 +190,15 @@ def extract_link_names(document: str, path_prefix: str, class_hint: str | None =
 
 
 def extract_performers(document: str) -> list[dict[str, Any]]:
-    performers = []
+    performers: list[dict[str, Any]] = []
     seen: set[str] = set()
-    for performer in extract_link_names(document, "/models/"):
+    for performer in extract_link_names(document, "/models/", class_hint="models__item"):
         name = performer.get("name")
-        if not name or name in seen:
+        if not isinstance(name, str):
+            continue
+        if name.strip().lower() in GENERIC_PERFORMER_LINK_NAMES:
+            continue
+        if name in seen:
             continue
         seen.add(name)
         performers.append(performer)
@@ -360,11 +381,11 @@ class KVSListParser(HTMLParser):
                 self._current["url"] = urljoin(self.base_url, href)
                 if title:
                     self._current["title"] = clean_text(title)
-            elif href and "/models/" in href:
+            elif href and "/models/" in href and _path_has_slug(href, "/models/"):
                 self._capture_model = {"kind": "performer", "href": urljoin(self.base_url, href), "parts": []}
-            elif href and "/sites/" in href:
+            elif href and "/sites/" in href and _path_has_slug(href, "/sites/"):
                 self._capture_model = {"kind": "studio", "href": urljoin(self.base_url, href), "parts": []}
-            elif href and "/tags/" in href:
+            elif href and "/tags/" in href and _path_has_slug(href, "/tags/"):
                 self._capture_model = {"kind": "tag", "href": urljoin(self.base_url, href), "parts": []}
 
         if tag == "img":
@@ -414,7 +435,7 @@ class KVSListParser(HTMLParser):
             href = self._capture_model.get("href")
             kind = self._capture_model.get("kind")
             if name:
-                if kind == "performer":
+                if kind == "performer" and name.lower() not in GENERIC_PERFORMER_LINK_NAMES:
                     self._current.setdefault("performers", []).append({"name": name, "urls": [href]})
                 elif kind == "studio" and "studio" not in self._current:
                     self._current["studio"] = {"name": name, "urls": [href]}

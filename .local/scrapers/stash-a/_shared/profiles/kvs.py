@@ -206,10 +206,57 @@ def extract_link_names(
     return values
 
 
+def clean_performers(values: list[dict[str, Any]]) -> list[dict[str, Any]]:
+    performers: list[dict[str, Any]] = []
+    seen: set[str] = set()
+    for performer in values:
+        name = performer.get("name")
+        if not isinstance(name, str):
+            continue
+        if name.strip().lower() in GENERIC_PERFORMER_LINK_NAMES:
+            continue
+        if name in seen:
+            continue
+        seen.add(name)
+        performers.append(performer)
+    return performers
+
+
+def _before_first_listing_card(document: str) -> str:
+    match = re.search(
+        r'<div\b[^>]*class=["\'][^"\']*\bitem\b[^"\']*["\']',
+        document,
+        re.IGNORECASE | re.DOTALL,
+    )
+    if not match:
+        return document
+    return document[: match.start()]
+
+
+def extract_scene_metadata_fallback(
+    document: str,
+    *,
+    source_name: str,
+    source_url: str,
+    source_slug: str,
+) -> dict[str, Any]:
+    # Scene pages can include related/list cards after the real metadata panel.
+    # Keep fallback parsing before the first KVS list card so related-card
+    # performers do not leak into the current scene.
+    metadata_doc = _before_first_listing_card(document)
+    performers = clean_performers(extract_link_names(metadata_doc, "/models/"))
+    studio = extract_studio(metadata_doc, source_name, source_url, source_slug)
+    return {
+        "performers": performers,
+        "studio": studio,
+        "used_metadata_prefix": metadata_doc != document,
+    }
+
+
 def extract_studio(document: str, default_name: str, default_url: str, default_slug: str) -> dict[str, Any]:
-    studios = extract_link_names(document, "/sites/", class_hint="models__item")
+    studios = extract_link_names(document, "/sites/")
     if not studios:
-        studios = extract_link_names(document, "/sites/")
+        studios = extract_link_names(document, "/networks/")
 
     for studio in studios:
         name = studio.get("name")
@@ -301,10 +348,16 @@ def parse_scene_page(
     current_card = extract_current_scene_card(document, page_url, canonical_url)
     card_performers = current_card.get("performers") if isinstance(current_card, dict) else None
     card_studio = current_card.get("studio") if isinstance(current_card, dict) else None
+    metadata_fallback = extract_scene_metadata_fallback(
+        document,
+        source_name=source_name,
+        source_url=source_url,
+        source_slug=source_slug,
+    )
 
     tags = unique_dicts_by_name(extract_meta_tags(document))
-    performers = card_performers if isinstance(card_performers, list) else []
-    studio = card_studio if isinstance(card_studio, dict) else {"name": source_name, "urls": [source_url], "remote_site_id": source_slug}
+    performers = card_performers if isinstance(card_performers, list) and card_performers else metadata_fallback["performers"]
+    studio = card_studio if isinstance(card_studio, dict) else metadata_fallback["studio"]
 
     online_media = drop_empty(
         {
@@ -329,6 +382,7 @@ def parse_scene_page(
             "embed_stream_count": sum(1 for stream in streams if stream.get("kind") == "embed"),
             "jsonld_video_object": bool(video_obj),
             "matched_scene_card": bool(current_card),
+            "used_metadata_prefix_fallback": bool(not current_card and metadata_fallback.get("used_metadata_prefix")),
         }
     )
 

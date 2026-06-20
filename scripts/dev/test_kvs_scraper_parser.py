@@ -29,18 +29,15 @@ SCENE_HTML = """
 </head>
 <body>
 <a href="https://example.test/models/">Directory</a>
+<div class="scene-metadata">
+  <a href="https://example.test/sites/sample-studio/">Sample Studio</a>
+  <a href="https://example.test/models/person-one/">Person One</a>
+  <a href="https://example.test/models/person-two/">Person Two</a>
+</div>
 <div class="item">
   <a href="https://example.test/videos/related-card/" title="Related Card"><strong class="title">Related Card</strong></a>
   <div class="models">
     <a class="models__item" href="https://example.test/models/related-person/"><span>Related Person</span></a>
-  </div>
-</div>
-<div class="item">
-  <a href="https://example.test/videos/sample-scene/" title="Sample Scene"><strong class="title">Sample Scene</strong></a>
-  <div class="models">
-    <a class="models__item thumb_cs" href="https://example.test/sites/sample-studio/"><span>Sample Studio</span></a>
-    <a class="models__item" href="https://example.test/models/person-one/"><span>Person One</span></a>
-    <a class="models__item" href="https://example.test/models/person-two/"><span>Person Two</span></a>
   </div>
 </div>
 <video>
@@ -97,7 +94,7 @@ def main() -> None:
     assert scene["online_media"]["streams"][0]["label"] == "2160p"
     assert scene["online_media"]["streams"][-1]["kind"] == "embed"
     assert scene["studio"]["name"] == "Sample Studio"
-    assert [p["name"] for p in scene["performers"]] == ["Person One", "Person Two"]
+    assert [p["name"] for p in scene["performers"]] == ["Person One", "Person Two"]\n    assert "Related Person" not in [p["name"] for p in scene["performers"]]
 
     source = parse_source_page(
         LIST_HTML,

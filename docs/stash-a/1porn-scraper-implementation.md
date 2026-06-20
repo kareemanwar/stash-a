@@ -54,7 +54,7 @@ The KVS profile reads:
 - model links as performers.
 - site links as studio.
 
-Direct streams are sorted before embed streams, but the embed fallback is preserved.
+Direct streams are sorted before embed streams, but the embed fallback is preserved. Generic navigation links such as `/models/` are excluded from performers.
 
 ### Source/list scraping
 
@@ -76,11 +76,31 @@ Preview candidates include title, URL, thumbnail, preview clip URL in `source_pr
 
 ## Checks
 
-Local offline checks run while preparing the implementation:
+Preparation environment checks:
 
 ```bash
 python -m py_compile /mnt/data/1porn_impl/_shared/*.py /mnt/data/1porn_impl/_shared/profiles/*.py /mnt/data/1porn_impl/1Porn/scraper.py /mnt/data/1porn_impl/scripts/dev/test_1porn_scraper_parser.py
 python /mnt/data/1porn_testrepo/scripts/dev/test_1porn_scraper_parser.py
 ```
 
-Both passed in the preparation environment.
+Both passed.
+
+User live smoke checks on Windows/Git Bash:
+
+```bash
+python -m py_compile \
+  .local/scrapers/stash-a/_shared/*.py \
+  .local/scrapers/stash-a/_shared/profiles/*.py \
+  .local/scrapers/stash-a/1Porn/scraper.py \
+  scripts/dev/test_1porn_scraper_parser.py
+python scripts/dev/test_1porn_scraper_parser.py
+python .local/scrapers/stash-a/1Porn/scraper.py scene-by-url --url "https://www.1porn.tv/videos/deepthroat-foursome-in-sex-class/"
+python .local/scrapers/stash-a/1Porn/scraper.py source-by-url --url "https://www.1porn.tv/search/alina-angel/relevance/"
+```
+
+Results:
+
+- Offline parser test returned `{"status": "ok", "scene_title": "Innocent High - Deepthroat Foursome in Sex Class", "source_candidates": 1}` before the neutral-fixture update.
+- Live scene scrape returned title, thumbnail, duration `2694`, embed URL, 2160p direct MP4 URL, four streams, studio `Team Skeet X Series`, and performer names.
+- Live source scrape returned source type `SEARCH`, 24 candidates, and six pagination URLs.
+- Follow-up fix tightened scene performer extraction because the first live result included the generic navigation label `Pornstars` as a performer.

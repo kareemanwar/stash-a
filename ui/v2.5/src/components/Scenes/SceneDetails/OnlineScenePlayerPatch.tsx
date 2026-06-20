@@ -1,5 +1,11 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
-import { gql, useQuery } from "@apollo/client";
+import {
+  ApolloClient,
+  NormalizedCacheObject,
+  gql,
+  useApolloClient,
+  useQuery,
+} from "@apollo/client";
 import { Alert, Button, Form } from "react-bootstrap";
 import videojs from "video.js";
 import { ErrorMessage } from "src/components/Shared/ErrorMessage";
@@ -47,6 +53,7 @@ interface IOnlineMedia {
   thumbnail_url?: string | null;
   duration_seconds?: number | null;
   external_view_count?: number | null;
+  raw_metadata_json?: string | null;
   streams: IOnlineStream[];
 }
 
@@ -70,10 +77,14 @@ interface IOnlineDurationData {
 interface IOnlinePreviewData {
   findScene?: {
     id: string;
-    online_media?: {
-      direct_video_url?: string | null;
-      thumbnail_url?: string | null;
-    } | null;
+    urls?: string[] | null;
+    online_media?: IOnlineMedia | null;
+  } | null;
+}
+
+interface IScrapeSceneOnlineMediaData {
+  scrapeSceneURL?: {
+    online_media?: IOnlineMedia | null;
   } | null;
 }
 
@@ -95,6 +106,7 @@ const FIND_SCENE_ONLINE_MEDIA = gql`
         thumbnail_url
         duration_seconds
         external_view_count
+        raw_metadata_json
         streams {
           id
           label
@@ -123,9 +135,50 @@ const FIND_SCENE_ONLINE_PREVIEW = gql`
   query FindSceneOnlinePreview($id: ID!) {
     findScene(id: $id) {
       id
+      urls
       online_media {
+        source_name
+        source_slug
+        external_id
+        embed_url
         direct_video_url
         thumbnail_url
+        duration_seconds
+        external_view_count
+        raw_metadata_json
+        streams {
+          id
+          label
+          kind
+          url
+          position
+          is_primary
+        }
+      }
+    }
+  }
+`;
+
+const SCRAPE_SCENE_ONLINE_MEDIA = gql`
+  query OnlineScenePlaybackScrapeSceneURL($url: String!) {
+    scrapeSceneURL(url: $url) {
+      online_media {
+        source_name
+        source_slug
+        external_id
+        embed_url
+        direct_video_url
+        thumbnail_url
+        duration_seconds
+        external_view_count
+        raw_metadata_json
+        streams {
+          label
+          kind
+          url
+          position
+          is_primary
+        }
       }
     }
   }
@@ -139,6 +192,119 @@ function isDirectStream(stream: IOnlineStream) {
 
 function isHLSURL(url: string) {
   return /\.m3u8(?:$|[?#])/i.test(url);
+}
+
+const DIRECT_URL_REFRESH_SAFETY_SECONDS = 10 * 60;
+
+function directURLExpiresAt(url?: string | null): number | null {
+  if (!url) return null;
+
+  try {
+    const parsed = new URL(url);
+    const signedAt = Number.parseInt(parsed.searchParams.get("s") ?? "", 10);
+    const lifetime = Number.parseInt(parsed.searchParams.get("e") ?? "", 10);
+
+    if (
+      Number.isFinite(signedAt) &&
+      signedAt > 0 &&
+      Number.isFinite(lifetime) &&
+      lifetime > 0
+    ) {
+      return (signedAt + lifetime) * 1000;
+    }
+
+    for (const key of ["expires", "expire", "exp"]) {
+      const value = Number.parseInt(parsed.searchParams.get(key) ?? "", 10);
+      if (Number.isFinite(value) && value > 0) {
+        return value * 1000;
+      }
+    }
+  } catch {
+    return null;
+  }
+
+  return null;
+}
+
+function isDirectURLFresh(url?: string | null) {
+  const expiresAt = directURLExpiresAt(url);
+  if (!expiresAt) return true;
+
+  return expiresAt - Date.now() > DIRECT_URL_REFRESH_SAFETY_SECONDS * 1000;
+}
+
+function isExpiredDirectStream(stream: IOnlineStream) {
+  return isDirectStream(stream) && !isDirectURLFresh(stream.url);
+}
+
+function firstFreshDirectURL(media?: IOnlineMedia | null) {
+  if (!media) return undefined;
+
+  if (media.direct_video_url && isDirectURLFresh(media.direct_video_url)) {
+    return media.direct_video_url;
+  }
+
+  return media.streams
+    ?.filter(isDirectStream)
+    .find((stream) => isDirectURLFresh(stream.url))?.url;
+}
+
+function needsOnlineMediaRefresh(media?: IOnlineMedia | null) {
+  if (!media) return false;
+
+  const hasEmbeds = !!media.embed_url || media.streams?.some((stream) => !isDirectStream(stream));
+  const directCandidates = [
+    media.direct_video_url,
+    ...(media.streams ?? []).filter(isDirectStream).map((stream) => stream.url),
+  ].filter(Boolean) as string[];
+
+  if (directCandidates.length === 0) {
+    return hasEmbeds;
+  }
+
+  return directCandidates.some((url) => !isDirectURLFresh(url));
+}
+
+function mergeOnlineMedia(
+  current: IOnlineMedia | null | undefined,
+  scraped: IOnlineMedia
+): IOnlineMedia {
+  return {
+    source_name: scraped.source_name || current?.source_name || "Online",
+    source_slug: scraped.source_slug || current?.source_slug || "online",
+    external_id: scraped.external_id ?? current?.external_id ?? null,
+    embed_url: scraped.embed_url ?? current?.embed_url ?? null,
+    direct_video_url: scraped.direct_video_url ?? current?.direct_video_url ?? null,
+    thumbnail_url: scraped.thumbnail_url ?? current?.thumbnail_url ?? null,
+    duration_seconds: scraped.duration_seconds ?? current?.duration_seconds ?? null,
+    external_view_count: scraped.external_view_count ?? current?.external_view_count ?? null,
+    raw_metadata_json: scraped.raw_metadata_json ?? current?.raw_metadata_json ?? null,
+    streams: scraped.streams?.length ? scraped.streams : current?.streams ?? [],
+  };
+}
+
+async function refreshOnlineSceneMedia(
+  client: ApolloClient<NormalizedCacheObject>,
+  sceneURLs?: string[] | null,
+  currentMedia?: IOnlineMedia | null
+) {
+  const sourceURL = sceneURLs?.find(Boolean) || currentMedia?.embed_url;
+  if (!sourceURL) {
+    return null;
+  }
+
+  const scrapeResult = await client.query<IScrapeSceneOnlineMediaData>({
+    query: SCRAPE_SCENE_ONLINE_MEDIA,
+    variables: { url: sourceURL },
+    fetchPolicy: "network-only",
+  });
+
+  const scrapedMedia = scrapeResult.data?.scrapeSceneURL?.online_media;
+  if (!scrapedMedia) {
+    return null;
+  }
+
+  return mergeOnlineMedia(currentMedia, scrapedMedia);
 }
 
 function streamQualityRank(stream: IOnlineStream) {
@@ -338,9 +504,12 @@ const OnlineSceneCardHoverPreview: React.FC<{
   active: boolean;
   sceneID: string;
 }> = ({ active, sceneID }) => {
+  const client = useApolloClient();
   const videoEl = useRef<HTMLVideoElement>(null);
   const playerRef = useRef<ReturnType<typeof videojs> | null>(null);
   const hoverTimerRef = useRef<number>();
+  const refreshInFlightRef = useRef(false);
+  const [refreshedMedia, setRefreshedMedia] = useState<IOnlineMedia | null>(null);
   const { data } = useQuery<IOnlinePreviewData, IOnlineMediaVariables>(
     FIND_SCENE_ONLINE_PREVIEW,
     {
@@ -349,8 +518,8 @@ const OnlineSceneCardHoverPreview: React.FC<{
     }
   );
 
-  const media = data?.findScene?.online_media;
-  const directVideoURL = media?.direct_video_url;
+  const media = refreshedMedia ?? data?.findScene?.online_media ?? null;
+  const directVideoURL = firstFreshDirectURL(media);
 
   useEffect(() => {
     return () => {
@@ -364,7 +533,7 @@ const OnlineSceneCardHoverPreview: React.FC<{
   }, []);
 
   useEffect(() => {
-    if (!active || !directVideoURL || !videoEl.current) {
+    if (!active) {
       window.clearTimeout(hoverTimerRef.current);
 
       const player = playerRef.current;
@@ -376,8 +545,31 @@ const OnlineSceneCardHoverPreview: React.FC<{
       return;
     }
 
-    hoverTimerRef.current = window.setTimeout(() => {
+    hoverTimerRef.current = window.setTimeout(async () => {
       if (!videoEl.current) return;
+
+      let playableURL = firstFreshDirectURL(media);
+
+      if (!playableURL && needsOnlineMediaRefresh(media) && !refreshInFlightRef.current) {
+        refreshInFlightRef.current = true;
+        try {
+          const refreshed = await refreshOnlineSceneMedia(
+            client,
+            data?.findScene?.urls,
+            media
+          );
+          if (refreshed) {
+            setRefreshedMedia(refreshed);
+            playableURL = firstFreshDirectURL(refreshed);
+          }
+        } catch {
+          // Keep thumbnail-only hover behavior if refresh fails.
+        } finally {
+          refreshInFlightRef.current = false;
+        }
+      }
+
+      if (!playableURL || !videoEl.current) return;
 
       const player =
         playerRef.current && !playerRef.current.isDisposed()
@@ -393,8 +585,8 @@ const OnlineSceneCardHoverPreview: React.FC<{
       playerRef.current = player;
       player.muted(true);
       player.src({
-        src: directVideoURL,
-        type: isHLSURL(directVideoURL) ? "application/x-mpegURL" : "video/mp4",
+        src: playableURL,
+        type: isHLSURL(playableURL) ? "application/x-mpegURL" : "video/mp4",
       });
 
       const playPromise = player.play();
@@ -406,16 +598,16 @@ const OnlineSceneCardHoverPreview: React.FC<{
     return () => {
       window.clearTimeout(hoverTimerRef.current);
     };
-  }, [active, directVideoURL]);
+  }, [active, client, data?.findScene?.urls, media]);
 
-  if (!directVideoURL) {
+  if (!media?.thumbnail_url && !directVideoURL && !needsOnlineMediaRefresh(media)) {
     return null;
   }
 
   return (
     <div
       className={`online-scene-card-hover-preview${
-        active ? " online-scene-card-hover-preview--active" : ""
+        active && directVideoURL ? " online-scene-card-hover-preview--active" : ""
       }`}
     >
       <style>{onlineCardPreviewStyle}</style>
@@ -457,6 +649,9 @@ const OnlineSceneCardImagePatch: React.FC<{
 };
 
 const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
+  const client = useApolloClient();
+  const refreshInFlightRef = useRef(false);
+  const [refreshedMedia, setRefreshedMedia] = useState<IOnlineMedia | null>(null);
   const { data, loading, error } = useQuery<IOnlineMediaData, IOnlineMediaVariables>(
     FIND_SCENE_ONLINE_MEDIA,
     {
@@ -465,8 +660,14 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
     }
   );
 
-  const media = data?.findScene?.online_media ?? null;
-  const streams = useMemo(() => (media ? buildPlaybackStreams(media) : []), [media]);
+  const media = refreshedMedia ?? data?.findScene?.online_media ?? null;
+  const streams = useMemo(
+    () =>
+      media
+        ? buildPlaybackStreams(media).filter((stream) => !isExpiredDirectStream(stream))
+        : [],
+    [media]
+  );
   const primaryStream = useMemo(
     () => streams.find((stream) => stream.is_primary) ?? streams[0],
     [streams]
@@ -476,6 +677,26 @@ const OnlineScenePlayer: React.FC<{ sceneID: string }> = ({ sceneID }) => {
   useEffect(() => {
     setSelectedURL(primaryStream?.url);
   }, [primaryStream?.url]);
+
+  useEffect(() => {
+    if (!media || !needsOnlineMediaRefresh(media) || refreshInFlightRef.current) {
+      return;
+    }
+
+    refreshInFlightRef.current = true;
+    refreshOnlineSceneMedia(client, data?.findScene?.urls, media)
+      .then((refreshed) => {
+        if (refreshed) {
+          setRefreshedMedia(refreshed);
+        }
+      })
+      .catch(() => {
+        // Expired direct streams stay filtered and embed fallbacks remain available.
+      })
+      .finally(() => {
+        refreshInFlightRef.current = false;
+      });
+  }, [client, data?.findScene?.urls, media]);
 
   if (loading && !media) {
     return <LoadingIndicator />;

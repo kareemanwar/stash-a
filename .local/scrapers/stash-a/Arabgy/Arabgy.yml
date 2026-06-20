@@ -1,0 +1,9 @@
+name: Arabgy
+sceneByURL:
+  - action: script
+    url:
+      - arabgy.com
+    script:
+      - python
+      - ArabgyOnline.py
+      - scene-by-url

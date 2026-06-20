@@ -1,0 +1,9 @@
+name: T7t Al7zam
+sceneByURL:
+  - action: script
+    url:
+      - t7t-al7zam.com
+    script:
+      - python
+      - T7tAl7zamOnline.py
+      - scene-by-url

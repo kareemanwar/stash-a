@@ -1,0 +1,10 @@
+name: 1Porn
+sceneByURL:
+  - action: script
+    url:
+      - 1porn.tv
+      - www.1porn.tv
+    script:
+      - python
+      - scraper.py
+      - scene-by-url

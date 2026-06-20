@@ -17,7 +17,7 @@ def extract_embed_streams(document: str, parser: T7tAl7zam.PageParser, base_url:
     streams: list[dict[str, Any]] = []
     seen: set[str] = set()
 
-    # Shrmha server selectors are not always <button> elements. Capture any
+    # T7tAl7zam server selectors are not always <button> elements. Capture any
     # element that calls go('embed-url') and use its visible text as the label.
     go_pattern = re.compile(
         r"<(?P<tag>[a-zA-Z0-9]+)\b(?P<attrs>[^>]*)\bonclick=[\"'][^\"']*\bgo\((?P<quote>[\"'])(?P<url>.*?)(?P=quote)\)[^\"']*[\"'][^>]*>(?P<label>.*?)</(?P=tag)>",
@@ -69,7 +69,7 @@ def build_online_media(*args: Any, **kwargs: Any) -> dict[str, Any]:
     if isinstance(page_url, str):
         media = enhance_online_media(
             media,
-            page_url,
+            T7tAl7zam.http_safe_url(page_url),
             user_agent=T7tAl7zam.USER_AGENT,
             source_slug=T7tAl7zam.STUDIO_SLUG,
             clean_text=T7tAl7zam.clean_text,

@@ -256,7 +256,7 @@ function makeVirtualScene(scene: GQL.ScrapedScene): GQL.SlimSceneDataFragment {
         name: tag.name,
         aliases: [],
         image_path: null,
-      } as GQL.TagDataFragment)
+      } as unknown as GQL.TagDataFragment)
     ),
     performers: [],
     groups: [],

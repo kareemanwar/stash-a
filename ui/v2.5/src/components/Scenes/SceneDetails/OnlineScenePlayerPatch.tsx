@@ -1,7 +1,6 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import {
   ApolloClient,
-  NormalizedCacheObject,
   gql,
   useApolloClient,
   useQuery,
@@ -284,7 +283,7 @@ function mergeOnlineMedia(
 }
 
 async function refreshOnlineSceneMedia(
-  client: ApolloClient<NormalizedCacheObject>,
+  client: ApolloClient<object>,
   sceneURLs?: string[] | null,
   currentMedia?: IOnlineMedia | null
 ) {

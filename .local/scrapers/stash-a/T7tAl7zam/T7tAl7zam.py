@@ -5,7 +5,7 @@ import re
 import sys
 from html.parser import HTMLParser
 from typing import Any
-from urllib.parse import parse_qs, urljoin, urlparse
+from urllib.parse import parse_qs, quote, unquote, urljoin, urlparse, urlsplit, urlunsplit
 from urllib.request import Request, urlopen
 
 
@@ -90,8 +90,24 @@ def write_json(value: Any) -> None:
     sys.stdout.write("\n")
 
 
+def http_safe_url(url: str) -> str:
+    parsed = urlsplit(url)
+    if not parsed.scheme or not parsed.netloc:
+        return url
+
+    return urlunsplit(
+        (
+            parsed.scheme,
+            parsed.netloc,
+            quote(unquote(parsed.path), safe="/%"),
+            quote(unquote(parsed.query), safe="=&?/:;+,%@"),
+            "",
+        )
+    )
+
+
 def fetch_html(url: str) -> str:
-    request = Request(url, headers={"User-Agent": USER_AGENT})
+    request = Request(http_safe_url(url), headers={"User-Agent": USER_AGENT})
     with urlopen(request, timeout=30) as response:
         charset = response.headers.get_content_charset() or "utf-8"
         return response.read().decode(charset, errors="replace")

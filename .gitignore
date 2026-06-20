@@ -73,3 +73,8 @@ dist
 /.local/scrapers/*
 !/.local/scrapers/stash-a/
 !/.local/scrapers/stash-a/**
+
+# Python bytecode/cache artifacts
+__pycache__/
+*.py[cod]
+*$py.class

@@ -233,6 +233,27 @@ def _before_first_listing_card(document: str) -> str:
     return document[: match.start()]
 
 
+def extract_id_block(document: str, element_id: str) -> str | None:
+    start = re.search(
+        rf'<div\b[^>]*id=["\']{re.escape(element_id)}["\'][^>]*>',
+        document,
+        re.IGNORECASE | re.DOTALL,
+    )
+    if not start:
+        return None
+
+    # KVS tab panels are sibling divs. Stop before the next tab panel when present.
+    end = re.search(
+        r'<div\b[^>]*id=["\']tab_[^"\']+["\'][^>]*>',
+        document[start.end():],
+        re.IGNORECASE | re.DOTALL,
+    )
+    if end:
+        return document[start.start(): start.end() + end.start()]
+
+    return document[start.start():]
+
+
 def extract_scene_metadata_fallback(
     document: str,
     *,
@@ -240,16 +261,23 @@ def extract_scene_metadata_fallback(
     source_url: str,
     source_slug: str,
 ) -> dict[str, Any]:
-    # Scene pages can include related/list cards after the real metadata panel.
-    # Keep fallback parsing before the first KVS list card so related-card
-    # performers do not leak into the current scene.
-    metadata_doc = _before_first_listing_card(document)
+    # Prefer the current scene info tab. It contains Channel/Network/Categories/Pornstars
+    # for the active scene and appears before sidebar/related-video lists.
+    tab_doc = extract_id_block(document, "tab_video_info")
+    if tab_doc:
+        metadata_doc = tab_doc
+        metadata_source = "tab_video_info"
+    else:
+        # Last-resort fallback for other KVS pages: only parse before list cards.
+        metadata_doc = _before_first_listing_card(document)
+        metadata_source = "metadata_prefix" if metadata_doc != document else "full_document"
+
     performers = clean_performers(extract_link_names(metadata_doc, "/models/"))
     studio = extract_studio(metadata_doc, source_name, source_url, source_slug)
     return {
         "performers": performers,
         "studio": studio,
-        "used_metadata_prefix": metadata_doc != document,
+        "metadata_source": metadata_source,
     }
 
 
@@ -382,7 +410,7 @@ def parse_scene_page(
             "embed_stream_count": sum(1 for stream in streams if stream.get("kind") == "embed"),
             "jsonld_video_object": bool(video_obj),
             "matched_scene_card": bool(current_card),
-            "used_metadata_prefix_fallback": bool(not current_card and metadata_fallback.get("used_metadata_prefix")),
+            "metadata_fallback_source": metadata_fallback.get("metadata_source"),
         }
     )
 

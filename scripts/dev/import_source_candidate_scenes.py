@@ -17,6 +17,7 @@ ENDPOINT = "http://localhost:9999/graphql"
 SCRAPERS = {
     "shrmha": {"name": "Shrmha", "source": "Shrmha/ShrmhaSource.py", "scene": "Shrmha/ShrmhaOnline.py"},
     "nafak": {"name": "Nafak", "source": "Nafak/NafakSourceHydrated.py", "scene": "Nafak/NafakOnline.py"},
+    "1porn": {"name": "1Porn", "source": "1Porn/scraper.py", "scene": "1Porn/scraper.py"},
 }
 
 

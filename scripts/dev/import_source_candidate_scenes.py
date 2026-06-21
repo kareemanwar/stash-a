@@ -2,11 +2,14 @@
 from __future__ import annotations
 
 import argparse
+import html
 import json
 import os
+import re
 import subprocess
 import sys
 import urllib.error
+import urllib.parse
 import urllib.request
 from pathlib import Path
 from typing import Any
@@ -19,6 +22,12 @@ SCRAPERS = {
     "nafak": {"name": "Nafak", "source": "Nafak/NafakSourceHydrated.py", "scene": "Nafak/NafakOnline.py"},
     "1porn": {"name": "1Porn", "source": "1Porn/scraper.py", "scene": "1Porn/scraper.py"},
 }
+USER_AGENT = "Mozilla/5.0 (compatible; Stash-a source importer)"
+
+META_RE = re.compile(r"<meta\b[^>]*>", re.I | re.S)
+IMG_RE = re.compile(r"<img\b[^>]*>", re.I | re.S)
+ATTR_RE = re.compile(r"([\w:-]+)\s*=\s*(['\"])(.*?)\2", re.I | re.S)
+LD_JSON_RE = re.compile(r"<script\b[^>]*type\s*=\s*(['\"])application/ld\+json\1[^>]*>(.*?)</script>", re.I | re.S)
 
 
 def log(msg: str) -> None:
@@ -56,6 +65,127 @@ def item_urls(item: dict[str, Any]) -> list[str]:
     if isinstance(media, dict):
         ret += strings(media.get("embed_url")) + strings(media.get("direct_video_url"))
     return uniq(ret)
+
+
+def tag_attrs(tag: str) -> dict[str, str]:
+    return {m.group(1).lower(): html.unescape(m.group(3)).strip() for m in ATTR_RE.finditer(tag)}
+
+
+def resolve_url(base_url: str, url: str | None) -> str | None:
+    url = clean(url)
+    if not url or url.startswith("data:"):
+        return None
+    return urllib.parse.urljoin(base_url, url)
+
+
+def is_image_candidate(url: str) -> bool:
+    lowered = url.lower()
+    if any(x in lowered for x in ("/logo", "favicon", "sprite", ".svg")):
+        return False
+    return lowered.startswith(("http://", "https://"))
+
+
+def http_text(url: str, timeout: int = 30) -> str:
+    req = urllib.request.Request(url, headers={"User-Agent": USER_AGENT, "Accept": "text/html,application/xhtml+xml"})
+    with urllib.request.urlopen(req, timeout=timeout) as res:
+        return res.read().decode("utf-8", "replace")
+
+
+def http_image_reachable(url: str, referer: str | None = None, timeout: int = 20) -> bool:
+    headers = {
+        "User-Agent": USER_AGENT,
+        "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",
+        "Range": "bytes=0-1023",
+    }
+    if referer:
+        headers["Referer"] = referer
+    req = urllib.request.Request(url, headers=headers)
+    try:
+        with urllib.request.urlopen(req, timeout=timeout) as res:
+            status = getattr(res, "status", 200)
+            content_type = res.headers.get("Content-Type", "")
+            return 200 <= status < 400 and (content_type.startswith("image/") or re.search(r"\.(jpe?g|png|webp)(?:[?#]|$)", url, re.I) is not None)
+    except Exception:
+        return False
+
+
+def jsonld_images(value: Any) -> list[str]:
+    ret: list[str] = []
+    if isinstance(value, dict):
+        image = value.get("image") or value.get("thumbnailUrl")
+        if isinstance(image, str):
+            ret.append(image)
+        elif isinstance(image, list):
+            ret.extend(x for x in image if isinstance(x, str))
+        elif isinstance(image, dict):
+            content = image.get("url") or image.get("contentUrl")
+            if isinstance(content, str):
+                ret.append(content)
+        for child in value.values():
+            ret.extend(jsonld_images(child))
+    elif isinstance(value, list):
+        for item in value:
+            ret.extend(jsonld_images(item))
+    return ret
+
+
+def extract_profile_image(page_url: str, body: str, performer_name_value: str | None = None) -> str | None:
+    meta_keys = {"og:image", "twitter:image", "twitter:image:src", "image", "thumbnailurl"}
+    for tag in META_RE.findall(body):
+        attrs = tag_attrs(tag)
+        key = (attrs.get("property") or attrs.get("name") or attrs.get("itemprop") or "").lower()
+        if key in meta_keys:
+            candidate = resolve_url(page_url, attrs.get("content"))
+            if candidate and is_image_candidate(candidate):
+                return candidate
+
+    for raw in LD_JSON_RE.findall(body):
+        try:
+            data = json.loads(html.unescape(raw[1]).strip())
+        except Exception:
+            continue
+        for image in jsonld_images(data):
+            candidate = resolve_url(page_url, image)
+            if candidate and is_image_candidate(candidate):
+                return candidate
+
+    # Fallback for KVS model pages. Keep this conservative to avoid using random video thumbnails.
+    target = (performer_name_value or "").casefold()
+    for tag in IMG_RE.findall(body):
+        attrs = tag_attrs(tag)
+        klass = (attrs.get("class") or "").casefold()
+        alt = (attrs.get("alt") or "").casefold()
+        if "model" not in klass and "avatar" not in klass and "profile" not in klass and (not target or target not in alt):
+            continue
+        candidate = resolve_url(page_url, attrs.get("src") or attrs.get("data-src"))
+        if candidate and is_image_candidate(candidate):
+            return candidate
+    return None
+
+
+def is_1porn_model_url(url: str) -> bool:
+    parsed = urllib.parse.urlparse(url)
+    host = parsed.netloc.lower().removeprefix("www.")
+    return host == "1porn.tv" and parsed.path.startswith("/models/")
+
+
+def performer_image_from_urls(name: str, urls: list[str], cache: dict[str, str | None]) -> str | None:
+    for url in uniq(urls):
+        if not is_1porn_model_url(url):
+            continue
+        if url in cache:
+            return cache[url]
+        try:
+            body = http_text(url)
+            image = extract_profile_image(url, body, name)
+            if image and http_image_reachable(image, referer=url):
+                cache[url] = image
+                return image
+            cache[url] = None
+        except Exception as exc:
+            cache[url] = None
+            log(f"    PERFORMER image skipped name={name!r} url={url!r}: {exc}")
+    return None
 
 
 def run_json(cmd: list[str], cwd: Path) -> dict[str, Any]:
@@ -134,13 +264,15 @@ def performer_name(performer: Any) -> str | None:
     return clean(performer.get("name")) if isinstance(performer, dict) else clean(performer)
 
 
-def find_or_create_performer(endpoint: str, performer: Any, cache: dict[str, str]) -> str | None:
+def find_or_create_performer(endpoint: str, performer: Any, cache: dict[str, str], image_cache: dict[str, str | None], include_image: bool) -> str | None:
     if not isinstance(performer, dict):
         name = clean(performer)
         urls: list[str] = []
+        image = None
     else:
         name = clean(performer.get("name"))
         urls = strings(performer.get("urls"))
+        image = clean(performer.get("image")) or clean(performer.get("image_url"))
     if not name:
         return None
     key = name.casefold()
@@ -154,13 +286,17 @@ def find_or_create_performer(endpoint: str, performer: Any, cache: dict[str, str
     new_input: dict[str, Any] = {"name": name}
     if urls:
         new_input["urls"] = urls
+    if include_image:
+        image = image or performer_image_from_urls(name, urls, image_cache)
+        if image:
+            new_input["image"] = image
     created = gql(endpoint, "mutation($input:PerformerCreateInput!){performerCreate(input:$input){id name}}", {"input": new_input})["performerCreate"]
     cache[key] = created["id"]
-    log(f"    PERFORMER created id={created['id']} name={created['name']!r}")
+    log(f"    PERFORMER created id={created['id']} name={created['name']!r} image={'yes' if new_input.get('image') else 'no'}")
     return created["id"]
 
 
-def resolve_performer_ids(endpoint: str, scene: dict[str, Any], cache: dict[str, str]) -> list[str]:
+def resolve_performer_ids(endpoint: str, scene: dict[str, Any], cache: dict[str, str], image_cache: dict[str, str | None], include_images: bool) -> list[str]:
     ret: list[str] = []
     seen: set[str] = set()
     for performer in scene.get("performers") or []:
@@ -171,7 +307,7 @@ def resolve_performer_ids(endpoint: str, scene: dict[str, Any], cache: dict[str,
         if key in seen:
             continue
         seen.add(key)
-        performer_id = find_or_create_performer(endpoint, performer, cache)
+        performer_id = find_or_create_performer(endpoint, performer, cache, image_cache, include_images)
         if performer_id:
             ret.append(performer_id)
     return ret
@@ -333,6 +469,7 @@ def main() -> int:
     parser.add_argument("--skip-studio", action="store_true")
     parser.add_argument("--skip-tags", action="store_true")
     parser.add_argument("--skip-performers", action="store_true")
+    parser.add_argument("--skip-performer-images", action="store_true")
     args = parser.parse_args()
 
     conf = SCRAPERS[args.scraper]
@@ -345,6 +482,7 @@ def main() -> int:
 
     studio_cache: dict[str, str] = {}
     performer_cache: dict[str, str] = {}
+    performer_image_cache: dict[str, str | None] = {}
     tag_cache: dict[str, str] = {}
     stats = {
         "created": 0,
@@ -382,7 +520,7 @@ def main() -> int:
                 log(f"{prefix} DRY would create scene")
                 continue
             studio_id = None if args.skip_studio else find_or_create_studio(args.endpoint, scene.get("studio"), studio_cache)
-            performer_ids = [] if args.skip_performers else resolve_performer_ids(args.endpoint, scene, performer_cache)
+            performer_ids = [] if args.skip_performers else resolve_performer_ids(args.endpoint, scene, performer_cache, performer_image_cache, not args.skip_performer_images)
             tag_ids = [] if args.skip_tags else resolve_tag_ids(args.endpoint, scene, tag_cache)
             created = create_scene(args.endpoint, scene, studio_id, tag_ids, performer_ids)
             stats["created"] += 1

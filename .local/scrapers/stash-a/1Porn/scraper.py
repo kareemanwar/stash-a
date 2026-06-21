@@ -57,12 +57,15 @@ def scraper_args() -> tuple[str, dict[str, Any]]:
     args = vars(parser.parse_args())
 
     if not sys.stdin.isatty():
-        try:
-            stdin_args = json.load(sys.stdin)
-            if isinstance(stdin_args, dict):
-                args.update(stdin_args)
-        except json.JSONDecodeError:
-            sys.exit(69)
+        stdin_text = sys.stdin.read().strip()
+        if stdin_text:
+            try:
+                stdin_args = json.loads(stdin_text)
+                if isinstance(stdin_args, dict):
+                    args.update(stdin_args)
+            except json.JSONDecodeError:
+                print(json.dumps({"error": "Invalid scraper JSON stdin"}), file=sys.stderr)
+                sys.exit(69)
 
     return args.pop("operation"), args
 

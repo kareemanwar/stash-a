@@ -47,6 +47,19 @@ def uniq(items: list[str]) -> list[str]:
     return ret
 
 
+def http_safe_url(url: str) -> str:
+    """Return a URL safe for Python's stdlib HTTP stack.
+
+    Stash can store Unicode URLs, but urllib requires an ASCII request URI.
+    Keep the user-facing URL unchanged elsewhere and only encode at fetch time.
+    """
+    parsed = urllib.parse.urlsplit(url)
+    netloc = parsed.netloc.encode("idna").decode("ascii") if parsed.netloc else ""
+    path = urllib.parse.quote(urllib.parse.unquote(parsed.path), safe="/%")
+    query = urllib.parse.quote(urllib.parse.unquote(parsed.query), safe="=&?/:;%+")
+    return urllib.parse.urlunsplit((parsed.scheme, netloc, path, query, parsed.fragment))
+
+
 def gql(endpoint: str, query: str, variables: dict[str, Any] | None = None) -> dict[str, Any]:
     body = json.dumps({"query": query, "variables": variables or {}}, ensure_ascii=False).encode("utf-8")
     req = urllib.request.Request(endpoint, data=body, headers={"Content-Type": "application/json", "User-Agent": USER_AGENT})
@@ -102,7 +115,7 @@ def oneporn_model_url(performer: dict[str, Any]) -> str | None:
 
 def fetch_html(url: str, timeout: int) -> str:
     req = urllib.request.Request(
-        url,
+        http_safe_url(url),
         headers={
             "User-Agent": USER_AGENT,
             "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
@@ -235,7 +248,7 @@ def extract_image_url(page_url: str, html: str) -> str | None:
 
 def validate_image_url(url: str, timeout: int) -> bool:
     req = urllib.request.Request(
-        url,
+        http_safe_url(url),
         headers={
             "User-Agent": USER_AGENT,
             "Accept": "image/avif,image/webp,image/apng,image/svg+xml,image/*,*/*;q=0.8",

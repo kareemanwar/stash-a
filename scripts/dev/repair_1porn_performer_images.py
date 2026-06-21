@@ -272,7 +272,8 @@ def main() -> int:
     parser = argparse.ArgumentParser()
     parser.add_argument("--endpoint", default=ENDPOINT)
     parser.add_argument("--apply", action="store_true")
-    parser.add_argument("--force", action="store_true", help="update performers even if image_path is already set")
+    parser.add_argument("--force", action="store_true", help="legacy compatibility; repair already updates matching 1Porn performers by default")
+    parser.add_argument("--skip-existing-image", action="store_true", help="skip performers when Stash reports image_path; image_path may be generated even without a real custom image")
     parser.add_argument("--limit", type=int, help="maximum matching performers to process")
     parser.add_argument("--start-at", type=int, default=1, help="1-based matching performer offset")
     parser.add_argument("--per-page", type=int, default=100)
@@ -312,10 +313,10 @@ def main() -> int:
             if not model_url:
                 continue
             stats["matched_1porn_url"] += 1
-            if clean(performer.get("image_path")) and not args.force:
+            matching_index += 1
+            if args.skip_existing_image and clean(performer.get("image_path")) and not args.force:
                 stats["skipped_existing_image"] += 1
                 continue
-            matching_index += 1
             if matching_index < max(1, args.start_at):
                 stats["skipped_before_start"] += 1
                 continue

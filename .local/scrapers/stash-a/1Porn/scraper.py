@@ -33,15 +33,23 @@ def scrape_scene_by_url(url: str) -> dict[str, Any]:
     )
 
 
-def scrape_source_by_url(url: str) -> dict[str, Any]:
+def scrape_source_by_url(url: str, *, limit: int | None = None) -> dict[str, Any]:
     document = fetch_text(url, user_agent=USER_AGENT, headers={"Referer": SOURCE_URL})
-    return parse_source_page(
+    output = parse_source_page(
         document,
         url,
         source_name=SOURCE_NAME,
         source_slug=SOURCE_SLUG,
         source_url=SOURCE_URL,
     )
+
+    if limit is not None and limit >= 0:
+        candidates = output.get("scene_candidates")
+        if isinstance(candidates, list):
+            output["scene_candidates"] = candidates[:limit]
+            output["candidates_returned"] = len(output["scene_candidates"])
+
+    return output
 
 
 def scraper_args() -> tuple[str, dict[str, Any]]:
@@ -53,6 +61,9 @@ def scraper_args() -> tuple[str, dict[str, Any]]:
 
     source_by_url = subparsers.add_parser("source-by-url")
     source_by_url.add_argument("--url")
+    source_by_url.add_argument("--limit", type=int)
+    source_by_url.add_argument("--max-pages", type=int, default=1)
+    source_by_url.add_argument("--preview-only", action="store_true")
 
     args = vars(parser.parse_args())
 
@@ -96,7 +107,8 @@ def main() -> None:
         return
 
     if operation == "source-by-url":
-        write_json(scrape_source_by_url(url))
+        limit = args.get("limit")
+        write_json(scrape_source_by_url(url, limit=limit if isinstance(limit, int) else None))
         return
 
     print(json.dumps({"error": f"Unsupported operation: {operation}"}), file=sys.stderr)

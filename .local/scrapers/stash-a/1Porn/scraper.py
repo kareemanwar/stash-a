@@ -33,9 +33,18 @@ def scrape_scene_by_url(url: str) -> dict[str, Any]:
     )
 
 
-def scrape_source_by_url(url: str, *, limit: int | None = None) -> dict[str, Any]:
+def candidate_key(candidate: dict[str, Any]) -> str | None:
+    urls = candidate.get("urls")
+    if isinstance(urls, list):
+        for url in urls:
+            if isinstance(url, str) and url:
+                return url
+    return None
+
+
+def scrape_source_page(url: str) -> dict[str, Any]:
     document = fetch_text(url, user_agent=USER_AGENT, headers={"Referer": SOURCE_URL})
-    output = parse_source_page(
+    return parse_source_page(
         document,
         url,
         source_name=SOURCE_NAME,
@@ -43,12 +52,58 @@ def scrape_source_by_url(url: str, *, limit: int | None = None) -> dict[str, Any
         source_url=SOURCE_URL,
     )
 
-    if limit is not None and limit >= 0:
-        candidates = output.get("scene_candidates")
-        if isinstance(candidates, list):
-            output["scene_candidates"] = candidates[:limit]
-            output["candidates_returned"] = len(output["scene_candidates"])
 
+def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int = 1) -> dict[str, Any]:
+    max_pages = max(1, max_pages)
+    queue: list[str] = [url]
+    visited_pages: set[str] = set()
+    seen_candidates: set[str] = set()
+    candidates: list[dict[str, Any]] = []
+    pagination_urls: list[str] = []
+    output: dict[str, Any] | None = None
+
+    while queue and len(visited_pages) < max_pages:
+        page_url = queue.pop(0)
+        if page_url in visited_pages:
+            continue
+        visited_pages.add(page_url)
+
+        page_output = scrape_source_page(page_url)
+        if output is None:
+            output = page_output
+
+        for candidate in page_output.get("scene_candidates") or []:
+            if not isinstance(candidate, dict):
+                continue
+            key = candidate_key(candidate)
+            if not key or key in seen_candidates:
+                continue
+            seen_candidates.add(key)
+            candidates.append(candidate)
+            if limit is not None and limit >= 0 and len(candidates) >= limit:
+                break
+
+        for next_url in page_output.get("pagination_urls") or []:
+            if not isinstance(next_url, str) or not next_url:
+                continue
+            if next_url not in pagination_urls:
+                pagination_urls.append(next_url)
+            if next_url not in visited_pages and next_url not in queue:
+                queue.append(next_url)
+
+        if limit is not None and limit >= 0 and len(candidates) >= limit:
+            break
+
+    if output is None:
+        output = scrape_source_page(url)
+
+    if limit is not None and limit >= 0:
+        candidates = candidates[:limit]
+
+    output["scene_candidates"] = candidates
+    output["pagination_urls"] = pagination_urls
+    output["pages_crawled"] = len(visited_pages)
+    output["candidates_returned"] = len(candidates)
     return output
 
 
@@ -108,7 +163,14 @@ def main() -> None:
 
     if operation == "source-by-url":
         limit = args.get("limit")
-        write_json(scrape_source_by_url(url, limit=limit if isinstance(limit, int) else None))
+        max_pages = args.get("max_pages")
+        write_json(
+            scrape_source_by_url(
+                url,
+                limit=limit if isinstance(limit, int) else None,
+                max_pages=max_pages if isinstance(max_pages, int) else 1,
+            )
+        )
         return
 
     print(json.dumps({"error": f"Unsupported operation: {operation}"}), file=sys.stderr)

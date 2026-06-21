@@ -6,6 +6,7 @@ import json
 import sys
 from pathlib import Path
 from typing import Any
+from urllib.parse import urlparse
 
 ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
@@ -53,6 +54,42 @@ def scrape_source_page(url: str) -> dict[str, Any]:
     )
 
 
+def _source_root_path(url: str) -> str:
+    path = urlparse(url).path.strip("/")
+    parts = [part for part in path.split("/") if part]
+    if parts and parts[-1].isdigit():
+        parts = parts[:-1]
+    return "/" + "/".join(parts)
+
+
+def _pagination_page(url: str, root_path: str) -> int | None:
+    path = urlparse(url).path.strip("/")
+    root = root_path.strip("/")
+    if not root or path == root:
+        return None
+    prefix = root + "/"
+    if not path.startswith(prefix):
+        return None
+    remainder = path[len(prefix):].strip("/")
+    if remainders := [part for part in remainder.split("/") if part]:
+        if len(remainders) == 1 and remainders[0].isdigit():
+            return int(remainders[0])
+    return None
+
+
+def _is_pagination_url(base_url: str, candidate_url: str) -> bool:
+    base = urlparse(base_url)
+    candidate = urlparse(candidate_url)
+    if candidate.scheme not in ("http", "https"):
+        return False
+    if candidate.netloc != base.netloc:
+        return False
+    root = _source_root_path(base_url)
+    if _source_root_path(candidate_url) != root:
+        return False
+    return _pagination_page(candidate_url, root) is not None
+
+
 def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int = 1) -> dict[str, Any]:
     max_pages = max(1, max_pages)
     queue: list[str] = [url]
@@ -85,6 +122,8 @@ def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int =
 
         for next_url in page_output.get("pagination_urls") or []:
             if not isinstance(next_url, str) or not next_url:
+                continue
+            if not _is_pagination_url(page_url, next_url):
                 continue
             if next_url not in pagination_urls:
                 pagination_urls.append(next_url)

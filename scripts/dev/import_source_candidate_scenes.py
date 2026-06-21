@@ -130,6 +130,53 @@ def find_or_create_studio(endpoint: str, studio: Any, cache: dict[str, str]) -> 
     return created["id"]
 
 
+def performer_name(performer: Any) -> str | None:
+    return clean(performer.get("name")) if isinstance(performer, dict) else clean(performer)
+
+
+def find_or_create_performer(endpoint: str, performer: Any, cache: dict[str, str]) -> str | None:
+    if not isinstance(performer, dict):
+        name = clean(performer)
+        urls: list[str] = []
+    else:
+        name = clean(performer.get("name"))
+        urls = strings(performer.get("urls"))
+    if not name:
+        return None
+    key = name.casefold()
+    if key in cache:
+        return cache[key]
+    data = gql(endpoint, "query($q:String!){findPerformers(filter:{q:$q,per_page:50}){performers{id name}}}", {"q": name})
+    for performer_row in data.get("findPerformers", {}).get("performers", []):
+        if clean(performer_row.get("name")) == name:
+            cache[key] = performer_row["id"]
+            return performer_row["id"]
+    new_input: dict[str, Any] = {"name": name}
+    if urls:
+        new_input["urls"] = urls
+    created = gql(endpoint, "mutation($input:PerformerCreateInput!){performerCreate(input:$input){id name}}", {"input": new_input})["performerCreate"]
+    cache[key] = created["id"]
+    log(f"    PERFORMER created id={created['id']} name={created['name']!r}")
+    return created["id"]
+
+
+def resolve_performer_ids(endpoint: str, scene: dict[str, Any], cache: dict[str, str]) -> list[str]:
+    ret: list[str] = []
+    seen: set[str] = set()
+    for performer in scene.get("performers") or []:
+        name = performer_name(performer)
+        if not name:
+            continue
+        key = name.casefold()
+        if key in seen:
+            continue
+        seen.add(key)
+        performer_id = find_or_create_performer(endpoint, performer, cache)
+        if performer_id:
+            ret.append(performer_id)
+    return ret
+
+
 def tag_name(tag: Any) -> str | None:
     return clean(tag.get("name")) if isinstance(tag, dict) else clean(tag)
 
@@ -160,7 +207,7 @@ def resolve_tag_ids(endpoint: str, scene: dict[str, Any], cache: dict[str, str])
     return ret
 
 
-def create_scene(endpoint: str, scene: dict[str, Any], studio_id: str | None, tag_ids: list[str]) -> dict[str, Any]:
+def create_scene(endpoint: str, scene: dict[str, Any], studio_id: str | None, tag_ids: list[str], performer_ids: list[str]) -> dict[str, Any]:
     media = scene.get("online_media") if isinstance(scene.get("online_media"), dict) else {}
     inp: dict[str, Any] = {
         "title": clean(scene.get("title")),
@@ -176,6 +223,8 @@ def create_scene(endpoint: str, scene: dict[str, Any], studio_id: str | None, ta
         inp["studio_id"] = studio_id
     if tag_ids:
         inp["tag_ids"] = tag_ids
+    if performer_ids:
+        inp["performer_ids"] = performer_ids
     inp = {k: v for k, v in inp.items() if v not in (None, "", [], {})}
     return gql(endpoint, "mutation($input:SceneCreateInput!){sceneCreate(input:$input){id title urls}}", {"input": inp})["sceneCreate"]
 
@@ -283,6 +332,7 @@ def main() -> int:
     parser.add_argument("--apply", action="store_true")
     parser.add_argument("--skip-studio", action="store_true")
     parser.add_argument("--skip-tags", action="store_true")
+    parser.add_argument("--skip-performers", action="store_true")
     args = parser.parse_args()
 
     conf = SCRAPERS[args.scraper]
@@ -294,6 +344,7 @@ def main() -> int:
     log(f"Source candidates collected: {len(candidates)}")
 
     studio_cache: dict[str, str] = {}
+    performer_cache: dict[str, str] = {}
     tag_cache: dict[str, str] = {}
     stats = {
         "created": 0,
@@ -317,7 +368,7 @@ def main() -> int:
         try:
             log(f"{prefix} SCRAPE {url}")
             scene = scrape_scene(conf, url)
-            for key in ("urls", "title", "image", "date", "tags", "studio"):
+            for key in ("urls", "title", "image", "date", "tags", "studio", "performers"):
                 if not scene.get(key) and preview.get(key):
                     scene[key] = preview[key]
             existing = find_any_scene(args.endpoint, item_urls(scene) or urls)
@@ -325,14 +376,15 @@ def main() -> int:
                 stats["existing_after_scrape"] += 1
                 log(f"{prefix} EXISTS_AFTER_SCRAPE scene={existing['id']} title={existing.get('title')!r}")
                 continue
-            log(f"{prefix} SCRAPED title={clean(scene.get('title'))!r} streams={stream_count(scene)}")
+            log(f"{prefix} SCRAPED title={clean(scene.get('title'))!r} performers={len(scene.get('performers') or [])} streams={stream_count(scene)}")
             if not args.apply:
                 stats["dry_run"] += 1
                 log(f"{prefix} DRY would create scene")
                 continue
             studio_id = None if args.skip_studio else find_or_create_studio(args.endpoint, scene.get("studio"), studio_cache)
+            performer_ids = [] if args.skip_performers else resolve_performer_ids(args.endpoint, scene, performer_cache)
             tag_ids = [] if args.skip_tags else resolve_tag_ids(args.endpoint, scene, tag_cache)
-            created = create_scene(args.endpoint, scene, studio_id, tag_ids)
+            created = create_scene(args.endpoint, scene, studio_id, tag_ids, performer_ids)
             stats["created"] += 1
             log(f"{prefix} CREATED scene={created['id']} title={created.get('title')!r}")
             saved = save_online_media(args.endpoint, created["id"], scene.get("online_media"))

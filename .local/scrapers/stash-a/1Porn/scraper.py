@@ -4,6 +4,8 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import time
+import urllib.error
 from pathlib import Path
 from typing import Any
 from urllib.parse import urlparse
@@ -21,6 +23,8 @@ SOURCE_NAME = "1Porn"
 SOURCE_SLUG = "1porn"
 SOURCE_URL = "https://www.1porn.tv/"
 USER_AGENT = "Mozilla/5.0 (compatible; Stash-a 1Porn scraper)"
+SEARCH_SORT_SEGMENTS = {"relevance", "latest-updates", "top-rated"}
+TRANSIENT_HTTP_CODES = {429, 500, 502, 503, 504}
 
 
 def scrape_scene_by_url(url: str) -> dict[str, Any]:
@@ -59,21 +63,31 @@ def _source_root_path(url: str) -> str:
     parts = [part for part in path.split("/") if part]
     if parts and parts[-1].isdigit():
         parts = parts[:-1]
+    if len(parts) >= 2 and parts[0] == "search":
+        return "/" + "/".join(parts[:2])
     return "/" + "/".join(parts)
 
 
 def _pagination_page(url: str, root_path: str) -> int | None:
-    path = urlparse(url).path.strip("/")
-    root = root_path.strip("/")
-    if not root or path == root:
+    path_parts = [part for part in urlparse(url).path.strip("/").split("/") if part]
+    root_parts = [part for part in root_path.strip("/").split("/") if part]
+    if not root_parts or path_parts == root_parts:
         return None
-    prefix = root + "/"
-    if not path.startswith(prefix):
+    if path_parts[: len(root_parts)] != root_parts:
         return None
-    remainder = path[len(prefix):].strip("/")
-    if remainders := [part for part in remainder.split("/") if part]:
-        if len(remainders) == 1 and remainders[0].isdigit():
-            return int(remainders[0])
+
+    remainder = path_parts[len(root_parts) :]
+
+    if len(root_parts) >= 2 and root_parts[0] == "search":
+        if len(remainder) == 1 and remainder[0].isdigit():
+            return int(remainder[0])
+        if len(remainder) == 2 and remainder[0] in SEARCH_SORT_SEGMENTS and remainder[1].isdigit():
+            return int(remainder[1])
+        return None
+
+    if len(remainder) == 1 and remainder[0].isdigit():
+        return int(remainder[0])
+
     return None
 
 
@@ -90,6 +104,27 @@ def _is_pagination_url(base_url: str, candidate_url: str) -> bool:
     return _pagination_page(candidate_url, root) is not None
 
 
+def _is_transient_fetch_error(exc: BaseException) -> bool:
+    return isinstance(exc, urllib.error.HTTPError) and exc.code in TRANSIENT_HTTP_CODES
+
+
+def _fetch_source_page_with_retries(url: str, *, attempts: int = 3, delay: float = 2.0) -> dict[str, Any]:
+    last_exc: BaseException | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return scrape_source_page(url)
+        except urllib.error.HTTPError as exc:
+            last_exc = exc
+            if exc.code not in TRANSIENT_HTTP_CODES or attempt >= attempts:
+                raise
+        except urllib.error.URLError as exc:
+            last_exc = exc
+            if attempt >= attempts:
+                raise
+        time.sleep(delay * attempt)
+    raise RuntimeError(f"failed to fetch source page after retries: {url}: {last_exc}")
+
+
 def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int = 1) -> dict[str, Any]:
     max_pages = max(1, max_pages)
     queue: list[str] = [url]
@@ -97,15 +132,23 @@ def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int =
     seen_candidates: set[str] = set()
     candidates: list[dict[str, Any]] = []
     pagination_urls: list[str] = []
+    crawl_errors: list[dict[str, Any]] = []
     output: dict[str, Any] | None = None
 
     while queue and len(visited_pages) < max_pages:
         page_url = queue.pop(0)
         if page_url in visited_pages:
             continue
-        visited_pages.add(page_url)
 
-        page_output = scrape_source_page(page_url)
+        try:
+            page_output = _fetch_source_page_with_retries(page_url)
+        except Exception as exc:
+            crawl_errors.append({"url": page_url, "error": str(exc)})
+            if output is None:
+                raise
+            break
+
+        visited_pages.add(page_url)
         if output is None:
             output = page_output
 
@@ -143,6 +186,8 @@ def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int =
     output["pagination_urls"] = pagination_urls
     output["pages_crawled"] = len(visited_pages)
     output["candidates_returned"] = len(candidates)
+    if crawl_errors:
+        output["crawl_errors"] = crawl_errors
     return output
 
 

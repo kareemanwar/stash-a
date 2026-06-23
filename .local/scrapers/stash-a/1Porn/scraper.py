@@ -3,6 +3,8 @@ from __future__ import annotations
 
 import argparse
 import json
+import shutil
+import subprocess
 import sys
 import time
 import urllib.error
@@ -14,7 +16,7 @@ ROOT = Path(__file__).resolve().parents[1]
 if str(ROOT) not in sys.path:
     sys.path.insert(0, str(ROOT))
 
-from _shared.fetch import fetch_text  # noqa: E402
+from _shared.fetch import fetch_text, http_safe_url  # noqa: E402
 from _shared.output import write_json  # noqa: E402
 from _shared.profiles.kvs import parse_scene_page, parse_source_page  # noqa: E402
 
@@ -28,10 +30,14 @@ USER_AGENT = (
     "Chrome/124.0.0.0 Safari/537.36"
 )
 FETCH_HEADERS = {
-    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8",
     "Accept-Language": "en-US,en;q=0.9",
     "Cache-Control": "no-cache",
     "Pragma": "no-cache",
+    "Sec-Fetch-Dest": "document",
+    "Sec-Fetch-Mode": "navigate",
+    "Sec-Fetch-Site": "none",
+    "Sec-Fetch-User": "?1",
     "Upgrade-Insecure-Requests": "1",
 }
 SEARCH_SORT_SEGMENTS = {"relevance", "latest-updates", "top-rated"}
@@ -44,6 +50,46 @@ def _fetch_1porn_text(url: str, *, referer: str = SOURCE_URL) -> str:
     return fetch_text(url, user_agent=USER_AGENT, headers=headers)
 
 
+def _decode_response_body(body: bytes) -> str:
+    for charset in ("utf-8", "cp1256", "latin-1"):
+        try:
+            return body.decode(charset, errors="replace")
+        except LookupError:
+            continue
+    return body.decode("utf-8", errors="replace")
+
+
+def _curl_fetch_text(url: str, *, referer: str = SOURCE_URL, timeout: int = 45) -> str:
+    curl = shutil.which("curl")
+    if not curl:
+        raise RuntimeError("curl executable was not found")
+
+    headers = dict(FETCH_HEADERS)
+    headers["Referer"] = referer
+    headers["User-Agent"] = USER_AGENT
+
+    cmd = [
+        curl,
+        "--location",
+        "--silent",
+        "--show-error",
+        "--fail",
+        "--compressed",
+        "--http1.1",
+        "--max-time",
+        str(timeout),
+    ]
+    for key, value in headers.items():
+        cmd.extend(["--header", f"{key}: {value}"])
+    cmd.append(http_safe_url(url))
+
+    result = subprocess.run(cmd, capture_output=True, check=False)
+    if result.returncode != 0:
+        stderr = result.stderr.decode("utf-8", errors="replace").strip()
+        raise RuntimeError(f"curl fetch failed ({result.returncode}) for {url}: {stderr}")
+    return _decode_response_body(result.stdout)
+
+
 def _fetch_text_with_retries(url: str, *, referer: str = SOURCE_URL, attempts: int = 4, delay: float = 2.0) -> str:
     last_exc: BaseException | None = None
     for attempt in range(1, attempts + 1):
@@ -51,12 +97,22 @@ def _fetch_text_with_retries(url: str, *, referer: str = SOURCE_URL, attempts: i
             return _fetch_1porn_text(url, referer=referer)
         except urllib.error.HTTPError as exc:
             last_exc = exc
-            if exc.code not in TRANSIENT_HTTP_CODES or attempt >= attempts:
+            if exc.code not in TRANSIENT_HTTP_CODES:
                 raise
+            try:
+                return _curl_fetch_text(url, referer=referer)
+            except Exception as curl_exc:
+                last_exc = curl_exc
+                if attempt >= attempts:
+                    raise
         except urllib.error.URLError as exc:
             last_exc = exc
-            if attempt >= attempts:
-                raise
+            try:
+                return _curl_fetch_text(url, referer=referer)
+            except Exception as curl_exc:
+                last_exc = curl_exc
+                if attempt >= attempts:
+                    raise
         time.sleep(delay * attempt)
     raise RuntimeError(f"failed to fetch 1Porn page after retries: {url}: {last_exc}")
 

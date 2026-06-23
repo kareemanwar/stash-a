@@ -22,13 +22,47 @@ from _shared.profiles.kvs import parse_scene_page, parse_source_page  # noqa: E4
 SOURCE_NAME = "1Porn"
 SOURCE_SLUG = "1porn"
 SOURCE_URL = "https://www.1porn.tv/"
-USER_AGENT = "Mozilla/5.0 (compatible; Stash-a 1Porn scraper)"
+USER_AGENT = (
+    "Mozilla/5.0 (Windows NT 10.0; Win64; x64) "
+    "AppleWebKit/537.36 (KHTML, like Gecko) "
+    "Chrome/124.0.0.0 Safari/537.36"
+)
+FETCH_HEADERS = {
+    "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+    "Accept-Language": "en-US,en;q=0.9",
+    "Cache-Control": "no-cache",
+    "Pragma": "no-cache",
+    "Upgrade-Insecure-Requests": "1",
+}
 SEARCH_SORT_SEGMENTS = {"relevance", "latest-updates", "top-rated"}
 TRANSIENT_HTTP_CODES = {429, 500, 502, 503, 504}
 
 
+def _fetch_1porn_text(url: str, *, referer: str = SOURCE_URL) -> str:
+    headers = dict(FETCH_HEADERS)
+    headers["Referer"] = referer
+    return fetch_text(url, user_agent=USER_AGENT, headers=headers)
+
+
+def _fetch_text_with_retries(url: str, *, referer: str = SOURCE_URL, attempts: int = 4, delay: float = 2.0) -> str:
+    last_exc: BaseException | None = None
+    for attempt in range(1, attempts + 1):
+        try:
+            return _fetch_1porn_text(url, referer=referer)
+        except urllib.error.HTTPError as exc:
+            last_exc = exc
+            if exc.code not in TRANSIENT_HTTP_CODES or attempt >= attempts:
+                raise
+        except urllib.error.URLError as exc:
+            last_exc = exc
+            if attempt >= attempts:
+                raise
+        time.sleep(delay * attempt)
+    raise RuntimeError(f"failed to fetch 1Porn page after retries: {url}: {last_exc}")
+
+
 def scrape_scene_by_url(url: str) -> dict[str, Any]:
-    document = fetch_text(url, user_agent=USER_AGENT, headers={"Referer": SOURCE_URL})
+    document = _fetch_text_with_retries(url)
     return parse_scene_page(
         document,
         url,
@@ -48,7 +82,7 @@ def candidate_key(candidate: dict[str, Any]) -> str | None:
 
 
 def scrape_source_page(url: str) -> dict[str, Any]:
-    document = fetch_text(url, user_agent=USER_AGENT, headers={"Referer": SOURCE_URL})
+    document = _fetch_text_with_retries(url)
     return parse_source_page(
         document,
         url,
@@ -104,27 +138,6 @@ def _is_pagination_url(base_url: str, candidate_url: str) -> bool:
     return _pagination_page(candidate_url, root) is not None
 
 
-def _is_transient_fetch_error(exc: BaseException) -> bool:
-    return isinstance(exc, urllib.error.HTTPError) and exc.code in TRANSIENT_HTTP_CODES
-
-
-def _fetch_source_page_with_retries(url: str, *, attempts: int = 3, delay: float = 2.0) -> dict[str, Any]:
-    last_exc: BaseException | None = None
-    for attempt in range(1, attempts + 1):
-        try:
-            return scrape_source_page(url)
-        except urllib.error.HTTPError as exc:
-            last_exc = exc
-            if exc.code not in TRANSIENT_HTTP_CODES or attempt >= attempts:
-                raise
-        except urllib.error.URLError as exc:
-            last_exc = exc
-            if attempt >= attempts:
-                raise
-        time.sleep(delay * attempt)
-    raise RuntimeError(f"failed to fetch source page after retries: {url}: {last_exc}")
-
-
 def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int = 1) -> dict[str, Any]:
     max_pages = max(1, max_pages)
     queue: list[str] = [url]
@@ -141,7 +154,7 @@ def scrape_source_by_url(url: str, *, limit: int | None = None, max_pages: int =
             continue
 
         try:
-            page_output = _fetch_source_page_with_retries(page_url)
+            page_output = scrape_source_page(page_url)
         except Exception as exc:
             crawl_errors.append({"url": page_url, "error": str(exc)})
             if output is None:

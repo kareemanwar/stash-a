@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from __future__ import annotations
 
-import Arabgy
+import scraper as Arabgy
 
-if __name__ == "__main__":
-    raise SystemExit(Arabgy.main())
+Arabgy.main()

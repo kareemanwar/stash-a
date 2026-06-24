@@ -321,9 +321,10 @@ def find_or_create_tag(endpoint: str, name: str, cache: dict[str, str]) -> str:
     key = name.casefold()
     if key in cache:
         return cache[key]
-    data = gql(endpoint, "query($q:String!){findTags(filter:{q:$q,per_page:50}){tags{id name}}}", {"q": name})
+    data = gql(endpoint, "query($q:String!){findTags(filter:{q:$q,per_page:100}){tags{id name}}}", {"q": name})
     for tag in data.get("findTags", {}).get("tags", []):
-        if clean(tag.get("name")) == name:
+        tag_name_value = clean(tag.get("name"))
+        if tag_name_value and tag_name_value.casefold() == key:
             cache[key] = tag["id"]
             return tag["id"]
     created = gql(endpoint, "mutation($input:TagCreateInput!){tagCreate(input:$input){id name}}", {"input": {"name": name}})["tagCreate"]

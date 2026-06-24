@@ -120,7 +120,7 @@ def attr_value(attrs: str, name: str) -> str | None:
 
 def absolute_url(base_url: str, value: str | None) -> str | None:
     value = clean_text(value)
-    if not value or value.startswith("data:"):
+    if not value or value.startswith("data:") or value.startswith("javascript:"):
         return None
     return urljoin(base_url, value)
 
@@ -521,19 +521,91 @@ def extract_post_block(document: str) -> str | None:
     return match.group("body") if match else None
 
 
-def extract_iframe_streams(document: str, base_url: str) -> list[dict[str, Any]]:
-    streams: list[dict[str, Any]] = []
-    post_block = extract_post_block(document) or document
-    for match in re.finditer(r"<iframe\b(?P<attrs>[^>]*)>", post_block, re.IGNORECASE | re.DOTALL):
+def should_keep_embed_url(url: str) -> bool:
+    parsed = urlparse(url)
+    if parsed.scheme not in ("http", "https"):
+        return False
+    host = parsed.netloc.lower()
+    return bool(host) and not any(part in host for part in IGNORED_IFRAME_HOST_PARTS)
+
+
+def extract_go_server_links(block: str, base_url: str) -> list[dict[str, str]]:
+    """Extract Arabgy server-switcher embeds from onclick="go('...')" anchors.
+
+    This intentionally returns embed/server URLs only. Host-specific direct video
+    extraction belongs in the separate online-media host extractor layer.
+    """
+    servers: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    for match in re.finditer(r"<a\b(?P<attrs>[^>]*)>(?P<body>.*?)</a>", block, re.IGNORECASE | re.DOTALL):
+        attrs = match.group("attrs")
+        onclick = attr_value(attrs, "onclick") or ""
+        go_match = re.search(r"\bgo\(\s*(['\"])(?P<url>.*?)\1\s*\)", html.unescape(onclick), re.IGNORECASE | re.DOTALL)
+        if not go_match:
+            continue
+        url = absolute_url(base_url, go_match.group("url"))
+        if not url or not should_keep_embed_url(url) or url in seen:
+            continue
+        seen.add(url)
+        label = clean_text(match.group("body")) or f"Server {len(servers) + 1}"
+        servers.append({"label": label, "url": url, "host": urlparse(url).netloc.lower(), "source": "arabgy_go_button"})
+
+    # Fallback for malformed markup where the onclick call is visible but the
+    # surrounding anchor was not captured by the anchor regex.
+    for match in re.finditer(r"\bgo\(\s*(['\"])(?P<url>https?://.*?)(?<!\\)\1\s*\)", block, re.IGNORECASE | re.DOTALL):
+        url = absolute_url(base_url, match.group("url"))
+        if not url or not should_keep_embed_url(url) or url in seen:
+            continue
+        seen.add(url)
+        servers.append({"label": f"Server {len(servers) + 1}", "url": url, "host": urlparse(url).netloc.lower(), "source": "arabgy_go_call"})
+
+    return servers
+
+
+def extract_iframe_links(block: str, base_url: str) -> list[dict[str, str]]:
+    embeds: list[dict[str, str]] = []
+    seen: set[str] = set()
+    for match in re.finditer(r"<iframe\b(?P<attrs>[^>]*)>", block, re.IGNORECASE | re.DOTALL):
         src = attr_value(match.group("attrs"), "src")
-        if not src:
+        url = absolute_url(base_url, src)
+        if not url or not should_keep_embed_url(url) or url in seen:
             continue
-        url = urljoin(base_url, src)
-        host = urlparse(url).netloc.lower()
-        if any(part in host for part in IGNORED_IFRAME_HOST_PARTS):
+        seen.add(url)
+        embeds.append({"label": f"Embed {len(embeds) + 1}", "url": url, "host": urlparse(url).netloc.lower(), "source": "iframe"})
+    return embeds
+
+
+def extract_embed_servers(document: str, base_url: str) -> tuple[list[dict[str, Any]], list[dict[str, str]]]:
+    """Return SceneOnlineMedia embed streams and raw server metadata.
+
+    Layer decision: this scraper only discovers Arabgy's available embed hosts.
+    It does not dereference host pages into direct video URLs. Direct URL/hover
+    preview support should be implemented by host extractors for arabgyruby.com,
+    shrmha.online, hmmade.net, dsvplay.com, etc.
+    """
+    post_block = extract_post_block(document) or document
+    server_links = extract_go_server_links(post_block, base_url)
+    iframe_links = extract_iframe_links(post_block, base_url)
+    label_by_url = {item["url"]: item["label"] for item in server_links}
+
+    ordered: list[dict[str, str]] = []
+    seen: set[str] = set()
+
+    for item in iframe_links + server_links:
+        url = item["url"]
+        if url in seen:
             continue
-        streams.append(make_stream(f"Embed {len(streams) + 1}", "embed", url, len(streams), len(streams) == 0))
-    return streams
+        seen.add(url)
+        entry = dict(item)
+        entry["label"] = label_by_url.get(url) or item.get("label") or f"Server {len(ordered) + 1}"
+        ordered.append(entry)
+
+    streams = [
+        make_stream(item["label"], "embed", item["url"], position, position == 0)
+        for position, item in enumerate(ordered)
+    ]
+    return streams, ordered
 
 
 def extract_first_post_paragraph(document: str) -> str | None:
@@ -585,7 +657,7 @@ def parse_scene_page(document: str, page_url: str) -> dict[str, Any]:
         or web_page_obj.get("datePublished")
     )
     external_id = extract_post_id(document, canonical_url)
-    streams = extract_iframe_streams(document, canonical_url)
+    streams, embed_servers = extract_embed_servers(document, canonical_url)
     embed_url = streams[0]["url"] if streams else None
     tags = extract_scene_taxonomy(document, "post-page-tags", canonical_url)
     performers = remove_generic_performer_categories(extract_scene_taxonomy(document, "post-page-category", canonical_url))
@@ -615,8 +687,11 @@ def parse_scene_page(document: str, page_url: str) -> dict[str, Any]:
             "source": SOURCE_SLUG,
             "external_id": external_id,
             "canonical_url": canonical_url,
+            "media_layer": "scraper_embed_discovery",
+            "extractor_layer": "host_direct_extraction_pending",
             "stream_count": len(streams),
             "embed_stream_count": len([stream for stream in streams if stream.get("kind") == "embed"]),
+            "embed_servers": embed_servers,
             "jsonld_article": bool(article_obj),
             "jsonld_web_page": bool(web_page_obj),
             "performers_from_category": bool(performers),

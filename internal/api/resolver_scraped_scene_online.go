@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"strconv"
 	"time"
 
 	"github.com/stashapp/stash/pkg/models"
@@ -141,8 +140,4 @@ func uniqNonEmptyStrings(values []string) []string {
 		ret = append(ret, value)
 	}
 	return ret
-}
-
-func sceneIDString(sceneID int) string {
-	return strconv.Itoa(sceneID)
 }

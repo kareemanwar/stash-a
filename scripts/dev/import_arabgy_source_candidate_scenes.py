@@ -13,7 +13,7 @@ import import_source_candidate_scenes as importer  # noqa: E402
 importer.SCRAPERS["arabgy"] = {
     "name": "Arabgy",
     "source": "Arabgy/scraper.py",
-    "scene": "Arabgy/scraper.py",
+    "scene": "Arabgy/ArabgyOnline.py",
 }
 
 

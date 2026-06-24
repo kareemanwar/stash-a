@@ -98,6 +98,7 @@ Findings:
 - Scene edit UI uses existing scraper hooks/services and review/apply dialogs instead of blindly overwriting metadata.
 - `ScraperMenu` is the native reusable dropdown for selecting scraper sources in existing UI.
 - Stash-a scene scrape resolvers persist `ScrapedScene.online_media` into native `SceneOnlineMedia` for existing scene URL scrapes and existing scene ID scrapes. Native metadata still follows the review/apply dialog; online media is external playback/provider metadata and is refreshed when a scene scraper returns it.
+- EgyZeb is a WordPress/UltimaTube-style scraper: listing pages use `article.thumb-block` cards; scene pages can expose direct MP4 media via `contentURL`/`<source src>`, so the scraper maps that to `SceneOnlineMedia.direct_video_url` and direct streams. The `EgyZebOnline.py` wrapper still calls `_shared.online_hosts.enhance_online_media` for consistent stream cleanup/enhancement.
 
 ## Community scraper patterns
 
@@ -117,27 +118,3 @@ Decision:
 
 - Track `.local/scrapers/**` in git for Stash-a scraper development.
 - Continue ignoring all other `.local` runtime state, including config files, databases, logs, generated cache, and downloaded media.
-
-Reasoning:
-
-- Stash-a scraper work currently lives under `.local/scrapers/stash-a` so development scrapers can run against local Stash while still being reviewable and versioned.
-
-## Source candidate importer pattern
-
-Studied files:
-
-- `scripts/dev/import_source_candidate_scenes.py`
-- `.local/scrapers/stash-a/1Porn/scraper.py`
-- `.local/scrapers/stash-a/Arabgy/scraper.py`
-- `scripts/dev/import_arabgy_source_candidate_scenes.py`
-
-Findings:
-
-- The source importer is a bulk import helper around scraper scripts. A source scraper exposes `source-by-url` to return lightweight `scene_candidates`, and a scene scraper exposes `scene-by-url` to hydrate one candidate into native-style scene metadata.
-- Candidate previews should include native fields where possible: `title`, `urls`, `image`, `date`, `studio`, `performers`, `tags`, `remote_site_id`, and optional `source_preview`.
-- Hydrated scenes should map ownership data to native Scene fields and relationships: title/details/date/urls/cover image, studio, performers, tags, and `online_media` for external-only embed/direct/thumbnail/provider metadata.
-- `scripts/dev/import_source_candidate_scenes.py` prefilters candidates against existing `Scene.urls` before hydrating scenes, then creates native scenes through GraphQL and saves external playback metadata through `SceneOnlineMedia`.
-- Arabgy is a WordPress/TubeAce source, not a KVS source. Its listing cards use `post-preview`/`preview-title`/`wp-post-image`; scene pages use the post iframe as embed media; tags come from `post-page-tags`; performer names are represented by category links under the site’s performer/category area.
-- Arabgy scene pages can include multiple player servers under `ul.tab-server` where each server URL is stored in `onclick="go('...')"` instead of a normal link. The scraper layer should discover all of these as `online_media.streams` with `kind: embed` and preserve the first iframe/server as primary.
-- Do not put host-specific direct media extraction inside the Arabgy scraper. Direct video URLs and hover preview support belong in the host extractor layer for hosts such as `arabgyruby.com`, `shrmha.online`, `hmmade.net`, and `dsvplay.com`.
-- If the main importer cannot be edited directly, a small entrypoint can inject a scraper config into `SCRAPERS` before calling the same importer `main()`; `import_arabgy_source_candidate_scenes.py` follows this pattern for Arabgy.

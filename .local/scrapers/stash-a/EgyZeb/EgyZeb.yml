@@ -1,0 +1,17 @@
+name: EgyZeb
+sceneByURL:
+  - action: script
+    url:
+      - egyzeb.com
+    script:
+      - python
+      - EgyZebOnline.py
+      - scene-by-url
+sourceByURL:
+  - action: script
+    url:
+      - egyzeb.com
+    script:
+      - python
+      - scraper.py
+      - source-by-url

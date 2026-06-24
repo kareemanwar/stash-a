@@ -61,6 +61,13 @@ func (r *queryResolver) ScrapeSceneURL(ctx context.Context, url string) (*models
 		return nil, err
 	}
 
+	if ret != nil {
+		urls := append([]string{url}, ret.URLs...)
+		if err := r.saveScrapedSceneOnlineMediaForURLs(ctx, urls, ret); err != nil {
+			return nil, err
+		}
+	}
+
 	return ret, nil
 }
 
@@ -211,6 +218,18 @@ func (r *queryResolver) ScrapeSingleScene(ctx context.Context, source scraper.So
 
 	for i := range ret {
 		slices.SortFunc(ret[i].Tags, models.ScrapedTagSortFunction)
+	}
+
+	if input.SceneID != nil {
+		for _, scene := range ret {
+			if scene == nil {
+				continue
+			}
+			if err := r.saveScrapedSceneOnlineMedia(ctx, sceneID, scene.OnlineMedia); err != nil {
+				return nil, err
+			}
+			break
+		}
 	}
 
 	return ret, nil

@@ -97,6 +97,7 @@ Findings:
 - URL scraper resolvers already exist for scenes, performers, galleries, images, and groups.
 - Scene edit UI uses existing scraper hooks/services and review/apply dialogs instead of blindly overwriting metadata.
 - `ScraperMenu` is the native reusable dropdown for selecting scraper sources in existing UI.
+- Stash-a scene scrape resolvers persist `ScrapedScene.online_media` into native `SceneOnlineMedia` for existing scene URL scrapes and existing scene ID scrapes. Native metadata still follows the review/apply dialog; online media is external playback/provider metadata and is refreshed when a scene scraper returns it.
 
 ## Community scraper patterns
 

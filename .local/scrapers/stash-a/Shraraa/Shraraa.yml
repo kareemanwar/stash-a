@@ -1,7 +1,17 @@
 name: Shraraa
 sceneByURL:
   - action: script
-    script: ShraraaOnline.py
+    url:
+      - shraraa.com
+    script:
+      - python
+      - ShraraaOnline.py
+      - scene-by-url
 sourceByURL:
   - action: script
-    script: ShraraaSource.py
+    url:
+      - shraraa.com
+    script:
+      - python
+      - ShraraaSource.py
+      - source-by-url
